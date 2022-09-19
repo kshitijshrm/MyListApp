@@ -230,6 +230,8 @@ export interface Application {
   appType: ApplicationType;
   versions: ApplicationVersion[];
   appClassification: ApplicationClassification;
+  subscriptionCredentials: ClientCredentials | undefined;
+  redirectUris: string[];
 }
 
 export interface ApplicationVersion {
@@ -251,6 +253,9 @@ export interface ApplicationVersion {
   recordAudit: RecordAudit | undefined;
   shortDescription: string;
   longDescription: string;
+  categories: string[];
+  permissions: FileMetadata[];
+  documents: DocumentMetadata[];
 }
 
 export interface ApplicationPrivacy {
@@ -337,6 +342,11 @@ export interface ApplicationUrlOverride {
   url: string;
 }
 
+export interface DocumentMetadata {
+  appDocument: FileMetadata | undefined;
+  category: string;
+}
+
 export const OS1_DEVELOPERPORTAL_APPLICATION_PACKAGE_NAME =
   'os1.developerportal.application';
 
@@ -351,6 +361,8 @@ function createBaseApplication(): Application {
     appType: 0,
     versions: [],
     appClassification: 0,
+    subscriptionCredentials: undefined,
+    redirectUris: [],
   };
 }
 
@@ -378,6 +390,12 @@ export const Application = {
       appClassification: isSet(object.appClassification)
         ? applicationClassificationFromJSON(object.appClassification)
         : 0,
+      subscriptionCredentials: isSet(object.subscriptionCredentials)
+        ? ClientCredentials.fromJSON(object.subscriptionCredentials)
+        : undefined,
+      redirectUris: Array.isArray(object?.redirectUris)
+        ? object.redirectUris.map((e: any) => String(e))
+        : [],
     };
   },
 
@@ -411,6 +429,15 @@ export const Application = {
       (obj.appClassification = applicationClassificationToJSON(
         message.appClassification,
       ));
+    message.subscriptionCredentials !== undefined &&
+      (obj.subscriptionCredentials = message.subscriptionCredentials
+        ? ClientCredentials.toJSON(message.subscriptionCredentials)
+        : undefined);
+    if (message.redirectUris) {
+      obj.redirectUris = message.redirectUris.map((e) => e);
+    } else {
+      obj.redirectUris = [];
+    }
     return obj;
   },
 };
@@ -434,6 +461,9 @@ function createBaseApplicationVersion(): ApplicationVersion {
     recordAudit: undefined,
     shortDescription: '',
     longDescription: '',
+    categories: [],
+    permissions: [],
+    documents: [],
   };
 }
 
@@ -487,6 +517,15 @@ export const ApplicationVersion = {
       longDescription: isSet(object.longDescription)
         ? String(object.longDescription)
         : '',
+      categories: Array.isArray(object?.categories)
+        ? object.categories.map((e: any) => String(e))
+        : [],
+      permissions: Array.isArray(object?.permissions)
+        ? object.permissions.map((e: any) => FileMetadata.fromJSON(e))
+        : [],
+      documents: Array.isArray(object?.documents)
+        ? object.documents.map((e: any) => DocumentMetadata.fromJSON(e))
+        : [],
     };
   },
 
@@ -557,6 +596,25 @@ export const ApplicationVersion = {
       (obj.shortDescription = message.shortDescription);
     message.longDescription !== undefined &&
       (obj.longDescription = message.longDescription);
+    if (message.categories) {
+      obj.categories = message.categories.map((e) => e);
+    } else {
+      obj.categories = [];
+    }
+    if (message.permissions) {
+      obj.permissions = message.permissions.map((e) =>
+        e ? FileMetadata.toJSON(e) : undefined,
+      );
+    } else {
+      obj.permissions = [];
+    }
+    if (message.documents) {
+      obj.documents = message.documents.map((e) =>
+        e ? DocumentMetadata.toJSON(e) : undefined,
+      );
+    } else {
+      obj.documents = [];
+    }
     return obj;
   },
 };
@@ -745,6 +803,31 @@ export const ApplicationUrlOverride = {
     const obj: any = {};
     message.stackId !== undefined && (obj.stackId = message.stackId);
     message.url !== undefined && (obj.url = message.url);
+    return obj;
+  },
+};
+
+function createBaseDocumentMetadata(): DocumentMetadata {
+  return { appDocument: undefined, category: '' };
+}
+
+export const DocumentMetadata = {
+  fromJSON(object: any): DocumentMetadata {
+    return {
+      appDocument: isSet(object.appDocument)
+        ? FileMetadata.fromJSON(object.appDocument)
+        : undefined,
+      category: isSet(object.category) ? String(object.category) : '',
+    };
+  },
+
+  toJSON(message: DocumentMetadata): unknown {
+    const obj: any = {};
+    message.appDocument !== undefined &&
+      (obj.appDocument = message.appDocument
+        ? FileMetadata.toJSON(message.appDocument)
+        : undefined);
+    message.category !== undefined && (obj.category = message.category);
     return obj;
   },
 };

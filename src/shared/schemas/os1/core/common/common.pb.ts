@@ -13,6 +13,11 @@ export interface RecordAudit {
   updatedAt: string;
 }
 
+export interface PhoneNumber {
+  countryCode: string;
+  number: string;
+}
+
 export const OS1_CORE_COMMON_PACKAGE_NAME = 'os1.core.common';
 
 function createBaseRecordStatus(): RecordStatus {
@@ -55,6 +60,27 @@ export const RecordAudit = {
     message.createdAt !== undefined && (obj.createdAt = message.createdAt);
     message.updatedBy !== undefined && (obj.updatedBy = message.updatedBy);
     message.updatedAt !== undefined && (obj.updatedAt = message.updatedAt);
+    return obj;
+  },
+};
+
+function createBasePhoneNumber(): PhoneNumber {
+  return { countryCode: '', number: '' };
+}
+
+export const PhoneNumber = {
+  fromJSON(object: any): PhoneNumber {
+    return {
+      countryCode: isSet(object.countryCode) ? String(object.countryCode) : '',
+      number: isSet(object.number) ? String(object.number) : '',
+    };
+  },
+
+  toJSON(message: PhoneNumber): unknown {
+    const obj: any = {};
+    message.countryCode !== undefined &&
+      (obj.countryCode = message.countryCode);
+    message.number !== undefined && (obj.number = message.number);
     return obj;
   },
 };

@@ -4,23 +4,23 @@ import { Subscription } from './subscription.pb';
 
 export const protobufPackage = 'os1.marketplace.subscription';
 
-export interface CreateSubscriptionResponse {
+export interface StartSolutionTrialResponse {
   id: SubscriptionIdentifier | undefined;
 }
 
-export interface GetAppSubscriptionsByOrgDomainResponse {
-  subscription: Subscription[];
+export interface GetSubscriptionsByOrgDomainResponse {
+  subscriptions: Subscription[];
 }
 
 export const OS1_MARKETPLACE_SUBSCRIPTION_PACKAGE_NAME =
   'os1.marketplace.subscription';
 
-function createBaseCreateSubscriptionResponse(): CreateSubscriptionResponse {
+function createBaseStartSolutionTrialResponse(): StartSolutionTrialResponse {
   return { id: undefined };
 }
 
-export const CreateSubscriptionResponse = {
-  fromJSON(object: any): CreateSubscriptionResponse {
+export const StartSolutionTrialResponse = {
+  fromJSON(object: any): StartSolutionTrialResponse {
     return {
       id: isSet(object.id)
         ? SubscriptionIdentifier.fromJSON(object.id)
@@ -28,7 +28,7 @@ export const CreateSubscriptionResponse = {
     };
   },
 
-  toJSON(message: CreateSubscriptionResponse): unknown {
+  toJSON(message: StartSolutionTrialResponse): unknown {
     const obj: any = {};
     message.id !== undefined &&
       (obj.id = message.id
@@ -38,27 +38,27 @@ export const CreateSubscriptionResponse = {
   },
 };
 
-function createBaseGetAppSubscriptionsByOrgDomainResponse(): GetAppSubscriptionsByOrgDomainResponse {
-  return { subscription: [] };
+function createBaseGetSubscriptionsByOrgDomainResponse(): GetSubscriptionsByOrgDomainResponse {
+  return { subscriptions: [] };
 }
 
-export const GetAppSubscriptionsByOrgDomainResponse = {
-  fromJSON(object: any): GetAppSubscriptionsByOrgDomainResponse {
+export const GetSubscriptionsByOrgDomainResponse = {
+  fromJSON(object: any): GetSubscriptionsByOrgDomainResponse {
     return {
-      subscription: Array.isArray(object?.subscription)
-        ? object.subscription.map((e: any) => Subscription.fromJSON(e))
+      subscriptions: Array.isArray(object?.subscriptions)
+        ? object.subscriptions.map((e: any) => Subscription.fromJSON(e))
         : [],
     };
   },
 
-  toJSON(message: GetAppSubscriptionsByOrgDomainResponse): unknown {
+  toJSON(message: GetSubscriptionsByOrgDomainResponse): unknown {
     const obj: any = {};
-    if (message.subscription) {
-      obj.subscription = message.subscription.map((e) =>
+    if (message.subscriptions) {
+      obj.subscriptions = message.subscriptions.map((e) =>
         e ? Subscription.toJSON(e) : undefined,
       );
     } else {
-      obj.subscription = [];
+      obj.subscriptions = [];
     }
     return obj;
   },

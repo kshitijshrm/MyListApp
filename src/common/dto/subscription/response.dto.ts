@@ -1,5 +1,5 @@
+import { ApplicationDTO } from '../application/application.dto';
 import { SolutionDTO } from '../solution/solution.dto';
-import { ApplicationDTO } from './application.dto';
 
 export interface SubscriptionsResponseDTO {
   solutions: Array<SolutionDTO>;

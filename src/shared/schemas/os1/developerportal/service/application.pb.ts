@@ -16,10 +16,13 @@ import {
   AddApplicationVersionRequest,
   ClassifyApplicationRequest,
   ApplicationUrlOverridesRequest,
+  ChangeApplicationDisplayAttributesRequest,
+  MigrateFirstPartyApplicationRequest,
   UpsertApplicationIconRequest,
   AddApplicationDocumentRequest,
   DeleteApplicationDocumentRequest,
-  ChangeApplicationDisplayAttributesRequest,
+  AddApplicationPermissionsRequest,
+  DeleteApplicationPermissionsRequest,
   ApplicationLifeCycleTransitionRequest,
   GetApplicationByVersionIdRequest,
   GetApplicationByApplicationIdRequest,
@@ -60,6 +63,16 @@ export interface ApplicationServiceClient {
     metadata?: Metadata,
   ): Observable<Empty>;
 
+  changeApplicationDisplayAttributes(
+    request: ChangeApplicationDisplayAttributesRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
+
+  migrateFirstPartyApplication(
+    request: MigrateFirstPartyApplicationRequest,
+    metadata?: Metadata,
+  ): Observable<RegisterApplicationResponse>;
+
   /** file upload and deletion commands */
 
   addApplicationIcon(
@@ -82,8 +95,13 @@ export interface ApplicationServiceClient {
     metadata?: Metadata,
   ): Observable<Empty>;
 
-  changeApplicationDisplayAttributes(
-    request: ChangeApplicationDisplayAttributesRequest,
+  addApplicationPermissions(
+    request: AddApplicationPermissionsRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
+
+  deleteApplicationPermissions(
+    request: DeleteApplicationPermissionsRequest,
     metadata?: Metadata,
   ): Observable<Empty>;
 
@@ -191,6 +209,19 @@ export interface ApplicationServiceController {
     metadata?: Metadata,
   ): void;
 
+  changeApplicationDisplayAttributes(
+    request: ChangeApplicationDisplayAttributesRequest,
+    metadata?: Metadata,
+  ): void;
+
+  migrateFirstPartyApplication(
+    request: MigrateFirstPartyApplicationRequest,
+    metadata?: Metadata,
+  ):
+    | Promise<RegisterApplicationResponse>
+    | Observable<RegisterApplicationResponse>
+    | RegisterApplicationResponse;
+
   /** file upload and deletion commands */
 
   addApplicationIcon(
@@ -213,8 +244,13 @@ export interface ApplicationServiceController {
     metadata?: Metadata,
   ): void;
 
-  changeApplicationDisplayAttributes(
-    request: ChangeApplicationDisplayAttributesRequest,
+  addApplicationPermissions(
+    request: AddApplicationPermissionsRequest,
+    metadata?: Metadata,
+  ): void;
+
+  deleteApplicationPermissions(
+    request: DeleteApplicationPermissionsRequest,
     metadata?: Metadata,
   ): void;
 
@@ -308,11 +344,14 @@ export function ApplicationServiceControllerMethods() {
       'classifyApplication',
       'addUrlOverride',
       'deleteUrlOverride',
+      'changeApplicationDisplayAttributes',
+      'migrateFirstPartyApplication',
       'addApplicationIcon',
       'replaceApplicationIcon',
       'addApplicationDocument',
       'deleteApplicationDocument',
-      'changeApplicationDisplayAttributes',
+      'addApplicationPermissions',
+      'deleteApplicationPermissions',
       'submitForTechReview',
       'approveTechReview',
       'declineTechReview',

@@ -37,3 +37,37 @@ export enum LifecycleEventCommand {
   APPROVE_MARKETPLACE_PUBLISH = 'APPROVE_MARKETPLACE_PUBLISH',
   DEPRECIATE = 'DEPRECIATE',
 }
+
+export interface ApplicationDTO {
+  appId: string;
+  appVersionId: string;
+  listingName: string;
+  version: string;
+  urlPath: string;
+  appType: AppType;
+  description: string;
+  isPrivate: boolean;
+  consoleCompatible: boolean;
+  appUrls: Array<ApplicationUrlDTO>;
+  urlOverrides: Array<UrlOverrideDTO>;
+  icons: Array<FileMetadataDTO>;
+  images: Array<FileMetadataDTO>;
+  shortDescription: string;
+  longDescription: string;
+}
+
+export interface ApplicationUrlDTO {
+  name: string;
+  url: string;
+}
+
+export interface UrlOverrideDTO {
+  stackId: string;
+  url: string;
+}
+export interface FileMetadataDTO {
+  fileId: string;
+  fileName: string;
+  fileDescription: string;
+  fileUrl?: string | undefined;
+}

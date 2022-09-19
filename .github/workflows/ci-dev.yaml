@@ -5,11 +5,7 @@ on:
     branches:
       - "development"
     paths-ignore:
-      - "README.md"
       - "deploy/**"
-      - "database/**"
-      - "cli/**"
-      - ".github/workflows/dev-database-schema-migrate.yaml"
   workflow_dispatch:
 
 jobs:
