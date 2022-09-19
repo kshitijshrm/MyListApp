@@ -1,0 +1,47 @@
+env: dev
+baseDomain: dev.fxtrt.io
+namespace: tenant-developerplatform
+service_name: console-api
+gateway_name: fxtrt-apps
+apps:
+  consoleapi:
+    replicaCount: 1
+    image:
+      repository: 639427026848.dkr.ecr.ap-southeast-1.amazonaws.com/developer-platform/console-api
+      version: 0.0.1-dev-324bd08
+    resourceType: m1
+    api:
+      path: /app/console-api
+      health: /app/console-api/health
+    unAuthPaths: /app/console-api/health,/app/console-api/docs/*,/app/console-api/docs-yaml
+    unAuthMethods: OPTIONS
+    port: 3000
+    corsHeaders:
+      - X-DEVELOPERPLATFORM-ACCESS
+      - X-DEVELOPERPLATFORM-USER-ID
+      - X-DEVELOPERPLATFORM-ROLE
+      - X-DEVELOPERPLATFORM-REQUEST-ID
+      - Content-Type
+    envVars:
+      - name: ORGANIZATION_SERVICE_ENDPOINT
+        value: http://developer-platform-organization-service-organization.tenant-developerplatform.svc.cluster.local/app/api/organization
+      - name: APPLICATION_SERVICE_ENDPOINT
+        value: application-service-applicationservice.tenant-developerplatform.svc.cluster.local:50052
+      - name: SOLUTION_SERVICE_ENDPOINT
+        value: solutions-service-solutionsservice.tenant-developerplatform.svc.cluster.local:50052
+      - name: FILE_SERVICE_ENDPOINT
+        value: file-service-fileservice.tenant-developerplatform.svc.cluster.local:50052
+      - name: KEYCLOAK_BASE_URL
+        value: https://keycloak.dev.fxtrt.io
+      - name: DEVELOPER_PLATFORM_BACKEND_CLIENT_ID
+        value: app::developerplatform-backend
+    secrets:
+      DEVELOPER_PLATFORM_BACKEND_CLIENT_SECRET: DEVELOPER_PLATFORM_BACKEND_CLIENT_SECRET
+    externalAccess:
+      enabled: true
+    autoscaling:
+      enabled: false
+    authentication:
+      enabled: true
+      authorizationProvider: developer-platform
+    podAnnotations: {}
