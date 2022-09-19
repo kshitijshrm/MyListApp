@@ -1,0 +1,124 @@
+{
+  "name": "developer-platform-console-api",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage",
+    "proto:service": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/marketplace/service/subscription.proto --ts_proto_opt=fileSuffix=.pb",
+    "proto:application": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/developerportal/service/application.proto --ts_proto_opt=fileSuffix=.pb",
+    "proto:solution": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/developerportal/service/solution.proto --ts_proto_opt=fileSuffix=.pb",
+    "proto:file": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/file.proto --ts_proto_opt=fileSuffix=.pb",
+    "proto:coreos-agent": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/coreosagent.proto --ts_proto_opt=fileSuffix=.pb",
+    "_proto:gen": "run-p proto:*",
+    "check-branch-name": "sh .husky/check_branch_naming.sh"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^7.4.0",
+    "@foxtrotplatform/developer-platform-core-lib": "0.1.1",
+    "@foxtrotplatform/developer-platform-proto-schemas": "0.3.3",
+    "@grpc/grpc-js": "^1.6.8",
+    "@nestjs/axios": "^0.1.0",
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/microservices": "^9.0.5",
+    "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.0.4",
+    "@types/multer": "^1.4.7",
+    "axios": "^0.27.2",
+    "axios-oauth-client": "^1.5.0",
+    "class-transformer": "^0.5.1",
+    "husky": "^8.0.1",
+    "joi": "^17.6.0",
+    "lint-staged": "^13.0.3",
+    "lodash": "^4.17.21",
+    "npm-run-all": "^4.1.5",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "rxjs": "^7.2.0",
+    "ts-proto": "^1.120.0",
+    "ts-protoc-gen": "^0.15.0",
+    "uuid-by-string": "^3.0.7"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^9.0.0",
+    "@nestjs/schematics": "^9.0.0",
+    "@nestjs/testing": "^9.0.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "28.1.4",
+    "@types/joi": "^17.2.3",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^16.0.0",
+    "@types/supertest": "^2.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "28.1.2",
+    "prettier": "^2.3.2",
+    "source-map-support": "^0.5.20",
+    "supertest": "^6.1.3",
+    "ts-jest": "28.0.5",
+    "ts-loader": "^9.2.3",
+    "ts-node": "^10.0.0",
+    "tsconfig-paths": "4.0.0",
+    "typescript": "^4.3.5"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/shared/schemas",
+      "index.ts",
+      ".entity.ts",
+      ".pipe.ts",
+      ".module.ts",
+      "main.ts",
+      "filter.ts",
+      "interceptor.ts"
+    ],
+    "coverageDirectory": "coverage",
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/.jest/setEnvVars.ts"
+    ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --write"
+    ],
+    "test/**/*.ts": [
+      "prettier --write"
+    ]
+  }
+}
