@@ -20,10 +20,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage",
+    "proto:service": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/marketplace/service/subscription.proto --ts_proto_opt=fileSuffix=.pb",
     "proto:application": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/developerportal/service/application.proto --ts_proto_opt=fileSuffix=.pb",
     "proto:solution": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/developerportal/service/solution.proto --ts_proto_opt=fileSuffix=.pb",
     "proto:file": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/file.proto --ts_proto_opt=fileSuffix=.pb",
-    "proto:all": "yarn run proto:application",
+    "proto:coreos-agent": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/coreosagent.proto --ts_proto_opt=fileSuffix=.pb",
     "_proto:gen": "run-p proto:*",
     "check-branch-name": "sh .husky/check_branch_naming.sh"
   },
