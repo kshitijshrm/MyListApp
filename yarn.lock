@@ -1022,10 +1022,10 @@
     rxjs "^7.2.0"
     uuid "^8.3.2"
 
-"@foxtrotplatform/developer-platform-proto-schemas@0.3.3":
-  version "0.3.3"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.3.3/005fe71c735987eb51d19745fbd586a257d1e9dc#005fe71c735987eb51d19745fbd586a257d1e9dc"
-  integrity sha512-ghW0+3bSlf0vaN4D03bRCTcQBC1JN8SQTavtrU2aTu4kDFTPkJ6J3TrIu33DybRQyBNgLcCwjBFJjxnwJc15/w==
+"@foxtrotplatform/developer-platform-proto-schemas@0.4.0":
+  version "0.4.0"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.4.0/2e4acacaeac0e9ec4e3f7aa215936e055faadad3#2e4acacaeac0e9ec4e3f7aa215936e055faadad3"
+  integrity sha512-qPXUNGZeenjMZuqKajnEwvTkFSW29MwU4WU456vMG3sKtwrFow63MiUM3klJ0vhRvCLTFvlwipLIW6My/eLn2A==
   dependencies:
     ts-proto "^1.121.5"
     ts-proto-descriptors "^1.7.1"
@@ -4775,6 +4775,11 @@ jsonfile@^6.0.1:
     universalify "^2.0.0"
   optionalDependencies:
     graceful-fs "^4.1.6"
+
+jwt-decode@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-3.1.2.tgz#3fb319f3675a2df0c2895c8f5e9fa4b67b04ed59"
+  integrity sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==
 
 kafkajs@^2.1.0:
   version "2.1.0"

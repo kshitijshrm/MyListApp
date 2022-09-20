@@ -5,6 +5,8 @@ import {
   ApplicationCompitablity,
   ApplicationUrl,
   EncryptedAppSecret,
+  DocumentMetadata,
+  ClientCredentials,
   applicationTypeFromJSON,
   applicationTypeToJSON,
   applicationClassificationFromJSON,
@@ -63,11 +65,20 @@ export interface UpsertApplicationIconRequest {
 
 export interface AddApplicationDocumentRequest {
   id: ApplicationVersionIdentifier | undefined;
-  appDocument: FileMetadata | undefined;
-  category: string;
+  document: DocumentMetadata | undefined;
 }
 
 export interface DeleteApplicationDocumentRequest {
+  id: ApplicationVersionIdentifier | undefined;
+  fileId: string;
+}
+
+export interface AddApplicationPermissionsRequest {
+  id: ApplicationVersionIdentifier | undefined;
+  appPermissions: FileMetadata | undefined;
+}
+
+export interface DeleteApplicationPermissionsRequest {
   id: ApplicationVersionIdentifier | undefined;
   fileId: string;
 }
@@ -100,6 +111,29 @@ export interface ChangeApplicationDisplayAttributesRequest {
   displayName: string;
   shortDescription: string;
   longDescription: string;
+  categories: string[];
+}
+
+export interface MigrateFirstPartyApplicationRequest {
+  organizationTeam: OrganizationTeamMetadata | undefined;
+  attributes:
+    | MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes
+    | undefined;
+}
+
+export interface MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes {
+  name: string;
+  urlPath: string;
+  displayName: string;
+  version: string;
+  description: string;
+  type: ApplicationType;
+  compitablity: ApplicationCompitablity | undefined;
+  appUrls: ApplicationUrl[];
+  clientCredentials: ClientCredentials | undefined;
+  shortDescription: string;
+  longDescription: string;
+  redirectUris: string[];
 }
 
 export const OS1_DEVELOPERPORTAL_APPLICATION_PACKAGE_NAME =
@@ -322,7 +356,7 @@ export const UpsertApplicationIconRequest = {
 };
 
 function createBaseAddApplicationDocumentRequest(): AddApplicationDocumentRequest {
-  return { id: undefined, appDocument: undefined, category: '' };
+  return { id: undefined, document: undefined };
 }
 
 export const AddApplicationDocumentRequest = {
@@ -331,10 +365,9 @@ export const AddApplicationDocumentRequest = {
       id: isSet(object.id)
         ? ApplicationVersionIdentifier.fromJSON(object.id)
         : undefined,
-      appDocument: isSet(object.appDocument)
-        ? FileMetadata.fromJSON(object.appDocument)
+      document: isSet(object.document)
+        ? DocumentMetadata.fromJSON(object.document)
         : undefined,
-      category: isSet(object.category) ? String(object.category) : '',
     };
   },
 
@@ -344,11 +377,10 @@ export const AddApplicationDocumentRequest = {
       (obj.id = message.id
         ? ApplicationVersionIdentifier.toJSON(message.id)
         : undefined);
-    message.appDocument !== undefined &&
-      (obj.appDocument = message.appDocument
-        ? FileMetadata.toJSON(message.appDocument)
+    message.document !== undefined &&
+      (obj.document = message.document
+        ? DocumentMetadata.toJSON(message.document)
         : undefined);
-    message.category !== undefined && (obj.category = message.category);
     return obj;
   },
 };
@@ -368,6 +400,61 @@ export const DeleteApplicationDocumentRequest = {
   },
 
   toJSON(message: DeleteApplicationDocumentRequest): unknown {
+    const obj: any = {};
+    message.id !== undefined &&
+      (obj.id = message.id
+        ? ApplicationVersionIdentifier.toJSON(message.id)
+        : undefined);
+    message.fileId !== undefined && (obj.fileId = message.fileId);
+    return obj;
+  },
+};
+
+function createBaseAddApplicationPermissionsRequest(): AddApplicationPermissionsRequest {
+  return { id: undefined, appPermissions: undefined };
+}
+
+export const AddApplicationPermissionsRequest = {
+  fromJSON(object: any): AddApplicationPermissionsRequest {
+    return {
+      id: isSet(object.id)
+        ? ApplicationVersionIdentifier.fromJSON(object.id)
+        : undefined,
+      appPermissions: isSet(object.appPermissions)
+        ? FileMetadata.fromJSON(object.appPermissions)
+        : undefined,
+    };
+  },
+
+  toJSON(message: AddApplicationPermissionsRequest): unknown {
+    const obj: any = {};
+    message.id !== undefined &&
+      (obj.id = message.id
+        ? ApplicationVersionIdentifier.toJSON(message.id)
+        : undefined);
+    message.appPermissions !== undefined &&
+      (obj.appPermissions = message.appPermissions
+        ? FileMetadata.toJSON(message.appPermissions)
+        : undefined);
+    return obj;
+  },
+};
+
+function createBaseDeleteApplicationPermissionsRequest(): DeleteApplicationPermissionsRequest {
+  return { id: undefined, fileId: '' };
+}
+
+export const DeleteApplicationPermissionsRequest = {
+  fromJSON(object: any): DeleteApplicationPermissionsRequest {
+    return {
+      id: isSet(object.id)
+        ? ApplicationVersionIdentifier.fromJSON(object.id)
+        : undefined,
+      fileId: isSet(object.fileId) ? String(object.fileId) : '',
+    };
+  },
+
+  toJSON(message: DeleteApplicationPermissionsRequest): unknown {
     const obj: any = {};
     message.id !== undefined &&
       (obj.id = message.id
@@ -506,6 +593,7 @@ function createBaseChangeApplicationDisplayAttributesRequest(): ChangeApplicatio
     displayName: '',
     shortDescription: '',
     longDescription: '',
+    categories: [],
   };
 }
 
@@ -522,6 +610,9 @@ export const ChangeApplicationDisplayAttributesRequest = {
       longDescription: isSet(object.longDescription)
         ? String(object.longDescription)
         : '',
+      categories: Array.isArray(object?.categories)
+        ? object.categories.map((e: any) => String(e))
+        : [],
     };
   },
 
@@ -537,9 +628,143 @@ export const ChangeApplicationDisplayAttributesRequest = {
       (obj.shortDescription = message.shortDescription);
     message.longDescription !== undefined &&
       (obj.longDescription = message.longDescription);
+    if (message.categories) {
+      obj.categories = message.categories.map((e) => e);
+    } else {
+      obj.categories = [];
+    }
     return obj;
   },
 };
+
+function createBaseMigrateFirstPartyApplicationRequest(): MigrateFirstPartyApplicationRequest {
+  return { organizationTeam: undefined, attributes: undefined };
+}
+
+export const MigrateFirstPartyApplicationRequest = {
+  fromJSON(object: any): MigrateFirstPartyApplicationRequest {
+    return {
+      organizationTeam: isSet(object.organizationTeam)
+        ? OrganizationTeamMetadata.fromJSON(object.organizationTeam)
+        : undefined,
+      attributes: isSet(object.attributes)
+        ? MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes.fromJSON(
+            object.attributes,
+          )
+        : undefined,
+    };
+  },
+
+  toJSON(message: MigrateFirstPartyApplicationRequest): unknown {
+    const obj: any = {};
+    message.organizationTeam !== undefined &&
+      (obj.organizationTeam = message.organizationTeam
+        ? OrganizationTeamMetadata.toJSON(message.organizationTeam)
+        : undefined);
+    message.attributes !== undefined &&
+      (obj.attributes = message.attributes
+        ? MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes.toJSON(
+            message.attributes,
+          )
+        : undefined);
+    return obj;
+  },
+};
+
+function createBaseMigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes(): MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes {
+  return {
+    name: '',
+    urlPath: '',
+    displayName: '',
+    version: '',
+    description: '',
+    type: 0,
+    compitablity: undefined,
+    appUrls: [],
+    clientCredentials: undefined,
+    shortDescription: '',
+    longDescription: '',
+    redirectUris: [],
+  };
+}
+
+export const MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes =
+  {
+    fromJSON(
+      object: any,
+    ): MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes {
+      return {
+        name: isSet(object.name) ? String(object.name) : '',
+        urlPath: isSet(object.urlPath) ? String(object.urlPath) : '',
+        displayName: isSet(object.displayName)
+          ? String(object.displayName)
+          : '',
+        version: isSet(object.version) ? String(object.version) : '',
+        description: isSet(object.description)
+          ? String(object.description)
+          : '',
+        type: isSet(object.type) ? applicationTypeFromJSON(object.type) : 0,
+        compitablity: isSet(object.compitablity)
+          ? ApplicationCompitablity.fromJSON(object.compitablity)
+          : undefined,
+        appUrls: Array.isArray(object?.appUrls)
+          ? object.appUrls.map((e: any) => ApplicationUrl.fromJSON(e))
+          : [],
+        clientCredentials: isSet(object.clientCredentials)
+          ? ClientCredentials.fromJSON(object.clientCredentials)
+          : undefined,
+        shortDescription: isSet(object.shortDescription)
+          ? String(object.shortDescription)
+          : '',
+        longDescription: isSet(object.longDescription)
+          ? String(object.longDescription)
+          : '',
+        redirectUris: Array.isArray(object?.redirectUris)
+          ? object.redirectUris.map((e: any) => String(e))
+          : [],
+      };
+    },
+
+    toJSON(
+      message: MigrateFirstPartyApplicationRequest_ApplicationMigrationAttributes,
+    ): unknown {
+      const obj: any = {};
+      message.name !== undefined && (obj.name = message.name);
+      message.urlPath !== undefined && (obj.urlPath = message.urlPath);
+      message.displayName !== undefined &&
+        (obj.displayName = message.displayName);
+      message.version !== undefined && (obj.version = message.version);
+      message.description !== undefined &&
+        (obj.description = message.description);
+      message.type !== undefined &&
+        (obj.type = applicationTypeToJSON(message.type));
+      message.compitablity !== undefined &&
+        (obj.compitablity = message.compitablity
+          ? ApplicationCompitablity.toJSON(message.compitablity)
+          : undefined);
+      if (message.appUrls) {
+        obj.appUrls = message.appUrls.map((e) =>
+          e ? ApplicationUrl.toJSON(e) : undefined,
+        );
+      } else {
+        obj.appUrls = [];
+      }
+      message.clientCredentials !== undefined &&
+        (obj.clientCredentials = message.clientCredentials
+          ? ClientCredentials.toJSON(message.clientCredentials)
+          : undefined);
+      message.shortDescription !== undefined &&
+        (obj.shortDescription = message.shortDescription);
+      message.longDescription !== undefined &&
+        (obj.longDescription = message.longDescription);
+      if (message.redirectUris) {
+        obj.redirectUris = message.redirectUris.map((e) => e);
+      } else {
+        obj.redirectUris = [];
+      }
+      return obj;
+    },
+  };
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

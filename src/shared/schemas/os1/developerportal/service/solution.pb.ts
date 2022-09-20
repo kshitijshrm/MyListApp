@@ -25,6 +25,7 @@ import {
   ChangeSolutionTermsRequest,
   ClassifySolutionRequest,
   SolutionLifeCycleTransitionRequest,
+  AddSolutionInitializationConfigurationRequest,
   GetSolutionByVersionIdRequest,
   GetSolutionBySolutionIdRequest,
   ListSolutionsByOrgRequest,
@@ -154,6 +155,11 @@ export interface SolutionServiceClient {
 
   depreciate(
     request: SolutionLifeCycleTransitionRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
+
+  addSolutionInitializationConfiguration(
+    request: AddSolutionInitializationConfigurationRequest,
     metadata?: Metadata,
   ): Observable<Empty>;
 
@@ -297,6 +303,11 @@ export interface SolutionServiceController {
     metadata?: Metadata,
   ): void;
 
+  addSolutionInitializationConfiguration(
+    request: AddSolutionInitializationConfigurationRequest,
+    metadata?: Metadata,
+  ): void;
+
   /** queries */
 
   getSolutionByVersionId(
@@ -350,6 +361,7 @@ export function SolutionServiceControllerMethods() {
       'approveInternalPublish',
       'approveMarketplacePublish',
       'depreciate',
+      'addSolutionInitializationConfiguration',
       'getSolutionByVersionId',
       'getSolutionBySolutionId',
       'listSolutionsByOrgId',

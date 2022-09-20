@@ -1,6 +1,3 @@
-import { SolutionBaseDTO } from './solution.dto';
+import { SolutionDTO } from './solution.dto';
 
-export interface RegisterSolutionResponseDTO {
-  solutionId: string;
-}
-export type SolutionResponseDTO = SolutionBaseDTO;
+export type SolutionResponseDTO = SolutionDTO;

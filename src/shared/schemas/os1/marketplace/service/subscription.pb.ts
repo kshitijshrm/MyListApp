@@ -3,14 +3,17 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Metadata } from '@grpc/grpc-js';
 import { Observable } from 'rxjs';
 import {
-  CreateSubscriptionResponse,
-  GetAppSubscriptionsByOrgDomainResponse,
+  StartSolutionTrialResponse,
+  GetSubscriptionsByOrgDomainResponse,
 } from '../subscription/response.pb';
+import { Empty } from '../../../google/protobuf/empty.pb';
 import {
-  SubscribeAppToDeveloperOrgRequest,
-  SubscribeAppToCustomerOrgRequest,
-  SubscribeSolutionToCustomerOrgRequest,
-  GetAppSubscriptionsByOrgDomainRequest,
+  StartSolutionTrialRequest,
+  UpgradeSolutionSubscriptionRequest,
+  StartApplicationTrialRequest,
+  SubscribeSolutionToDeveloperOrgRequest,
+  SubscribeApplicationToDeveloperOrgRequest,
+  GetSubscriptionsByOrgDomainRequest,
 } from '../subscription/request.pb';
 
 export const protobufPackage = 'os1.marketplace.service';
@@ -18,86 +21,121 @@ export const protobufPackage = 'os1.marketplace.service';
 export const OS1_MARKETPLACE_SERVICE_PACKAGE_NAME = 'os1.marketplace.service';
 
 export interface SubscriptionServiceClient {
-  /**
-   * commands
-   * app
-   */
+  /** customer subscription */
 
-  subscribeAppToDeveloperOrg(
-    request: SubscribeAppToDeveloperOrgRequest,
+  startSolutionTrial(
+    request: StartSolutionTrialRequest,
     metadata?: Metadata,
-  ): Observable<CreateSubscriptionResponse>;
+  ): Observable<StartSolutionTrialResponse>;
 
-  subscribeAppToCustomerOrg(
-    request: SubscribeAppToCustomerOrgRequest,
+  upgradeSolutionTailToProduction(
+    request: UpgradeSolutionSubscriptionRequest,
     metadata?: Metadata,
-  ): Observable<CreateSubscriptionResponse>;
+  ): Observable<Empty>;
 
-  /** solutions */
-
-  subscribeSolutionToCustomerOrg(
-    request: SubscribeSolutionToCustomerOrgRequest,
+  startApplicationTrial(
+    request: StartApplicationTrialRequest,
     metadata?: Metadata,
-  ): Observable<CreateSubscriptionResponse>;
+  ): Observable<Empty>;
+
+  upgradeApplicationTailToProduction(
+    request: UpgradeSolutionSubscriptionRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
+
+  /** developer subscriptions */
+
+  subscribeSolutionToDeveloperOrg(
+    request: SubscribeSolutionToDeveloperOrgRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
+
+  subscribeApplicationToDeveloperOrg(
+    request: SubscribeApplicationToDeveloperOrgRequest,
+    metadata?: Metadata,
+  ): Observable<Empty>;
 
   /** queries */
 
-  getAppSubscriptionsByOrgDomain(
-    request: GetAppSubscriptionsByOrgDomainRequest,
+  getSubscriptionsByOrganizationId(
+    request: GetSubscriptionsByOrgDomainRequest,
     metadata?: Metadata,
-  ): Observable<GetAppSubscriptionsByOrgDomainResponse>;
+  ): Observable<GetSubscriptionsByOrgDomainResponse>;
+
+  getSubscriptionsByOrganizationDomain(
+    request: GetSubscriptionsByOrgDomainRequest,
+    metadata?: Metadata,
+  ): Observable<GetSubscriptionsByOrgDomainResponse>;
 }
 
 export interface SubscriptionServiceController {
-  /**
-   * commands
-   * app
-   */
+  /** customer subscription */
 
-  subscribeAppToDeveloperOrg(
-    request: SubscribeAppToDeveloperOrgRequest,
+  startSolutionTrial(
+    request: StartSolutionTrialRequest,
     metadata?: Metadata,
   ):
-    | Promise<CreateSubscriptionResponse>
-    | Observable<CreateSubscriptionResponse>
-    | CreateSubscriptionResponse;
+    | Promise<StartSolutionTrialResponse>
+    | Observable<StartSolutionTrialResponse>
+    | StartSolutionTrialResponse;
 
-  subscribeAppToCustomerOrg(
-    request: SubscribeAppToCustomerOrgRequest,
+  upgradeSolutionTailToProduction(
+    request: UpgradeSolutionSubscriptionRequest,
     metadata?: Metadata,
-  ):
-    | Promise<CreateSubscriptionResponse>
-    | Observable<CreateSubscriptionResponse>
-    | CreateSubscriptionResponse;
+  ): void;
 
-  /** solutions */
-
-  subscribeSolutionToCustomerOrg(
-    request: SubscribeSolutionToCustomerOrgRequest,
+  startApplicationTrial(
+    request: StartApplicationTrialRequest,
     metadata?: Metadata,
-  ):
-    | Promise<CreateSubscriptionResponse>
-    | Observable<CreateSubscriptionResponse>
-    | CreateSubscriptionResponse;
+  ): void;
+
+  upgradeApplicationTailToProduction(
+    request: UpgradeSolutionSubscriptionRequest,
+    metadata?: Metadata,
+  ): void;
+
+  /** developer subscriptions */
+
+  subscribeSolutionToDeveloperOrg(
+    request: SubscribeSolutionToDeveloperOrgRequest,
+    metadata?: Metadata,
+  ): void;
+
+  subscribeApplicationToDeveloperOrg(
+    request: SubscribeApplicationToDeveloperOrgRequest,
+    metadata?: Metadata,
+  ): void;
 
   /** queries */
 
-  getAppSubscriptionsByOrgDomain(
-    request: GetAppSubscriptionsByOrgDomainRequest,
+  getSubscriptionsByOrganizationId(
+    request: GetSubscriptionsByOrgDomainRequest,
     metadata?: Metadata,
   ):
-    | Promise<GetAppSubscriptionsByOrgDomainResponse>
-    | Observable<GetAppSubscriptionsByOrgDomainResponse>
-    | GetAppSubscriptionsByOrgDomainResponse;
+    | Promise<GetSubscriptionsByOrgDomainResponse>
+    | Observable<GetSubscriptionsByOrgDomainResponse>
+    | GetSubscriptionsByOrgDomainResponse;
+
+  getSubscriptionsByOrganizationDomain(
+    request: GetSubscriptionsByOrgDomainRequest,
+    metadata?: Metadata,
+  ):
+    | Promise<GetSubscriptionsByOrgDomainResponse>
+    | Observable<GetSubscriptionsByOrgDomainResponse>
+    | GetSubscriptionsByOrgDomainResponse;
 }
 
 export function SubscriptionServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      'subscribeAppToDeveloperOrg',
-      'subscribeAppToCustomerOrg',
-      'subscribeSolutionToCustomerOrg',
-      'getAppSubscriptionsByOrgDomain',
+      'startSolutionTrial',
+      'upgradeSolutionTailToProduction',
+      'startApplicationTrial',
+      'upgradeApplicationTailToProduction',
+      'subscribeSolutionToDeveloperOrg',
+      'subscribeApplicationToDeveloperOrg',
+      'getSubscriptionsByOrganizationId',
+      'getSubscriptionsByOrganizationDomain',
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(

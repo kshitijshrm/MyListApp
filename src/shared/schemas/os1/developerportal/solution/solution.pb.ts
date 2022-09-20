@@ -102,6 +102,7 @@ export interface SolutionVersion {
   submissionId: string;
   terms: SolutionTerms | undefined;
   configurations: SolutionConfiguration[];
+  initializationConfiguration: SolutionInitializationConfiguration | undefined;
 }
 
 export interface SolutionDisplayAttributes {
@@ -138,6 +139,16 @@ export interface SolutionConfiguration {
 export interface SolutionDocumentMetadata {
   category: string;
   file: FileMetadata | undefined;
+}
+
+export interface SolutionInitializationConfiguration {
+  appInitializationSequence: SolutionInitializationConfiguration_AppInitializationSequence[];
+}
+
+export interface SolutionInitializationConfiguration_AppInitializationSequence {
+  id: ApplicationVersionIdentifier | undefined;
+  appUrn: string;
+  initilizationSequenceNumber: number;
 }
 
 export const OS1_DEVELOPERPORTAL_SOLUTION_PACKAGE_NAME =
@@ -198,6 +209,7 @@ function createBaseSolutionVersion(): SolutionVersion {
     submissionId: '',
     terms: undefined,
     configurations: [],
+    initializationConfiguration: undefined,
   };
 }
 
@@ -249,6 +261,11 @@ export const SolutionVersion = {
             SolutionConfiguration.fromJSON(e),
           )
         : [],
+      initializationConfiguration: isSet(object.initializationConfiguration)
+        ? SolutionInitializationConfiguration.fromJSON(
+            object.initializationConfiguration,
+          )
+        : undefined,
     };
   },
 
@@ -322,6 +339,12 @@ export const SolutionVersion = {
     } else {
       obj.configurations = [];
     }
+    message.initializationConfiguration !== undefined &&
+      (obj.initializationConfiguration = message.initializationConfiguration
+        ? SolutionInitializationConfiguration.toJSON(
+            message.initializationConfiguration,
+          )
+        : undefined);
     return obj;
   },
 };
@@ -496,6 +519,79 @@ export const SolutionDocumentMetadata = {
     message.category !== undefined && (obj.category = message.category);
     message.file !== undefined &&
       (obj.file = message.file ? FileMetadata.toJSON(message.file) : undefined);
+    return obj;
+  },
+};
+
+function createBaseSolutionInitializationConfiguration(): SolutionInitializationConfiguration {
+  return { appInitializationSequence: [] };
+}
+
+export const SolutionInitializationConfiguration = {
+  fromJSON(object: any): SolutionInitializationConfiguration {
+    return {
+      appInitializationSequence: Array.isArray(
+        object?.appInitializationSequence,
+      )
+        ? object.appInitializationSequence.map((e: any) =>
+            SolutionInitializationConfiguration_AppInitializationSequence.fromJSON(
+              e,
+            ),
+          )
+        : [],
+    };
+  },
+
+  toJSON(message: SolutionInitializationConfiguration): unknown {
+    const obj: any = {};
+    if (message.appInitializationSequence) {
+      obj.appInitializationSequence = message.appInitializationSequence.map(
+        (e) =>
+          e
+            ? SolutionInitializationConfiguration_AppInitializationSequence.toJSON(
+                e,
+              )
+            : undefined,
+      );
+    } else {
+      obj.appInitializationSequence = [];
+    }
+    return obj;
+  },
+};
+
+function createBaseSolutionInitializationConfiguration_AppInitializationSequence(): SolutionInitializationConfiguration_AppInitializationSequence {
+  return { id: undefined, appUrn: '', initilizationSequenceNumber: 0 };
+}
+
+export const SolutionInitializationConfiguration_AppInitializationSequence = {
+  fromJSON(
+    object: any,
+  ): SolutionInitializationConfiguration_AppInitializationSequence {
+    return {
+      id: isSet(object.id)
+        ? ApplicationVersionIdentifier.fromJSON(object.id)
+        : undefined,
+      appUrn: isSet(object.appUrn) ? String(object.appUrn) : '',
+      initilizationSequenceNumber: isSet(object.initilizationSequenceNumber)
+        ? Number(object.initilizationSequenceNumber)
+        : 0,
+    };
+  },
+
+  toJSON(
+    message: SolutionInitializationConfiguration_AppInitializationSequence,
+  ): unknown {
+    const obj: any = {};
+    message.id !== undefined &&
+      (obj.id = message.id
+        ? ApplicationVersionIdentifier.toJSON(message.id)
+        : undefined);
+    message.appUrn !== undefined && (obj.appUrn = message.appUrn);
+    message.initilizationSequenceNumber !== undefined &&
+      (obj.initilizationSequenceNumber = Math.round(
+        message.initilizationSequenceNumber,
+      ));
     return obj;
   },
 };

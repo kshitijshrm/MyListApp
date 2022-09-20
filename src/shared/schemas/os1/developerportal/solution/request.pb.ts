@@ -8,6 +8,7 @@ import {
   SolutionDocumentMetadata,
   SolutionDisplayAttributes,
   SolutionTerms,
+  SolutionInitializationConfiguration,
 } from './solution.pb';
 import {
   SolutionIdentifier,
@@ -114,6 +115,11 @@ export interface GetSolutionByVersionIdRequest {
 
 export interface ListSolutionsByOrgRequest {
   id: OrganizationIdentifier | undefined;
+}
+
+export interface AddSolutionInitializationConfigurationRequest {
+  id: SolutionVersionIdentifier | undefined;
+  configuration: SolutionInitializationConfiguration | undefined;
 }
 
 export const OS1_DEVELOPERPORTAL_SOLUTION_PACKAGE_NAME =
@@ -675,6 +681,36 @@ export const ListSolutionsByOrgRequest = {
     message.id !== undefined &&
       (obj.id = message.id
         ? OrganizationIdentifier.toJSON(message.id)
+        : undefined);
+    return obj;
+  },
+};
+
+function createBaseAddSolutionInitializationConfigurationRequest(): AddSolutionInitializationConfigurationRequest {
+  return { id: undefined, configuration: undefined };
+}
+
+export const AddSolutionInitializationConfigurationRequest = {
+  fromJSON(object: any): AddSolutionInitializationConfigurationRequest {
+    return {
+      id: isSet(object.id)
+        ? SolutionVersionIdentifier.fromJSON(object.id)
+        : undefined,
+      configuration: isSet(object.configuration)
+        ? SolutionInitializationConfiguration.fromJSON(object.configuration)
+        : undefined,
+    };
+  },
+
+  toJSON(message: AddSolutionInitializationConfigurationRequest): unknown {
+    const obj: any = {};
+    message.id !== undefined &&
+      (obj.id = message.id
+        ? SolutionVersionIdentifier.toJSON(message.id)
+        : undefined);
+    message.configuration !== undefined &&
+      (obj.configuration = message.configuration
+        ? SolutionInitializationConfiguration.toJSON(message.configuration)
         : undefined);
     return obj;
   },

@@ -1,3 +1,4 @@
+import { ApplicationDTO } from '../application/application.dto';
 import {
   ConfigurationMetadataDTO,
   DocumentMetadataDTO,
@@ -39,25 +40,15 @@ export enum SolutionDocumentCategory {
   DEPRECIATED = 'DEPRECIATED',
 }
 
-export interface SolutionBaseDTO
+export interface SolutionDTO
   extends SolutionVersionIdentifierDTO,
     SolutionDisplayAttributesDTO,
-    SolutionClassificationDTO,
     SolutionCompatibilityDTO,
-    SolutionDisplayAttributesDTO,
-    SolutionTermsDTO {
+    SolutionDisplayAttributesDTO {
   version: string;
-  categories: Array<string>;
-  phase: SolutionPhase;
   images: Array<FileMetadataDTO>;
   icon: FileMetadataDTO;
-  documents: Array<DocumentMetadataDTO>;
-  configurations: Array<ConfigurationMetadataDTO>;
-  applications: Array<SolutionApplicaitonDTO>;
-}
-
-export interface SolutionClassificationDTO {
-  categories: Array<string>;
+  applications: Array<ApplicationDTO>;
 }
 
 export interface SolutionCompatibilityDTO {
@@ -65,13 +56,6 @@ export interface SolutionCompatibilityDTO {
   isConsoleCompatible: boolean;
 }
 
-export interface SolutionApplicaitonDTO {
-  appId: string;
-  appVersionId: string;
-}
-export interface SolutionTermsDTO {
-  isCopyrightFree: boolean;
-}
 export interface SolutionDisplayAttributesDTO {
   displayName: string;
   longDescription: string;

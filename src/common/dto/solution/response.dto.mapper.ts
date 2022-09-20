@@ -1,35 +1,25 @@
 import { FileMetadata } from 'src/shared/schemas/os1/core/file/file.pb';
-import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import {
   Solution,
   SolutionConfiguration,
   SolutionDocumentMetadata,
-  solutionPhaseToJSON,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import {
   ConfigurationMetadataDTO,
   DocumentMetadataDTO,
   FileMetadataDTO,
 } from '../common/common.dto';
-import { SolutionResponseDTO } from './response.dto';
-import { SolutionApplicaitonDTO, SolutionPhase } from './solution.dto';
+import { SolutionDTO } from './solution.dto';
 
 export class SolutionResponseSchemaToDtoMapper {
-  static mapToAppResponseDTO(solution: Solution): SolutionResponseDTO {
-    const response: SolutionResponseDTO = {
+  static mapToSolutionDTO(solution: Solution): SolutionDTO {
+    const response: SolutionDTO = {
       solutionId: solution.id.solutionId,
       solutionVersionId: solution.version[0].id.solutionVersionId,
       displayName: solution.version[0].displayAttributes.displayName,
       version: solution.version[0].version,
       shortDescription: solution.version[0].displayAttributes.shortDescription,
       longDescription: solution.version[0].displayAttributes.longDescription,
-      categories: solution.version[0].classification
-        ? solution.version[0].classification.categories
-        : [],
-      phase: SolutionPhase[solutionPhaseToJSON(solution.version[0].phase)],
-      isCopyrightFree: solution.version[0].terms
-        ? solution.version[0].terms.isCopyrightFree
-        : undefined,
       icon:
         solution.version[0].icons && solution.version[0].icons.length > 0
           ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
@@ -41,21 +31,7 @@ export class SolutionResponseSchemaToDtoMapper {
             SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
           )
         : undefined,
-      documents: solution.version[0].documents
-        ? solution.version[0].documents.map(
-            SolutionResponseSchemaToDtoMapper.mapToDocumentMetadataDTO,
-          )
-        : undefined,
-      configurations: solution.version[0].configurations
-        ? solution.version[0].configurations.map(
-            SolutionResponseSchemaToDtoMapper.mapToConfigurationMetadataDTO,
-          )
-        : undefined,
-      applications: solution.version[0].applications
-        ? solution.version[0].applications.map(
-            SolutionResponseSchemaToDtoMapper.mapToSolutionApplicaitonDTO,
-          )
-        : undefined,
+      applications: [],
       isMarketplaceCompatible:
         solution.version[0].compatibility?.isMarketplaceCompatible,
       isConsoleCompatible:
@@ -96,15 +72,5 @@ export class SolutionResponseSchemaToDtoMapper {
       ),
     };
     return configurationDTO;
-  }
-
-  static mapToSolutionApplicaitonDTO(
-    application: ApplicationVersionIdentifier,
-  ): SolutionApplicaitonDTO {
-    const applicationDTO: SolutionApplicaitonDTO = {
-      appId: application.appId,
-      appVersionId: application.appVersionId,
-    };
-    return applicationDTO;
   }
 }
