@@ -98,15 +98,7 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-  ): Promise<SubscriptionDTO> {
-    const subscriptionResponse: SubscriptionDTO = {
-      subscriptionId: '',
-      applications: [],
-      solutions: [],
-      status: undefined,
-      tier: undefined,
-    };
-
+  ): Promise<Array<SubscriptionDTO>> {
     const getAppsForCoreosUserRequest: GetAppsForCoreosUserRequest = {
       tenantId: tenantId,
       coreosUserId: userId,
@@ -140,100 +132,115 @@ export class SubscriptionService {
       );
     }
 
-    subscriptionResponse.subscriptionId = subscriptions[0].id.subscriptionId;
-    subscriptionResponse.tier = {
-      displayName: subscriptions[0].tier.displayName,
-      periodInDays: subscriptions[0].tier.periodInDays,
-      planType: subscriptionTier_PlanTypeToJSON(subscriptions[0].tier.planType),
-    };
-    subscriptionResponse.status = {
-      status: subscriptions[0].status.status,
-      activatedAt: subscriptions[0].status.activatedAt,
-      requestedAt: subscriptions[0].status.requestedAt,
-    };
+    const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
+    for (const subscription of subscriptions) {
+      this.logger.log(
+        'processing subscriptions: ' + subscription.id.subscriptionId,
+      );
 
-    // using only the first subscription for now
-    const subscription: Subscription = subscriptions[0];
+      const subscriptionDTO = {
+        subscriptionId: '',
+        applications: [],
+        solutions: [],
+        status: undefined,
+        tier: undefined,
+      };
 
-    if (subscription.item.solution) {
-      let solution: Solution;
-      let solutionDto: SolutionDTO;
-
-      await firstValueFrom(
-        this.getSolutionsBySolutionVersionIdentifier(
-          ctx,
-          subscription.item.solution.id,
+      subscriptionDTO.subscriptionId = subscriptions[0].id.subscriptionId;
+      subscriptionDTO.tier = {
+        displayName: subscriptions[0].tier.displayName,
+        periodInDays: subscriptions[0].tier.periodInDays,
+        planType: subscriptionTier_PlanTypeToJSON(
+          subscriptions[0].tier.planType,
         ),
-      )
-        .then((response) => {
-          solution = response;
-          solutionDto =
-            SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
-          subscriptionResponse.solutions.push(solutionDto);
-        })
-        .catch((error) => {
-          if (error.code === 5) {
-            // app not found. no action required
-          } else {
-            const message = `Error occuret while getting solution for solutionVersionIdentifier ${subscription.item.solution}`;
-            this.logger.error(message, error.stack);
-            throw new InternalServerErrorException(message);
+      };
+      subscriptionDTO.status = {
+        status: subscriptions[0].status.status,
+        activatedAt: subscriptions[0].status.activatedAt,
+        requestedAt: subscriptions[0].status.requestedAt,
+      };
+
+      if (subscription.item.solution) {
+        let solution: Solution;
+        let solutionDto: SolutionDTO;
+
+        await firstValueFrom(
+          this.getSolutionsBySolutionVersionIdentifier(
+            ctx,
+            subscription.item.solution.id,
+          ),
+        )
+          .then((response) => {
+            solution = response;
+            solutionDto =
+              SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
+            subscriptionDTO.solutions.push(solutionDto);
+          })
+          .catch((error) => {
+            if (error.code === 5) {
+              // app not found. no action required
+            } else {
+              const message = `Error occuret while getting solution for solutionVersionIdentifier ${subscription.item.solution}`;
+              this.logger.error(message, error.stack);
+              throw new InternalServerErrorException(message);
+            }
+          });
+
+        // return empty subscription if solution not found
+        if (solution) {
+          const appsReferencedInSolution: Array<ApplicationVersionIdentifier> =
+            solution.version[0].applications;
+
+          // get app details and build a map of app id to app for all apps referenced in solution
+          for (const appVersionIdentifier of appsReferencedInSolution) {
+            // collect all applciations referenced in solution
+            await firstValueFrom(
+              this.getApplicationByApplicationVersionIdentifier(
+                ctx,
+                appVersionIdentifier,
+              ),
+            )
+              .then((app) => {
+                solutionDto.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+                );
+              })
+              .catch((error) => {
+                if (error.code === 5) {
+                  // app not found. no action required
+                } else {
+                  const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
+                  this.logger.error(message, error);
+                  throw new InternalServerErrorException(message);
+                }
+              });
           }
-        });
-
-      // return empty subscription if solution not found
-      if (solution) {
-        const appsReferencedInSolution: Array<ApplicationVersionIdentifier> =
-          solution.version[0].applications;
-
-        // get app details and build a map of app id to app for all apps referenced in solution
-        for (const appVersionIdentifier of appsReferencedInSolution) {
-          // collect all applciations referenced in solution
-          await firstValueFrom(
-            this.getApplicationByApplicationVersionIdentifier(
-              ctx,
-              appVersionIdentifier,
-            ),
-          )
-            .then((app) => {
-              solutionDto.applications.push(
-                ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-              );
-            })
-            .catch((error) => {
-              if (error.code === 5) {
-                // app not found. no action required
-              } else {
-                const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
-                this.logger.error(message, error);
-                throw new InternalServerErrorException(message);
-              }
-            });
         }
+      } else {
+        await firstValueFrom(
+          this.getApplicationByApplicationVersionIdentifier(
+            ctx,
+            subscription.item.application.id,
+          ),
+        )
+          .then((app) => {
+            subscriptionDTO.applications.push(
+              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+            );
+          })
+          .catch((error) => {
+            if (error.code === 5) {
+              // app not found. no action required
+            } else {
+              const message = `Error while getting application details for ${subscription.item.application.id.appId} and ${subscription.item.application.id.appVersionId}. Reson: ${error.message}`;
+              this.logger.error(message, error);
+              throw new InternalServerErrorException(message);
+            }
+          });
       }
-    } else {
-      await firstValueFrom(
-        this.getApplicationByApplicationVersionIdentifier(
-          ctx,
-          subscription.item.application.id,
-        ),
-      )
-        .then((app) => {
-          subscriptionResponse.applications.push(
-            ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-          );
-        })
-        .catch((error) => {
-          if (error.code === 5) {
-            // app not found. no action required
-          } else {
-            const message = `Error while getting application details for ${subscription.item.application.id.appId} and ${subscription.item.application.id.appVersionId}. Reson: ${error.message}`;
-            this.logger.error(message, error);
-            throw new InternalServerErrorException(message);
-          }
-        });
+      subscriptionResponseDTOs.push(subscriptionDTO);
     }
-    return subscriptionResponse;
+    return subscriptionResponseDTOs;
   }
 
   private getSubscriptionsByTenantId(

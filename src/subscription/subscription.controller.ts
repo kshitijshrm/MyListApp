@@ -36,7 +36,7 @@ export class SubscriptionController {
   private getAllSubscriptions(
     @Param('tenantId') tenantId: string,
     @Headers() headers,
-  ): Promise<SubscriptionDTO> {
+  ): Promise<Array<SubscriptionDTO>> {
     const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
