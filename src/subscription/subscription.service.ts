@@ -216,7 +216,8 @@ export class SubscriptionService {
               });
           }
         }
-      } else {
+      }
+      if (subscription.item.application) {
         await firstValueFrom(
           this.getApplicationByApplicationVersionIdentifier(
             ctx,
