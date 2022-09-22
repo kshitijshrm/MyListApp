@@ -17,7 +17,10 @@ apps:
     unAuthMethods: OPTIONS
     port: 3000
     corsHeaders:
-      - X-COREOS-ACCESS
+      - X-DEVELOPERPLATFORM-ACCESS
+      - X-DEVELOPERPLATFORM-USER-ID
+      - X-DEVELOPERPLATFORM-ROLE
+      - X-DEVELOPERPLATFORM-REQUEST-ID
       - Content-Type
     envVars:
       - name: APPLICATION_SERVICE_ENDPOINT
@@ -35,5 +38,6 @@ apps:
     autoscaling:
       enabled: false
     authentication:
-      enabled: false
+      enabled: true
+      authorizationProvider: developer-platform
     podAnnotations: {}
