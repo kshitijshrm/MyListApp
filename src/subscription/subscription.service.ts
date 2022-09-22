@@ -132,32 +132,30 @@ export class SubscriptionService {
       );
     }
 
-    const subscriptionDTO = {
-      subscriptionId: '',
-      applications: [],
-      solutions: [],
-      status: undefined,
-      tier: undefined,
-    };
-
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     for (const subscription of subscriptions) {
       this.logger.log(
         'processing subscriptions: ' + subscription.id.subscriptionId,
       );
 
-      subscriptionDTO.subscriptionId = subscriptions[0].id.subscriptionId;
+      const subscriptionDTO = {
+        subscriptionId: '',
+        applications: [],
+        solutions: [],
+        status: undefined,
+        tier: undefined,
+      };
+
+      subscriptionDTO.subscriptionId = subscription.id.subscriptionId;
       subscriptionDTO.tier = {
-        displayName: subscriptions[0].tier.displayName,
-        periodInDays: subscriptions[0].tier.periodInDays,
-        planType: subscriptionTier_PlanTypeToJSON(
-          subscriptions[0].tier.planType,
-        ),
+        displayName: subscription.tier.displayName,
+        periodInDays: subscription.tier.periodInDays,
+        planType: subscriptionTier_PlanTypeToJSON(subscription.tier.planType),
       };
       subscriptionDTO.status = {
-        status: subscriptions[0].status.status,
-        activatedAt: subscriptions[0].status.activatedAt,
-        requestedAt: subscriptions[0].status.requestedAt,
+        status: subscription.status.status,
+        activatedAt: subscription.status.activatedAt,
+        requestedAt: subscription.status.requestedAt,
       };
 
       if (subscription.item.solution) {
