@@ -132,19 +132,19 @@ export class SubscriptionService {
       );
     }
 
+    const subscriptionDTO = {
+      subscriptionId: '',
+      applications: [],
+      solutions: [],
+      status: undefined,
+      tier: undefined,
+    };
+
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     for (const subscription of subscriptions) {
       this.logger.log(
         'processing subscriptions: ' + subscription.id.subscriptionId,
       );
-
-      const subscriptionDTO = {
-        subscriptionId: '',
-        applications: [],
-        solutions: [],
-        status: undefined,
-        tier: undefined,
-      };
 
       subscriptionDTO.subscriptionId = subscriptions[0].id.subscriptionId;
       subscriptionDTO.tier = {
