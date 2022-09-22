@@ -13,6 +13,8 @@ apps:
     api:
       path: /app/console-api
       health: /app/console-api/health
+    unAuthPaths: /app/console-api/*
+    unAuthMethods: OPTIONS
     port: 3000
     corsHeaders:
       - X-COREOS-ACCESS
