@@ -264,7 +264,9 @@ export class SubscriptionService {
     corsAppsAssignedToUser: string[],
     app: Application,
   ): boolean {
-    return corsAppsAssignedToUser.includes(app.urn);
+    return corsAppsAssignedToUser
+      ? corsAppsAssignedToUser.includes(app.urn)
+      : false;
   }
 
   private isDeveloperSubscription(subscriptionDTO: SubscriptionDTO) {
