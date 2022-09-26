@@ -3,7 +3,7 @@ name: "Dev: Build and Publish to ECR"
 on:
   push:
     branches:
-      - "task/0000_bugfixes"
+      - "development"
     paths-ignore:
       - "deploy/**"
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
     with:
       service_directory: "."
       docker_file_name: "Dockerfile"
-      branch: "task/0000_bugfixes"
+      branch: "development"
       ecr_repo: "developer-platform/console-api"
       tag: ${{needs.tag.outputs.tag_name}}
       deploy_values_file_path: "deploy/deploy-values-dev.yaml"

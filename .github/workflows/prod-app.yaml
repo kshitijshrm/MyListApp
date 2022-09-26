@@ -1,0 +1,46 @@
+name: "Dev: Build and Publish to ECR"
+
+on:
+  push:
+    branches:
+      - "production"
+    paths-ignore:
+      - "deploy/**"
+  workflow_dispatch:
+
+jobs:
+  tag:
+    name: Prepare docker image tag name
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.version.outputs.app_version }}-dev-${{ steps.version.outputs.commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: get version
+        id: version
+        run: |
+          version=$(jq -r .version package.json )
+          echo "::set-output name=app_version::${version}"
+          commit_id=$(git rev-parse --short=7 HEAD)
+          echo "::set-output name=commit::${commit_id}"
+  docker:
+    needs: tag
+    uses: FoxtrotPlatform/developer-platform-github-workflow/.github/workflows/build-and-publish-ecr.yaml@main
+    with:
+      service_directory: "."
+      docker_file_name: "Dockerfile"
+      branch: "production"
+      ecr_repo: "developer-platform/console-api"
+      tag: ${{needs.tag.outputs.tag_name}}
+      deploy_values_file_path: "deploy/deploy-values-prod.yaml"
+      deploy_values_property_path: "apps.consoleapi.image.version"
+      repo_policy_file: "repo-policy.json"
+      repo_policy_url: "https://api.github.com/repos/FoxtrotPlatform/platform-infra-golden-images/contents/repo-policy.json"
+    secrets:
+      aws_access_key_id: ${{ secrets.F_AWS_SERVERLESS_BASE_KEY }}
+      aws_secret_access_key: ${{ secrets.F_AWS_SERVERLESS_BASE_SECRET }}
+      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_BASE }}
+      aws_region: ${{ secrets.AWS_REGION_BASE }}
+      ecr_base_image_url: ${{ secrets.ECR_BASE_IMAGES_URL_BASE }}
+      f_github_token: ${{ secrets.F_GITHUB_TOKEN }}
