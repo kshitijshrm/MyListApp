@@ -997,12 +997,18 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.4.0.tgz#cac720d860a89d487b47e55e66a4fd114f1d3fe5"
   integrity sha512-xDd3Tvkt2jgkx1LkuwwxpNBy/Oe+LkZBTwkgEFTiWpVSZgQ5sc/LenbHKRHbFl0dq/KFeeq/szyyPtpJRKY0fg==
 
-"@foxtrotplatform/developer-platform-core-lib@0.1.1":
-  version "0.1.1"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-core-lib/0.1.1/386e258c728c95438324ed36ac68f5efac8f80e7#386e258c728c95438324ed36ac68f5efac8f80e7"
-  integrity sha512-/tjwDtBZigGdIC7o7E3rfP8yDJeaFr5Fflinyp+boBV8bRWZ/n1u78VmF93iGu8CJpkZ8+e7j3wCNpyrNUT2nQ==
+"@faker-js/faker@^7.5.0":
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.5.0.tgz#8e8265f65f5b68d2a57886d59b03788eeb676264"
+  integrity sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==
+
+"@foxtrotplatform/developer-platform-core-lib@0.1.4":
+  version "0.1.4"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-core-lib/0.1.4/bba75ed98adc00ef7c2f0538d1441969b2d2427e#bba75ed98adc00ef7c2f0538d1441969b2d2427e"
+  integrity sha512-uZKXsq+PFnA+ey2QcUWNOK+u4OQL02JWsUjMpu7Qzqt+i+YJoOaojl78qQD68F5Ar6IIyiYjtOjOC7pc3mmpFg==
   dependencies:
     "@aws-sdk/client-ses" "3.118.0"
+    "@faker-js/faker" "^7.5.0"
     "@nestjs/common" "^9.0.0"
     "@nestjs/config" "^2.2.0"
     "@nestjs/core" "^9.0.0"
