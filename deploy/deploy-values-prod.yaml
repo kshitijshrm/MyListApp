@@ -1,5 +1,5 @@
-env: dev
-baseDomain: dev.fxtrt.io
+env: prod
+baseDomain: preprod.dlv2.fxtrt.io
 namespace: tenant-developerplatform
 service_name: console-api
 gateway_name: fxtrt-apps
@@ -8,7 +8,7 @@ apps:
     replicaCount: 1
     image:
       repository: 429738059147.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
-      version: 0.0.1-dev-0716fb7
+      version: 0.0.1-dev-08d7d31
     resourceType: m1
     api:
       path: /app/console-api

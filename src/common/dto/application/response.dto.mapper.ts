@@ -42,11 +42,13 @@ export class ApplicationResponseSchemaToDtoMapper {
             ApplicationResponseSchemaToDtoMapper.mapToUrlOverrideDTO,
           )
         : undefined,
-      icons: application.versions[0].appIcons
-        ? application.versions[0].appIcons.map(
-            ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO,
-          )
-        : undefined,
+      icon:
+        application.versions[0].appIcons &&
+        application.versions[0].appIcons.length > 0
+          ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+              application.versions[0].appIcons[0],
+            )
+          : undefined,
       images: application.versions[0].displayImages
         ? application.versions[0].displayImages.map(
             ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO,

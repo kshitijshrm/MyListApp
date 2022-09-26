@@ -43,8 +43,6 @@ import {
 import { GetSubscriptionsByOrgDomainRequest } from 'src/shared/schemas/os1/marketplace/subscription/request.pb';
 import {
   Subscription,
-  SubscriptionStatus,
-  SubscriptionTier,
   subscriptionTier_PlanTypeToJSON,
 } from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
 
@@ -105,11 +103,19 @@ export class SubscriptionService {
     };
 
     // TODO: filter response only based on apps assigned to the user
-    const corsAppsAssignedToUser: string[] = await firstValueFrom(
+    let corsAppsAssignedToUser: string[] = [];
+    await firstValueFrom(
       this.coreosAgentServiceClient
         .getAppsForCoreosUser(getAppsForCoreosUserRequest, ctx.rpcMetadata)
         .pipe(map((response) => response.apps)),
-    );
+    )
+      .then((apps) => {
+        corsAppsAssignedToUser = apps;
+      })
+      .catch((error) => {
+        const message = `Error while fetching apps assigned to user ${userId} from coreos`;
+        throw new InternalServerErrorException(message, error);
+      });
     this.logger.log('corsAppsAssignedToUser: ' + corsAppsAssignedToUser);
 
     // get subscriptions for tenant
@@ -138,7 +144,7 @@ export class SubscriptionService {
         'processing subscriptions: ' + subscription.id.subscriptionId,
       );
 
-      const subscriptionDTO = {
+      const subscriptionDTO: SubscriptionDTO = {
         subscriptionId: '',
         applications: [],
         solutions: [],
@@ -146,18 +152,16 @@ export class SubscriptionService {
         tier: undefined,
       };
 
-      subscriptionDTO.subscriptionId = subscriptions[0].id.subscriptionId;
+      subscriptionDTO.subscriptionId = subscription.id.subscriptionId;
       subscriptionDTO.tier = {
-        displayName: subscriptions[0].tier.displayName,
-        periodInDays: subscriptions[0].tier.periodInDays,
-        planType: subscriptionTier_PlanTypeToJSON(
-          subscriptions[0].tier.planType,
-        ),
+        displayName: subscription.tier.displayName,
+        periodInDays: subscription.tier.periodInDays,
+        planType: subscriptionTier_PlanTypeToJSON(subscription.tier.planType),
       };
       subscriptionDTO.status = {
-        status: subscriptions[0].status.status,
-        activatedAt: subscriptions[0].status.activatedAt,
-        requestedAt: subscriptions[0].status.requestedAt,
+        status: subscription.status.status,
+        activatedAt: subscription.status.activatedAt,
+        requestedAt: subscription.status.requestedAt,
       };
 
       if (subscription.item.solution) {
@@ -201,9 +205,16 @@ export class SubscriptionService {
               ),
             )
               .then((app) => {
-                solutionDto.applications.push(
-                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-                );
+                if (
+                  this.isDeveloperSubscription(subscriptionDTO) ||
+                  this.isAppAssignedToUser(corsAppsAssignedToUser, app)
+                ) {
+                  solutionDto.applications.push(
+                    ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+                      app,
+                    ),
+                  );
+                }
               })
               .catch((error) => {
                 if (error.code === 5) {
@@ -216,7 +227,8 @@ export class SubscriptionService {
               });
           }
         }
-      } else {
+      }
+      if (subscription.item.application) {
         await firstValueFrom(
           this.getApplicationByApplicationVersionIdentifier(
             ctx,
@@ -224,9 +236,14 @@ export class SubscriptionService {
           ),
         )
           .then((app) => {
-            subscriptionDTO.applications.push(
-              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-            );
+            if (
+              this.isDeveloperSubscription(subscriptionDTO) ||
+              this.isAppAssignedToUser(corsAppsAssignedToUser, app)
+            ) {
+              subscriptionDTO.applications.push(
+                ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+              );
+            }
           })
           .catch((error) => {
             if (error.code === 5) {
@@ -241,6 +258,20 @@ export class SubscriptionService {
       subscriptionResponseDTOs.push(subscriptionDTO);
     }
     return subscriptionResponseDTOs;
+  }
+
+  private isAppAssignedToUser(
+    corsAppsAssignedToUser: string[],
+    app: Application,
+  ): boolean {
+    return corsAppsAssignedToUser.includes(app.urn);
+  }
+
+  private isDeveloperSubscription(subscriptionDTO: SubscriptionDTO) {
+    return (
+      subscriptionDTO.tier.planType === 'DEVELOPER' ||
+      subscriptionDTO.tier.planType === 'SANDBOX'
+    );
   }
 
   private getSubscriptionsByTenantId(

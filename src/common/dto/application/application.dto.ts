@@ -50,7 +50,7 @@ export interface ApplicationDTO {
   consoleCompatible: boolean;
   appUrls: Array<ApplicationUrlDTO>;
   urlOverrides: Array<UrlOverrideDTO>;
-  icons: Array<FileMetadataDTO>;
+  icon: FileMetadataDTO;
   images: Array<FileMetadataDTO>;
   shortDescription: string;
   longDescription: string;
