@@ -193,7 +193,7 @@ export class SubscriptionService {
         // return empty subscription if solution not found
         if (solution) {
           const appsReferencedInSolution: Array<ApplicationVersionIdentifier> =
-            solution.version[0].applications;
+            solution.version[0].applications ?? [];
 
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const appVersionIdentifier of appsReferencedInSolution) {
