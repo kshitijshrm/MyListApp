@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "run-p _proto:gen && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -27,7 +27,8 @@
     "proto:file": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/file.proto --ts_proto_opt=fileSuffix=.pb",
     "proto:coreos-agent": "protoc -I=./node_modules/@foxtrotplatform/developer-platform-proto-schemas/ --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=addGrpcMetadata=true,outputEncodeMethods=false,useEnumNames=false,outputJsonMethods=true,nestJs=true --ts_proto_out=src/shared/schemas ./node_modules/@foxtrotplatform/developer-platform-proto-schemas/os1/core/service/coreosagent.proto --ts_proto_opt=fileSuffix=.pb",
     "_proto:gen": "run-p proto:*",
-    "check-branch-name": "sh .husky/check_branch_naming.sh"
+    "check-branch-name": "sh .husky/check_branch_naming.sh",
+    "setup:local": "mkdir -p ./src/shared/schemas && run-p _proto:gen"
   },
   "dependencies": {
     "@faker-js/faker": "^7.4.0",
