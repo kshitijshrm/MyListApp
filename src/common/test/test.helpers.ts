@@ -99,6 +99,8 @@ export class TestHelpers extends TestHelpersBase {
       subscribeApplicationToDeveloperOrg: jest.fn(),
       getSubscriptionsByOrganizationId: jest.fn(),
       getSubscriptionsByOrganizationDomain: jest.fn(),
+      getSubscriptionsBySubscriptionId: jest.fn(),
+      retryFailedSubscription: jest.fn(),
     };
   }
 
@@ -113,6 +115,10 @@ export class TestHelpers extends TestHelpersBase {
       listAllTenants: jest.fn(),
       getAppPermissionsUploadStatus: jest.fn(),
       getAppsForCoreosUser: jest.fn(),
+      addUmsAdminDesignationToTenant: jest.fn(),
+      changeCoreosTenantOrgCountry: jest.fn(),
+      changeCoreosTenantSubscriptionType: jest.fn(),
+      getTenantByOrgShortName: jest.fn(),
     };
   }
 
