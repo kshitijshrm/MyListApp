@@ -35,4 +35,4 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Dont include proto generated files
-# /src/shared/schemas
+/src/shared/schemas
