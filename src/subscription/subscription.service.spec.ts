@@ -75,6 +75,10 @@ describe('SubscriptionService', () => {
   describe('isAppToBeAddedToSolution predicate', () => {
     const app =
       TestHelpers.CreateGetApplicationByApplicationIdResponse().application;
+    app.versions[0].applicationCompitablity.compitableSolutions = undefined;
+    app.versions[0].applicationCompitablity.isConsoleCompatible = undefined;
+    app.versions[0].applicationCompitablity.isMarketplaceCompatible = undefined;
+
     const subscriptionDTO: SubscriptionDTO =
       TestHelpers.CreateSubscriptionDTO();
     const corsAppsAssignedToUser: Array<string> = [];

@@ -274,7 +274,7 @@ export class SubscriptionService {
     // filter out which are not console compatable apps not assigned to user
     // return all apps for developer subscription
     return (
-      app.versions[0]?.applicationCompitablity?.compitableSolutions &&
+      app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
       (this.isDeveloperSubscription(subscriptionDTO) ||
         corsAppsAssignedToUser.includes(app.urn))
     );
