@@ -193,7 +193,7 @@ export class SubscriptionService {
         // return empty subscription if solution not found
         if (solution) {
           const appsReferencedInSolution: Array<ApplicationVersionIdentifier> =
-            solution.version[0].applications;
+            solution.version[0].applications ?? [];
 
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const appVersionIdentifier of appsReferencedInSolution) {
@@ -206,8 +206,11 @@ export class SubscriptionService {
             )
               .then((app) => {
                 if (
-                  this.isDeveloperSubscription(subscriptionDTO) ||
-                  this.isAppAssignedToUser(corsAppsAssignedToUser, app)
+                  this.isAppToBeAddedToSolution(
+                    subscriptionDTO,
+                    app,
+                    corsAppsAssignedToUser,
+                  )
                 ) {
                   solutionDto.applications.push(
                     ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
@@ -237,8 +240,11 @@ export class SubscriptionService {
         )
           .then((app) => {
             if (
-              this.isDeveloperSubscription(subscriptionDTO) ||
-              this.isAppAssignedToUser(corsAppsAssignedToUser, app)
+              this.isAppToBeAddedToSolution(
+                subscriptionDTO,
+                app,
+                corsAppsAssignedToUser,
+              )
             ) {
               subscriptionDTO.applications.push(
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
@@ -260,13 +266,18 @@ export class SubscriptionService {
     return subscriptionResponseDTOs;
   }
 
-  private isAppAssignedToUser(
-    corsAppsAssignedToUser: string[],
+  private isAppToBeAddedToSolution(
+    subscriptionDTO: SubscriptionDTO,
     app: Application,
+    corsAppsAssignedToUser: string[],
   ): boolean {
-    return corsAppsAssignedToUser
-      ? corsAppsAssignedToUser.includes(app.urn)
-      : false;
+    // filter out which are not console compatable apps not assigned to user
+    // return all apps for developer subscription
+    return (
+      app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
+      (this.isDeveloperSubscription(subscriptionDTO) ||
+        corsAppsAssignedToUser.includes(app.urn))
+    );
   }
 
   private isDeveloperSubscription(subscriptionDTO: SubscriptionDTO) {
