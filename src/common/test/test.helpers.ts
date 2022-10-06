@@ -101,6 +101,7 @@ export class TestHelpers extends TestHelpersBase {
       getSubscriptionsByOrganizationDomain: jest.fn(),
       getSubscriptionsBySubscriptionId: jest.fn(),
       retryFailedSubscription: jest.fn(),
+      getSubscriptionsByTenantId: jest.fn(),
     };
   }
 
