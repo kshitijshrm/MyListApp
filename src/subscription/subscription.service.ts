@@ -40,10 +40,7 @@ import {
   SubscriptionServiceClient,
   SUBSCRIPTION_SERVICE_NAME,
 } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
-import {
-  GetSubscriptionsByOrgDomainRequest,
-  GetSubscriptionsByTenantIdRequest,
-} from 'src/shared/schemas/os1/marketplace/subscription/request.pb';
+import { GetSubscriptionsByTenantIdRequest } from 'src/shared/schemas/os1/marketplace/subscription/request.pb';
 import {
   Subscription,
   subscriptionTier_PlanTypeToJSON,
