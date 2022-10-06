@@ -1028,10 +1028,10 @@
     rxjs "^7.2.0"
     uuid "^8.3.2"
 
-"@foxtrotplatform/developer-platform-proto-schemas@0.5.9":
-  version "0.5.9"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.5.9/9c29a465c6b5c0ba3d3704dce644116ea5d0cd6e#9c29a465c6b5c0ba3d3704dce644116ea5d0cd6e"
-  integrity sha512-9XhndrR+OtUiXdZsvQhjBV3R+ELdnLPmfKoam0ktOkqohYEnFTP1zO+QzKClK1DFIesQ09FeVjbkyqUZ/tsjZA==
+"@foxtrotplatform/developer-platform-proto-schemas@0.5.12":
+  version "0.5.12"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.5.12/b60e21fcb1dba722cb1b23569a227b936675ef80#b60e21fcb1dba722cb1b23569a227b936675ef80"
+  integrity sha512-V4MQvhcP0yeI6CZPdF9eeaLwsVh8wZpSyQHV9f+7aP1Pgh0n1E040D8Pzjl2U7Jnraol+ju/eyW/r5sAcNtKtQ==
   dependencies:
     ts-proto "^1.121.5"
     ts-proto-descriptors "^1.7.1"

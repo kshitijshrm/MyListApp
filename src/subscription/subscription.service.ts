@@ -40,7 +40,7 @@ import {
   SubscriptionServiceClient,
   SUBSCRIPTION_SERVICE_NAME,
 } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
-import { GetSubscriptionsByOrgDomainRequest } from 'src/shared/schemas/os1/marketplace/subscription/request.pb';
+import { GetSubscriptionsByTenantIdRequest } from 'src/shared/schemas/os1/marketplace/subscription/request.pb';
 import {
   Subscription,
   subscriptionTier_PlanTypeToJSON,
@@ -291,11 +291,11 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     tenantId: string,
   ): Observable<Subscription[]> {
-    const request: GetSubscriptionsByOrgDomainRequest = {
-      organizationDomain: tenantId,
+    const request: GetSubscriptionsByTenantIdRequest = {
+      tenantId: tenantId,
     };
     return this.subscriptionServiceClient
-      .getSubscriptionsByOrganizationDomain(request, ctx.rpcMetadata)
+      .getSubscriptionsByTenantId(request, ctx.rpcMetadata)
       .pipe(map((response) => response.subscriptions));
   }
 
