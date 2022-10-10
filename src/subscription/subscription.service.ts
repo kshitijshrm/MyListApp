@@ -35,7 +35,10 @@ import {
 } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
 import { SolutionVersionIdentifier } from 'src/shared/schemas/os1/developerportal/solution/identifiers.pb';
 import { GetSolutionByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/solution/request.pb';
-import { Solution } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
+import {
+  Solution,
+  SolutionVersion_Application,
+} from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import {
   SubscriptionServiceClient,
   SUBSCRIPTION_SERVICE_NAME,
@@ -192,17 +195,16 @@ export class SubscriptionService {
 
         // return empty subscription if solution not found
         if (solution) {
-          const appsReferencedInSolution: Array<ApplicationVersionIdentifier> =
-            solution.version[0].applications ?? [];
+          const appsReferencedInSolution: Array<SolutionVersion_Application> =
+            solution.version[0].associatedApplications ?? [];
 
+          // sort applications by display order descending
+          this.sortSolutionApplications(appsReferencedInSolution);
           // get app details and build a map of app id to app for all apps referenced in solution
-          for (const appVersionIdentifier of appsReferencedInSolution) {
+          for (const app of appsReferencedInSolution) {
             // collect all applciations referenced in solution
             await firstValueFrom(
-              this.getApplicationByApplicationVersionIdentifier(
-                ctx,
-                appVersionIdentifier,
-              ),
+              this.getApplicationByApplicationVersionIdentifier(ctx, app.id),
             )
               .then((app) => {
                 if (
@@ -223,7 +225,7 @@ export class SubscriptionService {
                 if (error.code === 5) {
                   // app not found. no action required
                 } else {
-                  const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
+                  const message = `Error while getting application details for ${app.id.appId} and ${app.id.appVersionId}. Reson: ${error.message}`;
                   this.logger.error(message, error);
                   throw new InternalServerErrorException(message);
                 }
@@ -264,6 +266,15 @@ export class SubscriptionService {
       subscriptionResponseDTOs.push(subscriptionDTO);
     }
     return subscriptionResponseDTOs;
+  }
+
+  private sortSolutionApplications(
+    appsReferencedInSolution: SolutionVersion_Application[],
+  ) {
+    appsReferencedInSolution.sort((a, b) => {
+      // default undefined display order to 0 so it always moved at bottom of the list
+      return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+    });
   }
 
   private isAppToBeAddedToSolution(
