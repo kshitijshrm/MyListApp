@@ -11,10 +11,12 @@ import {
   ApplicationType,
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
+import { SolutionServiceClient } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
 import { GetSolutionBySolutionIdResponse } from 'src/shared/schemas/os1/developerportal/solution/response.pb';
 import {
   SolutionInitializationConfiguration_AppInitializationSequence,
   SolutionPhase,
+  SolutionVersion_Application,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SubscriptionDTO } from '../dto/subscription/subscription.dto';
@@ -57,7 +59,7 @@ export class TestHelpers extends TestHelpersBase {
     };
   }
 
-  static SolutionServiceClientMock() {
+  static SolutionServiceClientMock(): SolutionServiceClient {
     return {
       registerSolution: jest.fn(),
       addSolutionVersion: jest.fn(),
@@ -86,6 +88,7 @@ export class TestHelpers extends TestHelpersBase {
       getSolutionByVersionId: jest.fn(),
       getSolutionBySolutionId: jest.fn(),
       listSolutionsByOrgId: jest.fn(),
+      changeApplicationDisplayOrder: jest.fn(),
     };
   }
 
@@ -286,6 +289,13 @@ export class TestHelpers extends TestHelpersBase {
             initializationConfiguration: {
               appInitializationSequence: [],
             },
+            associatedApplications: [],
+            solutionState: {
+              activatedAt: faker.date.past().toISOString(),
+              logs: [],
+              requestedAt: faker.date.past().toISOString(),
+              status: 'SUCCESS',
+            },
           },
         ],
       },
@@ -310,14 +320,47 @@ export class TestHelpers extends TestHelpersBase {
       },
     ];
 
+    const associatedApplications: SolutionVersion_Application[] = [
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+      },
+    ];
+
     solutionResponse.solution.version[0].applications = applicationsReferenced;
+    solutionResponse.solution.version[0].associatedApplications =
+      associatedApplications;
 
     // update intialization configuration based on available applications
-    for (const app of applicationsReferenced) {
+    for (const app of associatedApplications) {
       solutionResponse.solution.version[0].initializationConfiguration.appInitializationSequence.push(
         {
           appUrn: this.CreateRandomAppUrn(),
-          id: app,
+          id: app.id,
           initilizationSequenceNumber: faker.datatype.number({
             min: 1,
             max: 10,

@@ -147,4 +147,44 @@ describe('SubscriptionService', () => {
       expect(result).toEqual(true);
     });
   });
+
+  describe('sortSolutionApplications', () => {
+    it('should sort the associated applications in decending order', async () => {
+      const solutionResponse =
+        TestHelpers.CreateGetSolutionBySolutionIdResponse();
+      const associatedApplications =
+        solutionResponse.solution.version[0].associatedApplications;
+
+      const servicePrototype = Object.getPrototypeOf(service);
+      servicePrototype.sortSolutionApplications(associatedApplications);
+
+      expect(associatedApplications.length).toEqual(4);
+      for (let i = 0; i < associatedApplications.length - 1; i++) {
+        expect(
+          associatedApplications[i].displayOrder >=
+            associatedApplications[i + 1].displayOrder,
+        ).toEqual(true);
+      }
+    });
+
+    it('should sort the associated applications in decending order when display order is not defined', async () => {
+      const solutionResponse =
+        TestHelpers.CreateGetSolutionBySolutionIdResponse();
+      const associatedApplications =
+        solutionResponse.solution.version[0].associatedApplications;
+
+      associatedApplications[0].displayOrder = undefined;
+
+      const servicePrototype = Object.getPrototypeOf(service);
+      servicePrototype.sortSolutionApplications(associatedApplications);
+
+      expect(associatedApplications.length).toEqual(4);
+      for (let i = 0; i < associatedApplications.length - 1; i++) {
+        expect(
+          (associatedApplications[i].displayOrder ?? 0) >=
+            (associatedApplications[i + 1].displayOrder ?? 0),
+        ).toEqual(true);
+      }
+    });
+  });
 });
