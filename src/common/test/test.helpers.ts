@@ -11,6 +11,7 @@ import {
   ApplicationType,
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
+import { ApplicationServiceClient } from 'src/shared/schemas/os1/developerportal/service/application.pb';
 import { SolutionServiceClient } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
 import { GetSolutionBySolutionIdResponse } from 'src/shared/schemas/os1/developerportal/solution/response.pb';
 import {
@@ -28,7 +29,7 @@ export class TestHelpers extends TestHelpersBase {
     };
   }
 
-  static ApplicationServiceClientMock() {
+  static ApplicationServiceClientMock(): ApplicationServiceClient {
     return {
       registerApplication: jest.fn(),
       addApplicationVersion: jest.fn(),
@@ -56,6 +57,9 @@ export class TestHelpers extends TestHelpersBase {
       getApplicationByApplicationId: jest.fn(),
       listApplicationsByOrgTeamId: jest.fn(),
       getApplicationByUrlPath: jest.fn(),
+      addApplicationNavigationMenuItem: jest.fn(),
+      deleteApplicationNavigationMenuItem: jest.fn(),
+      changeApplicationNavigationMenuItemAttributes: jest.fn(),
     };
   }
 
@@ -105,6 +109,7 @@ export class TestHelpers extends TestHelpersBase {
       getSubscriptionsBySubscriptionId: jest.fn(),
       retryFailedSubscription: jest.fn(),
       getSubscriptionsByTenantId: jest.fn(),
+      changeRecordStatus: jest.fn(),
     };
   }
 
@@ -120,9 +125,12 @@ export class TestHelpers extends TestHelpersBase {
       getAppPermissionsUploadStatus: jest.fn(),
       getAppsForCoreosUser: jest.fn(),
       addUmsAdminDesignationToTenant: jest.fn(),
-      changeCoreosTenantOrgCountry: jest.fn(),
       changeCoreosTenantSubscriptionType: jest.fn(),
       getTenantByOrgShortName: jest.fn(),
+      addDeveloperTenantToRegistry: jest.fn(),
+      allocateAnyAvailableDeveloperTenantToOrganization: jest.fn(),
+      changeCoreosTenantOrgDetails: jest.fn(),
+      updateTenantState: jest.fn(),
     };
   }
 
@@ -224,6 +232,9 @@ export class TestHelpers extends TestHelpersBase {
               updatedBy: faker.datatype.uuid(),
               createdAt: faker.date.past().toISOString(),
               updatedAt: faker.date.past().toISOString(),
+            },
+            appNavigation: {
+              menuItems: [],
             },
           },
         ],

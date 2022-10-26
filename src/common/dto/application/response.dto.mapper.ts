@@ -1,6 +1,7 @@
 import { FileMetadata } from 'src/shared/schemas/os1/core/file/file.pb';
 import {
   Application,
+  ApplicationNavigation_MenuItem,
   ApplicationPrivacy_Type,
   applicationTypeToJSON,
   ApplicationUrl,
@@ -10,6 +11,7 @@ import {
 import { DocumentMetadataDTO } from '../common/common.dto';
 import {
   ApplicationDTO,
+  ApplicationMenuDTO,
   ApplicationUrlDTO,
   AppType,
   FileMetadataDTO,
@@ -56,6 +58,9 @@ export class ApplicationResponseSchemaToDtoMapper {
         : undefined,
       shortDescription: application.versions[0].shortDescription ?? undefined,
       longDescription: application.versions[0].longDescription ?? undefined,
+      applicationMenu: application.versions[0].appNavigation?.menuItems?.map(
+        ApplicationResponseSchemaToDtoMapper.mapToApplicationMenuDTO,
+      ),
     };
     return response;
   }
@@ -94,5 +99,22 @@ export class ApplicationResponseSchemaToDtoMapper {
       stackId: override.stackId,
       url: override.url,
     };
+  }
+
+  static mapToApplicationMenuDTO(
+    menuItems: ApplicationNavigation_MenuItem,
+  ): ApplicationMenuDTO {
+    const menuItemDTO: ApplicationMenuDTO = {
+      displayName: menuItems.displayName,
+      displayOrder: menuItems.displayOrder,
+      id: menuItems.id,
+      relativePath: menuItems.relativePath,
+      icon: menuItems.icon
+        ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+            menuItems.icon,
+          )
+        : undefined,
+    };
+    return menuItemDTO;
   }
 }
