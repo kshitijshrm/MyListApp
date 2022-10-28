@@ -54,6 +54,7 @@ export interface ApplicationDTO {
   images: Array<FileMetadataDTO>;
   shortDescription: string;
   longDescription: string;
+  applicationMenu: Array<ApplicationMenuDTO>;
 }
 
 export interface ApplicationUrlDTO {
@@ -63,11 +64,19 @@ export interface ApplicationUrlDTO {
 
 export interface UrlOverrideDTO {
   stackId: string;
-  url: string;
+  url: ApplicationUrlDTO[];
 }
 export interface FileMetadataDTO {
   fileId: string;
   fileName: string;
   fileDescription: string;
   fileUrl?: string | undefined;
+}
+
+export interface ApplicationMenuDTO {
+  id: string;
+  displayName: string;
+  displayOrder: number;
+  relativePath: string;
+  icon: FileMetadataDTO;
 }

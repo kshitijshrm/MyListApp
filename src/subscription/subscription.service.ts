@@ -122,7 +122,7 @@ export class SubscriptionService {
     this.logger.log('corsAppsAssignedToUser: ' + corsAppsAssignedToUser);
 
     // get subscriptions for tenant
-    const subscriptions: Subscription[] = await firstValueFrom(
+    let subscriptions: Subscription[] = await firstValueFrom(
       this.getSubscriptionsByTenantId(ctx, tenantId),
     ).catch((error) => {
       if (error.code === 5) {
@@ -141,8 +141,14 @@ export class SubscriptionService {
       );
     }
 
+    subscriptions = subscriptions.filter(
+      (subscription) =>
+        subscription.recordStatus.isActive &&
+        !subscription.recordStatus.isDeleted,
+    );
+
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
-    for (const subscription of subscriptions) {
+    for (const subscription of subscriptions || []) {
       this.logger.log(
         'processing subscriptions: ' + subscription.id.subscriptionId,
       );
