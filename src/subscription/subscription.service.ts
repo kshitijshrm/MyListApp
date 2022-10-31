@@ -22,7 +22,7 @@ import {
   FileServiceClient,
   FILE_SERVICE_NAME,
 } from 'src/shared/schemas/os1/core/service/file.pb';
-import { Application } from 'src/shared/schemas/os1/developerportal/application/application.pb';
+import { Application, ApplicationNavigation_MenuItem } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
 import {
@@ -220,6 +220,9 @@ export class SubscriptionService {
                     corsAppsAssignedToUser,
                   )
                 ) {
+                  this.sortApplicationMenuItems(
+                    app.versions[0]?.appNavigation?.menuItems || [],
+                  );
                   solutionDto.applications.push(
                     ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
                       app,
@@ -278,6 +281,15 @@ export class SubscriptionService {
     appsReferencedInSolution: SolutionVersion_Application[],
   ) {
     appsReferencedInSolution.sort((a, b) => {
+      // default undefined display order to 0 so it always moved at bottom of the list
+      return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+    });
+  }
+
+  private sortApplicationMenuItems(
+    appMenuItems: ApplicationNavigation_MenuItem[],
+  ) {
+    appMenuItems.sort((a, b) => {
       // default undefined display order to 0 so it always moved at bottom of the list
       return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
     });
