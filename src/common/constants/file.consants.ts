@@ -1,7 +1,3 @@
-export const AcceptedIconTypes = [
-  'jpeg','png','svg',
-]
+export const AcceptedIconTypes = ['jpeg', 'png', 'svg'];
 
-export const AcceptedDocumentTypes = [
-  'doc','docx','pdf'
-]
+export const AcceptedDocumentTypes = ['doc', 'docx', 'pdf'];

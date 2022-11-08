@@ -1,20 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { COREOS_AGENT_SERVICE_NAME } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
-import {
-  FILE_SERVICE_NAME,
-  OS1_CORE_SERVICE_PACKAGE_NAME,
-} from 'src/shared/schemas/os1/core/service/file.pb';
-import {
-  APPLICATION_SERVICE_NAME,
-  OS1_DEVELOPERPORTAL_SERVICE_PACKAGE_NAME,
-} from 'src/shared/schemas/os1/developerportal/service/application.pb';
-import { SOLUTION_SERVICE_NAME } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
-import {
-  OS1_MARKETPLACE_SERVICE_PACKAGE_NAME,
-  SUBSCRIPTION_SERVICE_NAME,
-} from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
+import { ServiceConstants } from 'src/common/constants/service.constants';
+import { FILE_SERVICE_NAME } from 'src/shared/schemas/os1/core/service/file.pb';
 import { SubscriptionController } from './subscription.controller';
 import { SubscriptionService } from './subscription.service';
 
@@ -22,72 +10,56 @@ import { SubscriptionService } from './subscription.service';
   imports: [
     ClientsModule.register([
       {
-        name: APPLICATION_SERVICE_NAME,
+        name: ServiceConstants.application_service.name,
         transport: Transport.GRPC,
         options: {
-          url: process.env.APPLICATION_SERVICE_ENDPOINT || 'localhost:50052',
-          package: OS1_DEVELOPERPORTAL_SERVICE_PACKAGE_NAME,
-          protoPath: 'os1/developerportal/service/application.proto',
+          url: ServiceConstants.application_service.url,
+          package: ServiceConstants.application_service.package,
+          protoPath: ServiceConstants.application_service.protoPath,
           loader: {
-            includeDirs: [
-              join(
-                './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
-              ),
-            ],
+            includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
     ]),
     ClientsModule.register([
       {
-        name: SOLUTION_SERVICE_NAME,
+        name: ServiceConstants.solution_service.name,
         transport: Transport.GRPC,
         options: {
-          url: process.env.SOLUTION_SERVICE_ENDPOINT || 'localhost:50056',
-          package: OS1_DEVELOPERPORTAL_SERVICE_PACKAGE_NAME,
-          protoPath: 'os1/developerportal/service/solution.proto',
+          url: ServiceConstants.solution_service.url,
+          package: ServiceConstants.solution_service.package,
+          protoPath: ServiceConstants.solution_service.protoPath,
           loader: {
-            includeDirs: [
-              join(
-                './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
-              ),
-            ],
+            includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
     ]),
     ClientsModule.register([
       {
-        name: SUBSCRIPTION_SERVICE_NAME,
+        name: ServiceConstants.subscription_service.name,
         transport: Transport.GRPC,
         options: {
-          url: process.env.SUBSCRIPTION_SERVICE_ENDPOINT || 'localhost:50055',
-          package: OS1_MARKETPLACE_SERVICE_PACKAGE_NAME,
-          protoPath: 'os1/marketplace/service/subscription.proto',
+          url: ServiceConstants.subscription_service.url,
+          package: ServiceConstants.subscription_service.package,
+          protoPath: ServiceConstants.subscription_service.protoPath,
           loader: {
-            includeDirs: [
-              join(
-                './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
-              ),
-            ],
+            includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
     ]),
     ClientsModule.register([
       {
-        name: COREOS_AGENT_SERVICE_NAME,
+        name: ServiceConstants.coreosagent_service.name,
         transport: Transport.GRPC,
         options: {
-          url: process.env.COREOS_AGENT_SERVICE_ENDPOINT || 'localhost:50053',
-          package: OS1_CORE_SERVICE_PACKAGE_NAME,
-          protoPath: 'os1/core/service/coreosagent.proto',
+          url: ServiceConstants.coreosagent_service.url,
+          package: ServiceConstants.coreosagent_service.package,
+          protoPath: ServiceConstants.coreosagent_service.protoPath,
           loader: {
-            includeDirs: [
-              join(
-                './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
-              ),
-            ],
+            includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
@@ -97,15 +69,11 @@ import { SubscriptionService } from './subscription.service';
         name: FILE_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: process.env.FILE_SERVICE_ENDPOINT || 'localhost:50054',
-          package: OS1_CORE_SERVICE_PACKAGE_NAME,
-          protoPath: 'os1/core/service/file.proto',
+          url: ServiceConstants.file_service.url,
+          package: ServiceConstants.file_service.package,
+          protoPath: ServiceConstants.file_service.protoPath,
           loader: {
-            includeDirs: [
-              join(
-                './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
-              ),
-            ],
+            includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
