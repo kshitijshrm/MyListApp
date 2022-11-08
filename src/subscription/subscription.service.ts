@@ -22,7 +22,10 @@ import {
   FileServiceClient,
   FILE_SERVICE_NAME,
 } from 'src/shared/schemas/os1/core/service/file.pb';
-import { Application, ApplicationNavigation_MenuItem } from 'src/shared/schemas/os1/developerportal/application/application.pb';
+import {
+  Application,
+  ApplicationNavigation_MenuItem,
+} from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
 import {

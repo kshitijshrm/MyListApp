@@ -7,6 +7,7 @@ import {
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ServiceConstants } from '../constants/service.constants';
 
 @Injectable()
 export class GlobalResponseTransformInterceptor implements NestInterceptor {
@@ -15,6 +16,14 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> {
     const request = context.switchToHttp().getRequest();
+
+    // skip response transformation for health check and ping
+    if (
+      ServiceConstants.global_filter_skip_routes.includes(request.originalUrl)
+    ) {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => {
         return {

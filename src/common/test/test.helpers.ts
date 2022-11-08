@@ -60,6 +60,9 @@ export class TestHelpers extends TestHelpersBase {
       addApplicationNavigationMenuItem: jest.fn(),
       deleteApplicationNavigationMenuItem: jest.fn(),
       changeApplicationNavigationMenuItemAttributes: jest.fn(),
+      addApplicationPermissionsForWebClient: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
     };
   }
 
@@ -93,6 +96,8 @@ export class TestHelpers extends TestHelpersBase {
       getSolutionBySolutionId: jest.fn(),
       listSolutionsByOrgId: jest.fn(),
       changeApplicationDisplayOrder: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
     };
   }
 
@@ -110,6 +115,9 @@ export class TestHelpers extends TestHelpersBase {
       retryFailedSubscription: jest.fn(),
       getSubscriptionsByTenantId: jest.fn(),
       changeRecordStatus: jest.fn(),
+      disableSubscription: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
     };
   }
 
@@ -131,6 +139,9 @@ export class TestHelpers extends TestHelpersBase {
       allocateAnyAvailableDeveloperTenantToOrganization: jest.fn(),
       changeCoreosTenantOrgDetails: jest.fn(),
       updateTenantState: jest.fn(),
+      addUmsUser: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
     };
   }
 
@@ -138,6 +149,8 @@ export class TestHelpers extends TestHelpersBase {
     return {
       createFile: jest.fn(),
       getFile: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
     };
   }
 
@@ -236,6 +249,7 @@ export class TestHelpers extends TestHelpersBase {
             appNavigation: {
               menuItems: [],
             },
+            permissionsWeb: [],
           },
         ],
       },

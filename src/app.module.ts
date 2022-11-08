@@ -1,8 +1,7 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { HealthModule } from './health/health.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
@@ -15,8 +14,8 @@ import { SubscriptionModule } from './subscription/subscription.module';
       isGlobal: true,
     }),
     SubscriptionModule,
+    HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
