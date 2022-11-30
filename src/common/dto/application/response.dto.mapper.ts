@@ -15,7 +15,6 @@ import {
   ApplicationUrlDTO,
   AppType,
   FileMetadataDTO,
-  UrlOverrideDTO,
 } from './application.dto';
 
 export class ApplicationResponseSchemaToDtoMapper {
@@ -94,10 +93,16 @@ export class ApplicationResponseSchemaToDtoMapper {
     };
   }
 
-  static mapToUrlOverrideDTO(override: ApplicationUrlOverride): UrlOverrideDTO {
+  static mapToUrlOverrideDTO(
+    override: ApplicationUrlOverride,
+  ): ApplicationUrlDTO {
+    if (override.url.length <= 0) {
+      return null;
+    }
+
     return {
-      stackId: override.stackId,
-      url: override.url,
+      name: override.url[0].name,
+      url: override.url[0].url,
     };
   }
 

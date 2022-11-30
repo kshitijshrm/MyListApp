@@ -187,4 +187,36 @@ describe('SubscriptionService', () => {
       }
     });
   });
+
+  describe('filterUrlOverridesByStackId', () => {
+    it('filters when stackId matches', () => {
+      const testStackId = 'testId';
+      const testUrl = 'testUrl';
+      const urlOverrides = [
+        {
+          stackId: testStackId,
+          url: {
+            name: 'test',
+            url: testUrl,
+          },
+        },
+        {
+          stackId: 'does not match',
+          url: {
+            name: 'test',
+            url: 'testUrl2',
+          },
+        },
+      ];
+
+      const servicePrototype = Object.getPrototypeOf(service);
+      const result = servicePrototype.filterUrlOverridesByStackId(
+        urlOverrides,
+        testStackId,
+      );
+
+      expect(result.length).toEqual(1);
+      expect(result[0].url.url).toEqual(testUrl);
+    });
+  });
 });
