@@ -12,7 +12,7 @@ import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
-import { GetAppsForCoreosUserRequest } from 'src/shared/schemas/os1/core/coreosagent/request.pb';
+import { GetAppsForCoreosUserRequest, GetTenantByIdRequest } from 'src/shared/schemas/os1/core/coreosagent/request.pb';
 
 import {
   CoreosAgentServiceClient,
@@ -22,10 +22,7 @@ import {
   FileServiceClient,
   FILE_SERVICE_NAME,
 } from 'src/shared/schemas/os1/core/service/file.pb';
-import {
-  Application,
-  ApplicationNavigation_MenuItem,
-} from 'src/shared/schemas/os1/developerportal/application/application.pb';
+import { Application, ApplicationNavigation_MenuItem, ApplicationUrlOverride } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
 import {
@@ -123,6 +120,10 @@ export class SubscriptionService {
         throw new InternalServerErrorException(message, error);
       });
     this.logger.log('corsAppsAssignedToUser: ' + corsAppsAssignedToUser);
+
+    const stackId = await firstValueFrom(
+      await this.getStackIdByTenantId(ctx, tenantId),
+    );
 
     // get subscriptions for tenant
     let subscriptions: Subscription[] = await firstValueFrom(
@@ -226,6 +227,11 @@ export class SubscriptionService {
                   this.sortApplicationMenuItems(
                     app.versions[0]?.appNavigation?.menuItems || [],
                   );
+                  app.versions[0].appUrlOverrides =
+                    this.filterUrlOverridesByStackId(
+                      app.versions[0]?.appUrlOverrides || [],
+                      stackId,
+                    );
                   solutionDto.applications.push(
                     ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
                       app,
@@ -353,5 +359,24 @@ export class SubscriptionService {
     return this.applicationServiceClient
       .getApplicationByVersionId(request, ctx.rpcMetadata)
       .pipe(map((response) => response.application));
+  }
+
+  private getStackIdByTenantId(
+    ctx: PlatformRequestContext,
+    tenantId: string,
+  ): Observable<string> {
+    const request: GetTenantByIdRequest = {
+      tenantId,
+    };
+    return this.coreosAgentServiceClient
+      .getTenantById(request, ctx.rpcMetadata)
+      .pipe(map((response) => response.tenant.stackId));
+  }
+
+  private filterUrlOverridesByStackId(
+    urlOverrides: ApplicationUrlOverride[],
+    stackId: string,
+  ): ApplicationUrlOverride[] {
+    return urlOverrides.filter((override) => override.stackId === stackId);
   }
 }

@@ -1,11 +1,3 @@
-export interface Url {
-  server?: string;
-  interface?: string;
-  admin?: string;
-  setting?: string;
-  userguide?: string;
-  gitinfo?: string;
-}
 export enum AppStatus {
   APPLICATION_PHASE_UNSPECIFIED = 'APPLICATION_PHASE_UNSPECIFIED',
   DEVELOPMENT = 'DEVELOPMENT',
@@ -49,7 +41,7 @@ export interface ApplicationDTO {
   isPrivate: boolean;
   consoleCompatible: boolean;
   appUrls: Array<ApplicationUrlDTO>;
-  urlOverrides: Array<UrlOverrideDTO>;
+  urlOverrides: Array<ApplicationUrlDTO>;
   icon: FileMetadataDTO;
   images: Array<FileMetadataDTO>;
   shortDescription: string;
@@ -62,10 +54,6 @@ export interface ApplicationUrlDTO {
   url: string;
 }
 
-export interface UrlOverrideDTO {
-  stackId: string;
-  url: ApplicationUrlDTO[];
-}
 export interface FileMetadataDTO {
   fileId: string;
   fileName: string;
