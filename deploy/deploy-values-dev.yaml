@@ -1,5 +1,5 @@
 env: dev
-baseDomain: dev.fxtrt.io
+baseDomain: coreos-dev.fxtrt.io
 namespace: tenant-developerplatform
 service_name: console-api
 gateway_name: fxtrt-apps
