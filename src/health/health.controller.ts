@@ -1,5 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { GrpcOptions, RedisOptions, Transport } from '@nestjs/microservices';
+import { ApiTags } from '@nestjs/swagger';
 import {
   GRPCHealthIndicator,
   HealthCheck,
@@ -9,6 +10,7 @@ import {
 import { join } from 'path';
 import { ServiceConstants } from 'src/common/constants/service.constants';
 
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
   @Inject(HealthCheckService)

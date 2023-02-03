@@ -8,13 +8,12 @@ import {
   ApplicationUrlOverride,
   DocumentMetadata,
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
-import { DocumentMetadataDTO } from '../common/common.dto';
+import { DocumentMetadataDTO, FileMetadataDTO } from '../common/common.dto';
 import {
   ApplicationDTO,
   ApplicationMenuDTO,
   ApplicationUrlDTO,
   AppType,
-  FileMetadataDTO,
 } from './application.dto';
 
 export class ApplicationResponseSchemaToDtoMapper {

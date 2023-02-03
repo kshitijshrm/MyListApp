@@ -1,9 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationDTO } from '../application/application.dto';
-import {
-  ConfigurationMetadataDTO,
-  DocumentMetadataDTO,
-  FileMetadataDTO,
-} from '../common/common.dto';
+import { FileMetadataDTO } from '../common/common.dto';
 
 export enum SolutionPhase {
   SOLUTION_PHASE_UNSPECIFIED = 'SOLUTION_PHASE_UNSPECIFIED',
@@ -40,29 +37,78 @@ export enum SolutionDocumentCategory {
   DEPRECIATED = 'DEPRECIATED',
 }
 
-export interface SolutionDTO
-  extends SolutionVersionIdentifierDTO,
-    SolutionDisplayAttributesDTO,
-    SolutionCompatibilityDTO,
-    SolutionDisplayAttributesDTO {
-  version: string;
-  images: Array<FileMetadataDTO>;
-  icon: FileMetadataDTO;
-  applications: Array<ApplicationDTO>;
-}
-
-export interface SolutionCompatibilityDTO {
-  isMarketplaceCompatible: boolean;
-  isConsoleCompatible: boolean;
-}
-
-export interface SolutionDisplayAttributesDTO {
-  displayName: string;
-  longDescription: string;
-  shortDescription: string;
-}
-
-export interface SolutionVersionIdentifierDTO {
+export class SolutionDTO {
+  @ApiProperty({
+    description: 'Solution identifier in the OS1 platform',
+    example: 'solution:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+  })
   solutionId: string;
+  @ApiProperty({
+    description:
+      'Identifier for the solution version whis is unique within the solution',
+    example: 'solutionVersion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+  })
   solutionVersionId: string;
+  @ApiProperty({
+    description: 'Name of the solution to be displayed in the UI',
+    example: 'My Solution',
+  })
+  displayName: string;
+  @ApiProperty({
+    description: 'Short description of the solution to be displayed in the UI',
+    example: 'My Solution Short Description',
+  })
+  shortDescription: string;
+  @ApiProperty({
+    description: 'Description of the solution to be displayed in the UI',
+    example: 'My Solution Description',
+  })
+  longDescription: string;
+  @ApiProperty({
+    description: 'Human readable semantic version of the solution',
+    example: '1.0.0',
+  })
+  version: string;
+  @ApiProperty({
+    description:
+      'Images associated with the solution to be displayed in the UI',
+    type: FileMetadataDTO,
+    isArray: true,
+    example: [
+      {
+        fileId: 'file:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+        fileName: 'solution-image.png',
+        fileUrl:
+          'https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+      },
+    ],
+  })
+  images: Array<FileMetadataDTO>;
+  @ApiProperty({
+    description: 'Icon of the solution to be displayed in the UI',
+    type: FileMetadataDTO,
+    example: {
+      fileId: '5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+      fileName: 'solution-icon.png',
+      fileUrl:
+        'https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f',
+    },
+  })
+  icon: FileMetadataDTO;
+  @ApiProperty({
+    description: 'Video of the solution to be displayed in the UI',
+    type: ApplicationDTO,
+    isArray: true,
+  })
+  applications: Array<ApplicationDTO>;
+  @ApiProperty({
+    description: 'Is the solution compatible with the marketplace',
+    example: true,
+  })
+  isMarketplaceCompatible: boolean;
+  @ApiProperty({
+    description: 'Is the solution compatible with the console',
+    example: true,
+  })
+  isConsoleCompatible: boolean;
 }

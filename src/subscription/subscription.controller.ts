@@ -4,12 +4,13 @@ import {
   Controller,
   Get,
   Headers,
+  HttpCode,
   Inject,
   Logger,
   NotImplementedException,
   Param,
 } from '@nestjs/common';
-import { ApiHeaders, ApiTags } from '@nestjs/swagger';
+import { ApiHeaders, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
 import jwtDecode from 'jwt-decode';
 import { Observable } from 'rxjs';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
@@ -33,6 +34,20 @@ export class SubscriptionController {
   private readonly subscriptionService: SubscriptionService;
 
   @Get('/:tenantId')
+  @ApiProperty({
+    description: `Get all subscriptions associated with a tenant. This list includes both solution and app subscriptions.
+
+When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+
+**Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
+`,
+  })
+  @HttpCode(200)
+  @ApiResponse({
+    type: SubscriptionDTO,
+    isArray: true,
+    status: 200,
+  })
   private getAllSubscriptions(
     @Param('tenantId') tenantId: string,
     @Headers() headers,
@@ -41,28 +56,6 @@ export class SubscriptionController {
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
     return this.subscriptionService.getAllSubscriptions(ctx, userId, tenantId);
-  }
-
-  @Get('/:tenantId/solution')
-  private getSolutionSubscriptions(
-    @Param('tenantId') tenantId: string,
-    @Headers() headers,
-  ): Observable<any> {
-    this.getUserIdFromCoreosToken(headers);
-    const ctx: PlatformRequestContext =
-      PlatformRequestContext.createFromHttpHeaders(headers);
-    throw new NotImplementedException(`getSolutionSubscriptions`);
-  }
-
-  @Get(':tenantId/app')
-  private getAppSubscriptions(
-    @Param('tenantId') tenantId: string,
-    @Headers() headers,
-  ): Observable<any> {
-    this.getUserIdFromCoreosToken(headers);
-    const ctx: PlatformRequestContext =
-      PlatformRequestContext.createFromHttpHeaders(headers);
-    throw new NotImplementedException(`getAppSubscriptions`);
   }
 
   private getUserIdFromCoreosToken(headers: any): string {
