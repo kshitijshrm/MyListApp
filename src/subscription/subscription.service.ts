@@ -12,7 +12,10 @@ import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
-import { GetAppsForCoreosUserRequest, GetTenantByIdRequest } from 'src/shared/schemas/os1/core/coreosagent/request.pb';
+import {
+  GetAppsForCoreosUserRequest,
+  GetTenantByIdRequest,
+} from 'src/shared/schemas/os1/core/coreosagent/request.pb';
 
 import {
   CoreosAgentServiceClient,
@@ -22,7 +25,11 @@ import {
   FileServiceClient,
   FILE_SERVICE_NAME,
 } from 'src/shared/schemas/os1/core/service/file.pb';
-import { Application, ApplicationNavigation_MenuItem, ApplicationUrlOverride } from 'src/shared/schemas/os1/developerportal/application/application.pb';
+import {
+  Application,
+  ApplicationNavigation_MenuItem,
+  ApplicationUrlOverride,
+} from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
 import {
@@ -314,7 +321,7 @@ export class SubscriptionService {
     return (
       app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
       (this.isDeveloperSubscription(subscriptionDTO) ||
-        corsAppsAssignedToUser.includes(app.urn))
+        corsAppsAssignedToUser?.includes(app.urn))
     );
   }
 
