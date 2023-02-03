@@ -10,7 +10,13 @@ import {
   NotImplementedException,
   Param,
 } from '@nestjs/common';
-import { ApiHeaders, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiHeaders,
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import jwtDecode from 'jwt-decode';
 import { Observable } from 'rxjs';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
@@ -34,7 +40,8 @@ export class SubscriptionController {
   private readonly subscriptionService: SubscriptionService;
 
   @Get('/:tenantId')
-  @ApiProperty({
+  @ApiOperation({
+    summary: 'Get all subscriptions associated with a tenant',
     description: `Get all subscriptions associated with a tenant. This list includes both solution and app subscriptions.
 
 When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
