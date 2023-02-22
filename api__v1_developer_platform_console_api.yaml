@@ -3,6 +3,16 @@ paths:
   "/app/console-api/subscription/{tenantId}":
     get:
       operationId: getAllSubscriptions
+      summary: Get all subscriptions associated with a tenant
+      description: >
+        Get all subscriptions associated with a tenant. This list includes
+        both solution and app subscriptions.
+
+
+        When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+
+
+        **Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
       parameters:
         - name: x-coreos-access
           in: header

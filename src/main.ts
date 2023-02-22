@@ -1,3 +1,5 @@
+require('@foxtrotplatform/tracer');
+import { PlatformLogger } from '@foxtrotplatform/developer-platform-core-lib';
 import { NestFactory } from '@nestjs/core';
 import {
   DocumentBuilder,
@@ -12,7 +14,10 @@ import { GlobalGrpcToHttpExceptionInterceptor } from './common/interceptor/globa
 import { GlobalResponseTransformInterceptor } from './common/interceptor/global.response.transformer.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: new PlatformLogger(),
+    bufferLogs: true,
+  });
   const basePath = '/app/console-api';
   app.setGlobalPrefix(basePath);
   app.enableCors();
