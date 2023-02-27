@@ -1,5 +1,5 @@
 env: dev
-baseDomain: dev.fxtrt.io
+baseDomain: coreos-dev.fxtrt.io
 namespace: tenant-developerplatform
 service_name: console-api
 gateway_name: fxtrt-apps
@@ -7,8 +7,8 @@ apps:
   consoleapi:
     replicaCount: 1
     image:
-      repository: 429738059147.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
-      version: 0.0.1-dev-40a5add
+      repository: 217425097687.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
+      version: 0.0.1-dev-c54c2f2
     resourceType: m1
     api:
       path: /app/console-api

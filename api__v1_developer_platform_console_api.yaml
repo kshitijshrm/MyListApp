@@ -1,0 +1,505 @@
+openapi: 3.0.0
+paths:
+  "/app/console-api/subscription/{tenantId}":
+    get:
+      operationId: getAllSubscriptions
+      summary: Get all subscriptions associated with a tenant
+      description: >
+        Get all subscriptions associated with a tenant. This list includes
+        both solution and app subscriptions.
+
+
+        When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+
+
+        **Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
+      parameters:
+        - name: x-coreos-access
+          in: header
+          description: coreos access token
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionDTO"
+      tags:
+        - Subscription
+  /app/console-api/health:
+    get:
+      operationId: check
+      parameters: []
+      responses:
+        "200":
+          description: The Health Check is successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  info:
+                    type: object
+                    example: &a1
+                      database: &a2
+                        status: up
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  error:
+                    type: object
+                    example: {}
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  details:
+                    type: object
+                    example: *a1
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+        "503":
+          description: The Health Check is not successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  info:
+                    type: object
+                    example: *a1
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  error:
+                    type: object
+                    example:
+                      redis: &a3
+                        status: down
+                        message: Could not connect
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+                    nullable: true
+                  details:
+                    type: object
+                    example:
+                      database: *a2
+                      redis: *a3
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties:
+                        type: string
+      tags:
+        - Health
+  /app/console-api/ping:
+    get:
+      operationId: getOk
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Health
+info:
+  title: Developer Platform Console API
+  description: >
+    
+    Console API is a <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends"> Backend for frontend </a> REST API that provides the data and functionality required by the Console UI.
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  schemas:
+    ApplicationUrlDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the url
+          example: relativePath
+          examples:
+            - relativePath
+            - interface
+        url:
+          type: string
+          description: The actual url item
+          example: /app/my-app
+          examples:
+            - /app/my-app
+            - https://mytenant.os1.delhivery.com/app/my-app
+      required:
+        - name
+        - url
+    FileMetadataDTO:
+      type: object
+      properties:
+        fileId:
+          type: string
+          description: File identifier
+          example: 5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        fileName:
+          type: string
+          description: File name
+          example: solution-image.png
+        fileDescription:
+          type: string
+          description: File description
+          example: Solution Image
+        fileUrl:
+          type: string
+          description: File URL
+          example: https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+      required:
+        - fileId
+        - fileName
+        - fileDescription
+        - fileUrl
+    ApplicationMenuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the menu item
+          example: 5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        displayName:
+          type: string
+          description: The name of the menu item
+          example: Create Order
+        displayOrder:
+          type: number
+          description: The order in which the menu item should be displayed
+          example: 1
+        relativePath:
+          type: string
+          description: The relative path of the menu item
+          example: /app/my-app/create-order
+        icon:
+          description: The icon associated with the menu item
+          allOf:
+            - $ref: "#/components/schemas/FileMetadataDTO"
+      required:
+        - id
+        - displayName
+        - displayOrder
+        - relativePath
+        - icon
+    ApplicationDTO:
+      type: object
+      properties:
+        appId:
+          type: string
+          description: The unique identifier of the application
+          example: app:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        appVersionId:
+          type: string
+          description: The unique identifier of the application version
+          example: appversion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        listingName:
+          type: string
+          description: The name of the application
+          example: My App
+        version:
+          type: string
+          description: The human readable semantic version of the application
+          example: 1.0.0
+        urlPath:
+          type: string
+          deprecated: true
+          description: >-
+            
+            The relative url path of the application. This field is deprecated. User **appUrls:relativePath** instead
+        appType:
+          type: string
+          description: The Type of the application
+          example: web
+          enum:
+            - unspecified
+            - web
+            - mobile
+            - backend
+        description:
+          type: string
+          description: The description of the application to show in the UI
+          example: My App is a sample application
+        isPrivate:
+          type: boolean
+          description: Is the application to be displayed in the marketplace
+        consoleCompatible:
+          type: boolean
+          description: Is the application to be displayed in the console
+        appUrls:
+          description: >-
+            
+            The list of url paths that are associated with the application. For web apps, relativePath should be used to access the application. In the presense of interface in the urlOverrides, the interface should be used to access the application
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationUrlDTO"
+        urlOverrides:
+          description: >
+            
+            Url overrides are stack specific urls that needs to take periority over the appUrls when the application is accessed from the tenant that belongs to the stack that is configured in the urlOverrides.
+
+
+            For exmaple, When the console is being accessed from the tenant mytenant.os1.delhivery.com, and the teant mytenant belongs to stack logistax and the urlOverrides contains an entry for logistax, then the urlOverrides should be used to access the application insteand of appUrls. This logic is already performed as part of the API.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationUrlDTO"
+        icon:
+          description: The icon associated with the application
+          allOf:
+            - $ref: "#/components/schemas/FileMetadataDTO"
+        images:
+          description: The image or screenshots associated with the application to be
+            displayed in the marketplace
+          type: array
+          items:
+            $ref: "#/components/schemas/FileMetadataDTO"
+        shortDescription:
+          type: string
+          description: The short description of the application to be displayed in the
+            marketplace
+          example: My App is a sample application
+        longDescription:
+          type: string
+          description: The long description of the application to be displayed in the
+            marketplace
+          example: My App is a sample application. This is a long description
+        applicationMenu:
+          description: Collection of sub menuitems that belong in the console sidenav.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationMenuDTO"
+      required:
+        - appId
+        - appVersionId
+        - listingName
+        - version
+        - urlPath
+        - appType
+        - description
+        - isPrivate
+        - consoleCompatible
+        - appUrls
+        - urlOverrides
+        - icon
+        - images
+        - shortDescription
+        - longDescription
+        - applicationMenu
+    SolutionDTO:
+      type: object
+      properties:
+        solutionId:
+          type: string
+          description: Solution identifier in the OS1 platform
+          example: solution:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        solutionVersionId:
+          type: string
+          description: Identifier for the solution version whis is unique within the
+            solution
+          example: solutionVersion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        displayName:
+          type: string
+          description: Name of the solution to be displayed in the UI
+          example: My Solution
+        shortDescription:
+          type: string
+          description: Short description of the solution to be displayed in the UI
+          example: My Solution Short Description
+        longDescription:
+          type: string
+          description: Description of the solution to be displayed in the UI
+          example: My Solution Description
+        version:
+          type: string
+          description: Human readable semantic version of the solution
+          example: 1.0.0
+        images:
+          description: Images associated with the solution to be displayed in the UI
+          example:
+            - fileId: file:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+              fileName: solution-image.png
+              fileUrl: https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+          type: array
+          items:
+            $ref: "#/components/schemas/FileMetadataDTO"
+        icon:
+          description: Icon of the solution to be displayed in the UI
+          example:
+            fileId: 5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+            fileName: solution-icon.png
+            fileUrl: https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+          allOf:
+            - $ref: "#/components/schemas/FileMetadataDTO"
+        applications:
+          description: Video of the solution to be displayed in the UI
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationDTO"
+        isMarketplaceCompatible:
+          type: boolean
+          description: Is the solution compatible with the marketplace
+          example: true
+        isConsoleCompatible:
+          type: boolean
+          description: Is the solution compatible with the console
+          example: true
+      required:
+        - solutionId
+        - solutionVersionId
+        - displayName
+        - shortDescription
+        - longDescription
+        - version
+        - images
+        - icon
+        - applications
+        - isMarketplaceCompatible
+        - isConsoleCompatible
+    SubscriptionStatusDTO:
+      type: object
+      properties:
+        status:
+          type: string
+          description: >
+            
+            Status of the subscription. Possible values are: Active, Inactive, Deleted
+          enum:
+            - Active
+            - Inactive
+            - Deleted
+          example: Active
+        requestedAt:
+          type: string
+          description: >
+            
+            Date and time when the subscription was requested. This will be present for all subscriptions.
+          example: 2020-12-01T00:00:00.000Z
+        activatedAt:
+          type: string
+          description: >
+            
+            Date and time when the subscription was activated. This will be present for all subscriptions. This will not be present if failed to activate because of technical issues.
+          example: 2020-12-01T00:00:00.000Z
+      required:
+        - status
+        - requestedAt
+        - activatedAt
+    SubscriptionTierDTO:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: |-
+            
+            Name of the subscription tier. Example: DEVELOPER, TRIAL, PRODUCTION
+          enum:
+            - DEVELOPER
+            - TRIAL
+            - PRODUCTION
+          example: TRAIL
+        planType:
+          type: string
+          description: |-
+            
+            Type of the subscription tier. Example: DEVELOPER, TRIAL, PRODUCTION
+          enum:
+            - DEVELOPER
+            - TRIAL
+            - PRODUCTION
+          example: TRIAL
+      required:
+        - displayName
+        - planType
+    SubscriptionDTO:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          description: >-
+            
+            Subscription identifier for the subscription product. 
+
+            Application and solution subsctiptions on a organization unique subscription product
+          example: subscription:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        applications:
+          description: >-
+            
+            List of applications associated with the subscription. This array will be present only for application subscriptions
+
+
+            **Note:** applications are defined as collection but one subscription will mostly have only one application. This is because, one subscription product can have only one application or solution associated with it.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApplicationDTO"
+        solutions:
+          description: >-
+            
+            List of solutions associated with the subscription. This array will be present only for solution subscriptions. Under the solution, there can exist multiple application that are part of the solution.
+
+
+            **Note:** solutions are defined as collection but one subscription will mostly have only one solution. This is because, one subscription product can have only one application or solution associated with it.
+          type: array
+          items:
+            $ref: "#/components/schemas/SolutionDTO"
+        status:
+          description: Status of the subscription. This will be present for all
+            subscriptions and indicate if the subscription is active or not
+          allOf:
+            - $ref: "#/components/schemas/SubscriptionStatusDTO"
+        tier:
+          description: >-
+            
+            This filed indicates the subscription tier. This will be present for all subscriptions. This will help to idetify the number of days in which the subscription is active or exired.
+          allOf:
+            - $ref: "#/components/schemas/SubscriptionTierDTO"
+      required:
+        - subscriptionId
+        - applications
+        - solutions
+        - status
+        - tier
