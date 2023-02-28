@@ -277,6 +277,24 @@ export class SubscriptionService {
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
               );
             }
+            if (app.versions[0].applicationCompitablity.compitableSolutions) {
+              for (const compatibleSolutionId of app.versions[0].applicationCompitablity.compitableSolutions) {
+                const solution = this.findSubscriptionBySubscriptionId(subscriptionDTO.solutions, compatibleSolutionId.solutionId);
+                if (!solution) {
+                  this.logger.log('solution not found for id: ' + compatibleSolutionId);
+                  continue;
+                }
+                this.logger.log('solution found for id: ' + compatibleSolutionId);
+                if (solution.applications.find(application => application.appId === app.id.appId)) {
+                  this.logger.log('application already added to solution: ' + compatibleSolutionId);
+                  continue;
+                }
+                this.logger.log('adding application to solution: ' + compatibleSolutionId);
+                solution.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+                );
+              }
+            }
           })
           .catch((error) => {
             if (error.code === 5) {
@@ -291,6 +309,10 @@ export class SubscriptionService {
       subscriptionResponseDTOs.push(subscriptionDTO);
     }
     return subscriptionResponseDTOs;
+  }
+
+  findSubscriptionBySubscriptionId(solutions: SolutionDTO[], solutionId: string): SolutionDTO{
+    return solutions.find(solution => solution.solutionId === solutionId);
   }
 
   private sortSolutionApplications(
