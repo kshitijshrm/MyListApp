@@ -101,12 +101,11 @@ export class SubscriptionService {
       this.fileClient.getService<FileServiceClient>(FILE_SERVICE_NAME);
   }
 
-  // returns only one subscription for now. Should return all subscriptions for a tenant in the future
-  async getAllSubscriptions(
+  async getCoreosAppsAssignedToUser(
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-  ): Promise<Array<SubscriptionDTO>> {
+  ): Promise<Array<string>> {
     const getAppsForCoreosUserRequest: GetAppsForCoreosUserRequest = {
       tenantId: tenantId,
       coreosUserId: userId,
@@ -127,7 +126,15 @@ export class SubscriptionService {
         throw new InternalServerErrorException(message, error);
       });
     this.logger.log('corsAppsAssignedToUser: ' + corsAppsAssignedToUser);
+    return corsAppsAssignedToUser;
+  }
 
+  async getActiveSubscriptions(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<Array<Subscription>> {
+    
     const stackId = await firstValueFrom(
       await this.getStackIdByTenantId(ctx, tenantId),
     );
@@ -157,7 +164,26 @@ export class SubscriptionService {
         subscription.recordStatus.isActive &&
         !subscription.recordStatus.isDeleted,
     );
+    return subscriptions
+  }
 
+  // returns only one subscription for now. Should return all subscriptions for a tenant in the future
+  async getAllSubscriptions(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<Array<SubscriptionDTO>> {
+    
+    const subscriptions = await this.getActiveSubscriptions(ctx, userId, tenantId);
+    const corsAppsAssignedToUser = await this.getCoreosAppsAssignedToUser(
+      ctx,
+      userId,
+      tenantId,
+    );
+
+    const stackId = await firstValueFrom(
+      await this.getStackIdByTenantId(ctx, tenantId),
+    );
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     for (const subscription of subscriptions || []) {
       this.logger.log(
@@ -277,9 +303,42 @@ export class SubscriptionService {
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
               );
             }
+          })
+          .catch((error) => {
+            if (error.code === 5) {
+              // app not found. no action required
+            } else {
+              const message = `Error while getting application details for ${subscription.item.application.id.appId} and ${subscription.item.application.id.appVersionId}. Reson: ${error.message}`;
+              this.logger.error(message, error);
+              throw new InternalServerErrorException(message);
+            }
+          });
+      }
+      subscriptionResponseDTOs.push(subscriptionDTO);
+    }
+    return subscriptionResponseDTOs;
+  }
+
+  async getAllSubscriptionsWithAddonApps(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<Array<SubscriptionDTO>> {
+    const allSubscriptions = await this.getAllSubscriptions(ctx, userId, tenantId);
+    const solutions  = allSubscriptions.map(subscription => subscription.solutions).flat();
+    const subscriptions = await this.getActiveSubscriptions(ctx, userId, tenantId);
+    for (const subscription of subscriptions || []) {
+      if (subscription.item.application) {
+        await firstValueFrom(
+          this.getApplicationByApplicationVersionIdentifier(
+            ctx,
+            subscription.item.application.id,
+          ),
+        )
+          .then((app) => {
             if (app.versions[0].applicationCompitablity.compitableSolutions) {
               for (const compatibleSolutionId of app.versions[0].applicationCompitablity.compitableSolutions) {
-                const solution = this.findSubscriptionBySubscriptionId(subscriptionDTO.solutions, compatibleSolutionId.solutionId);
+                const solution = this.findSolutionBySolutionId(solutions, compatibleSolutionId.solutionId);
                 if (!solution) {
                   this.logger.log('solution not found for id: ' + compatibleSolutionId);
                   continue;
@@ -306,12 +365,11 @@ export class SubscriptionService {
             }
           });
       }
-      subscriptionResponseDTOs.push(subscriptionDTO);
     }
-    return subscriptionResponseDTOs;
+    return allSubscriptions;
   }
 
-  findSubscriptionBySubscriptionId(solutions: SolutionDTO[], solutionId: string): SolutionDTO{
+  findSolutionBySolutionId(solutions: SolutionDTO[], solutionId: string): SolutionDTO{
     return solutions.find(solution => solution.solutionId === solutionId);
   }
 
