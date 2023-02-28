@@ -134,7 +134,6 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
-    
     const stackId = await firstValueFrom(
       await this.getStackIdByTenantId(ctx, tenantId),
     );
@@ -164,7 +163,7 @@ export class SubscriptionService {
         subscription.recordStatus.isActive &&
         !subscription.recordStatus.isDeleted,
     );
-    return subscriptions
+    return subscriptions;
   }
 
   // returns only one subscription for now. Should return all subscriptions for a tenant in the future
@@ -173,8 +172,11 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
   ): Promise<Array<SubscriptionDTO>> {
-    
-    const subscriptions = await this.getActiveSubscriptions(ctx, userId, tenantId);
+    const subscriptions = await this.getActiveSubscriptions(
+      ctx,
+      userId,
+      tenantId,
+    );
     const corsAppsAssignedToUser = await this.getCoreosAppsAssignedToUser(
       ctx,
       userId,
@@ -324,9 +326,19 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
   ): Promise<Array<SubscriptionDTO>> {
-    const allSubscriptions = await this.getAllSubscriptions(ctx, userId, tenantId);
-    const solutions  = allSubscriptions.map(subscription => subscription.solutions).flat();
-    const subscriptions = await this.getActiveSubscriptions(ctx, userId, tenantId);
+    const allSubscriptions = await this.getAllSubscriptions(
+      ctx,
+      userId,
+      tenantId,
+    );
+    const solutions = allSubscriptions
+      .map((subscription) => subscription.solutions)
+      .flat();
+    const subscriptions = await this.getActiveSubscriptions(
+      ctx,
+      userId,
+      tenantId,
+    );
     for (const subscription of subscriptions || []) {
       if (subscription.item.application) {
         await firstValueFrom(
@@ -337,18 +349,35 @@ export class SubscriptionService {
         )
           .then((app) => {
             if (app.versions[0].applicationCompitablity.compitableSolutions) {
-              for (const compatibleSolutionId of app.versions[0].applicationCompitablity.compitableSolutions) {
-                const solution = this.findSolutionBySolutionId(solutions, compatibleSolutionId.solutionId);
+              for (const compatibleSolutionId of app.versions[0]
+                .applicationCompitablity.compitableSolutions) {
+                const solution = this.findSolutionBySolutionId(
+                  solutions,
+                  compatibleSolutionId.solutionId,
+                );
                 if (!solution) {
-                  this.logger.log('solution not found for id: ' + compatibleSolutionId);
+                  this.logger.log(
+                    'solution not found for id: ' + compatibleSolutionId,
+                  );
                   continue;
                 }
-                this.logger.log('solution found for id: ' + compatibleSolutionId);
-                if (solution.applications.find(application => application.appId === app.id.appId)) {
-                  this.logger.log('application already added to solution: ' + compatibleSolutionId);
+                this.logger.log(
+                  'solution found for id: ' + compatibleSolutionId,
+                );
+                if (
+                  solution.applications.find(
+                    (application) => application.appId === app.id.appId,
+                  )
+                ) {
+                  this.logger.log(
+                    'application already added to solution: ' +
+                      compatibleSolutionId,
+                  );
                   continue;
                 }
-                this.logger.log('adding application to solution: ' + compatibleSolutionId);
+                this.logger.log(
+                  'adding application to solution: ' + compatibleSolutionId,
+                );
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
@@ -369,8 +398,11 @@ export class SubscriptionService {
     return allSubscriptions;
   }
 
-  findSolutionBySolutionId(solutions: SolutionDTO[], solutionId: string): SolutionDTO{
-    return solutions.find(solution => solution.solutionId === solutionId);
+  findSolutionBySolutionId(
+    solutions: SolutionDTO[],
+    solutionId: string,
+  ): SolutionDTO {
+    return solutions.find((solution) => solution.solutionId === solutionId);
   }
 
   private sortSolutionApplications(
