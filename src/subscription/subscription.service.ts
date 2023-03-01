@@ -348,9 +348,9 @@ export class SubscriptionService {
           ),
         )
           .then((app) => {
-            if (app.versions[0].applicationCompitablity.compitableSolutions) {
-              for (const compatibleSolutionId of app.versions[0]
-                .applicationCompitablity.compitableSolutions) {
+            const compatibleSolutionsForApp = app.versions[0]?.applicationCompitablity?.compitableSolutions;
+            if (compatibleSolutionsForApp) {
+              for (const compatibleSolutionId of compatibleSolutionsForApp) {
                 const solution = this.findSolutionBySolutionId(
                   solutions,
                   compatibleSolutionId.solutionId,
