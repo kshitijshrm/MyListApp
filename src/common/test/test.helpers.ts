@@ -3,13 +3,7 @@ import { TestHelpersBase } from '@foxtrotplatform/developer-platform-core-lib';
 import { File } from 'src/shared/schemas/os1/core/file/file.pb';
 import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
-import {
-  ApplicationClassification,
-  ApplicationHosting,
-  ApplicationPhase,
-  ApplicationPrivacy_Type,
-  ApplicationType,
-} from 'src/shared/schemas/os1/developerportal/application/application.pb';
+import { DateTime } from 'luxon';
 import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
 import { ApplicationServiceClient } from 'src/shared/schemas/os1/developerportal/service/application.pb';
 import { SolutionServiceClient } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
@@ -18,6 +12,7 @@ import {
   SolutionInitializationConfiguration_AppInitializationSequence,
   SolutionPhase,
   SolutionVersion_Application,
+  SolutionVersion,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SubscriptionDTO } from '../dto/subscription/subscription.dto';
@@ -37,8 +32,15 @@ export class TestHelpers extends TestHelpersBase {
       addUrlOverride: jest.fn(),
       deleteUrlOverride: jest.fn(),
       changeApplicationDisplayAttributes: jest.fn(),
+      changeApplicationProductionSecrets: jest.fn(),
+      changeApplicationUrls: jest.fn(),
       migrateFirstPartyApplication: jest.fn(),
       addApplicationIcon: jest.fn(),
+      deleteApplicationUrl: jest.fn(),
+      addSolutionCompatablity: jest.fn(),
+      removeSolutionCompatablity: jest.fn(),
+      lookupRelativePath: jest.fn(),
+      listCompatibleAppsBySolutionId: jest.fn(),
       replaceApplicationIcon: jest.fn(),
       addApplicationDocument: jest.fn(),
       deleteApplicationDocument: jest.fn(),
@@ -73,6 +75,9 @@ export class TestHelpers extends TestHelpersBase {
       addSolutionIcon: jest.fn(),
       replaceSolutionIcon: jest.fn(),
       addSolutionImage: jest.fn(),
+      changeSolutionCompatibility: jest.fn(),
+      changeSolutionVisibility: jest.fn(),
+      listSolutionsByPhase: jest.fn(),
       removeSolutionImage: jest.fn(),
       addSolutionDocument: jest.fn(),
       removeSolutionDocument: jest.fn(),
@@ -103,21 +108,24 @@ export class TestHelpers extends TestHelpersBase {
 
   static SubscriptionServiceClientMock(): SubscriptionServiceClient {
     return {
-      startSolutionTrial: jest.fn(),
-      upgradeSolutionTailToProduction: jest.fn(),
-      startApplicationTrial: jest.fn(),
-      upgradeApplicationTailToProduction: jest.fn(),
-      subscribeSolutionToDeveloperOrg: jest.fn(),
-      subscribeApplicationToDeveloperOrg: jest.fn(),
-      getSubscriptionsByOrganizationId: jest.fn(),
-      getSubscriptionsByOrganizationDomain: jest.fn(),
-      getSubscriptionsBySubscriptionId: jest.fn(),
-      retryFailedSubscription: jest.fn(),
-      getSubscriptionsByTenantId: jest.fn(),
       changeRecordStatus: jest.fn(),
-      disableSubscription: jest.fn(),
       check: jest.fn(),
       watch: jest.fn(),
+      disableSubscription: jest.fn(),
+      getSubscriptionsByOrganizationDomain: jest.fn(),
+      getSubscriptionsByOrganizationId: jest.fn(),
+      getSubscriptionsBySubscriptionId: jest.fn(),
+      getSubscriptionsByTenantId: jest.fn(),
+      listSubscriptionsByTenantIds: jest.fn(),
+      retryFailedSubscription: jest.fn(),
+      startApplicationTrial: jest.fn(),
+      startSolutionTrial: jest.fn(),
+      subscribeApplicationToDeveloperOrg: jest.fn(),
+      subscribeSolutionToDeveloperOrg: jest.fn(),
+      updateSubscriptionItemVersion: jest.fn(),
+      upgradeSubscription: jest.fn(),
+      changeSubscriptionExpiryDate: jest.fn(),
+      listActiveSubscriptions: jest.fn(),
     };
   }
 
@@ -151,110 +159,72 @@ export class TestHelpers extends TestHelpersBase {
       getFile: jest.fn(),
       check: jest.fn(),
       watch: jest.fn(),
+      createFileInBucket: jest.fn(),
     };
   }
 
-  static CreateGetApplicationByApplicationIdResponse(
-    appId?: string,
-    appVersionId?: string,
-  ): GetApplicationByApplicationIdResponse {
+  static CreateGetApplicationByApplicationIdResponse(): GetApplicationByApplicationIdResponse {
     // Leaving it as json for this PR.
     // All testing utils needs to be moved to a shared testing library.
-    appId = appId || this.CreateRandomAppId();
-    appVersionId = appVersionId || this.CreateRandomAppVersionId();
-    const applicationResponse: GetApplicationByApplicationIdResponse = {
+    return GetApplicationByApplicationIdResponse.fromJSON({
       application: {
         id: {
-          appId: appId,
+          appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
         },
-        name: faker.random.word(),
-        urlPath: this.CreateRandomUrlPath(),
-        urn: this.CreateRandomAppUrn(),
+        name: 'Baht',
+        urlPath: 'Baht',
+        urn: 'platform:app:undefined',
         orgTeam: {
           organization: {
-            organizationId: this.CreateRandomOrganizationId(),
-            domain: this.CreateRandomorganizationDomain(),
-            dns: this.CreateRandomOrganizationDns(),
+            organizationId: '5d5e08b5-b989-4c72-b5b6-134071fe7bd4',
+            domain: 'platformcoreos',
+            dns: 'platformcoreos.dev.fxtrt.io',
           },
-          teamId: this.CreateRandomOrganizationTeamId(),
+          teamId: '126939ff-e9c1-4da7-866c-aa727d5eef6a',
         },
         clientCredentials: {
-          clientId: this.CreateRandomClientId(),
-          clientSecretPlainText: faker.datatype.uuid(),
+          clientId: 'platform:app:undefined-backend',
+          clientSecretPlainText: 'df5f683a-2445-4f96-9b1b-9c30065798bd',
           clientSecretEncrypted: {
-            iv: faker.datatype.uuid(),
+            iv: '6d86d58d1fefc078a0523b3728ff5f09',
             encryptedText:
-              faker.datatype.uuid() +
-              faker.datatype.uuid() +
-              faker.datatype.uuid(),
+              '4d89ba67ff5aab22c1e3ce6e3c5f55ef8a59fc3e65f09254fa96eed8051879515469ae30',
           },
         },
-        appType: ApplicationType.BACKEND,
-        appClassification: ApplicationClassification.CORE,
-        redirectUris: [faker.internet.url()],
-        subscriptionCredentials: {
-          clientId: this.CreateRandomClientId(),
-          clientSecretEncrypted: {
-            iv: faker.datatype.uuid(),
-            encryptedText:
-              faker.datatype.uuid() +
-              faker.datatype.uuid() +
-              faker.datatype.uuid(),
-          },
-          clientSecretPlainText: faker.datatype.uuid(),
-        },
+        appType: 'BACKEND',
         versions: [
           {
             id: {
-              appId: appId,
-              appVersionId: appVersionId,
+              appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
+              appVersionId: 'appversion:8710fa5d-f11c-525d-a702-ed5aae7ce86a',
             },
-            displayName: this.CreateRandomDisplayName(),
-            version: this.CreateRandomSemver(),
-            description: faker.lorem.paragraph(),
+            displayName: 'Schultz Group',
+            version: '1.0.0',
+            description:
+              'Esse fugit neque in. Earum ut vel tempore dolorem. Sit cum et quaerat cupiditate quos molestias laboriosam ut.',
             applicationCompitablity: {
-              isMarketplaceCompatible: faker.datatype.boolean(),
-              isConsoleCompatible: faker.datatype.boolean(),
-              compitableSolutions: [],
+              isMarketplaceCompatible: false,
+              isConsoleCompatible: false,
             },
             privacy: {
-              type: ApplicationPrivacy_Type.PRIVATE,
+              type: 'PRIVATE',
             },
-            applicationPhase: ApplicationPhase.TECH_REVIEW,
-            appUrlOverrides: [],
-            appUrls: [],
-            categories: [],
-            appIcons: [],
-            displayImages: [],
-            documents: [],
-            longDescription: faker.lorem.paragraph(),
-            shortDescription: faker.lorem.sentence(),
-            state: {
-              createApp: 'SUCCESS',
-              grantPerimssions: 'SUCCESS',
-              subscribeApp: 'SUCCESS',
-            },
-            permissions: [this.CreateGetFileResponse()],
-            hosting: ApplicationHosting.PLATFORM,
-            recordStatus: {
-              isActive: faker.datatype.boolean(),
-              isDeleted: faker.datatype.boolean(),
+            record_status: {
+              isActive: true,
+              isDeleted: false,
             },
             recordAudit: {
-              createdBy: faker.datatype.uuid(),
-              updatedBy: faker.datatype.uuid(),
-              createdAt: faker.date.past().toISOString(),
-              updatedAt: faker.date.past().toISOString(),
+              createdBy: '49ff2aa4-568c-4471-b534-50e5491d7596',
+              createdAt:
+                'Thu Aug 25 2022 12:17:23 GMT-0400 (Eastern Daylight Time)',
+              updatedBy: '707c8d2d-53f6-4faf-a614-cffbe0e77fe6',
+              updatedAt:
+                'Thu Aug 25 2022 12:17:28 GMT-0400 (Eastern Daylight Time)',
             },
-            appNavigation: {
-              menuItems: [],
-            },
-            permissionsWeb: [],
           },
         ],
       },
-    };
-    return applicationResponse;
+    });
   }
   static CreateGetSolutionBySolutionIdResponse(
     solutionId?: string,
@@ -287,7 +257,7 @@ export class TestHelpers extends TestHelpersBase {
             classification: {
               categories: [faker.random.word()],
             },
-            phase: SolutionPhase.TECH_REVIEW,
+            phase: SolutionPhase.DRAFT,
             compatibility: {
               isMarketplaceCompatible: true,
               isConsoleCompatible: true,
@@ -299,9 +269,9 @@ export class TestHelpers extends TestHelpersBase {
             },
             recordAudit: {
               createdBy: faker.datatype.uuid(),
+              createdAt: DateTime.local().toISO(),
               updatedBy: faker.datatype.uuid(),
-              createdAt: faker.date.past().toISOString(),
-              updatedAt: faker.date.past().toISOString(),
+              updatedAt: DateTime.local().toISO(),
             },
             submissionId: '0',
             configurations: [],
@@ -314,14 +284,14 @@ export class TestHelpers extends TestHelpersBase {
             initializationConfiguration: {
               appInitializationSequence: [],
             },
-            associatedApplications: [],
             solutionState: {
-              activatedAt: faker.date.past().toISOString(),
+              status: 'Active',
+              requestedAt: DateTime.utc().toISO(),
+              activatedAt: DateTime.utc().toISO(),
               logs: [],
-              requestedAt: faker.date.past().toISOString(),
-              status: 'SUCCESS',
             },
-          },
+            associatedApplications: [],
+          } as SolutionVersion,
         ],
       },
     };
@@ -405,10 +375,12 @@ export class TestHelpers extends TestHelpersBase {
         fileName: faker.system.fileName(),
         fileDescription: faker.lorem.paragraph(),
         fileUrl: faker.internet.url(),
+        filePath: faker.system.filePath(),
       },
       fileBinary: new TextEncoder().encode('file content in string'),
     };
   }
+
 
   static CreateSubscriptionDTO(): SubscriptionDTO {
     const subscriptionDTO: SubscriptionDTO = {
