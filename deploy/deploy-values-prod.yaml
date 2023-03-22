@@ -1,5 +1,4 @@
 env: prod
-baseDomain: preprod.dlv2.fxtrt.io
 namespace: tenant-developerplatform
 service_name: console-api
 gateway_name: fxtrt-apps
@@ -22,17 +21,6 @@ apps:
       - X-DEVELOPERPLATFORM-ROLE
       - X-DEVELOPERPLATFORM-REQUEST-ID
       - Content-Type
-    envVars:
-      - name: APPLICATION_SERVICE_ENDPOINT
-        value: application-service-applicationservice.tenant-developerplatform.svc.cluster.local:50052
-      - name: SOLUTION_SERVICE_ENDPOINT
-        value: solutions-service-solutionsservice.tenant-developerplatform.svc.cluster.local:50052
-      - name: SUBSCRIPTION_SERVICE_ENDPOINT
-        value: subscription-service-subscriptionservice.tenant-developerplatform.svc.cluster.local:50052
-      - name: COREOS_AGENT_SERVICE_ENDPOINT
-        value: coreos-agent-coreosagent.tenant-developerplatform.svc.cluster.local:50052
-      - name: FILE_SERVICE_ENDPOINT
-        value: file-service-fileservice.tenant-developerplatform.svc.cluster.local:50052
     externalAccess:
       enabled: true
     autoscaling:
