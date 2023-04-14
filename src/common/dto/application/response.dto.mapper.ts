@@ -36,12 +36,12 @@ export class ApplicationResponseSchemaToDtoMapper {
         ? application.versions[0].appUrls.map(
             ApplicationResponseSchemaToDtoMapper.mapToApplicationUrlDTO,
           )
-        : undefined,
+        : [],
       urlOverrides: application.versions[0].appUrlOverrides
         ? application.versions[0].appUrlOverrides.map(
             ApplicationResponseSchemaToDtoMapper.mapToUrlOverrideDTO,
           )
-        : undefined,
+        : [],
       icon:
         application.versions[0].appIcons &&
         application.versions[0].appIcons.length > 0
@@ -53,7 +53,7 @@ export class ApplicationResponseSchemaToDtoMapper {
         ? application.versions[0].displayImages.map(
             ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO,
           )
-        : undefined,
+        : [],
       shortDescription: application.versions[0].shortDescription ?? undefined,
       longDescription: application.versions[0].longDescription ?? undefined,
       applicationMenu: application.versions[0].appNavigation?.menuItems?.map(
