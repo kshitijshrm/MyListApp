@@ -1,20 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { TestHelpersBase } from '@foxtrotplatform/developer-platform-core-lib';
-import { File } from 'src/shared/schemas/os1/core/file/file.pb';
-import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
-import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
 import { DateTime } from 'luxon';
+import { File } from 'src/shared/schemas/os1/core/file/file.pb';
 import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
-import { ApplicationServiceClient } from 'src/shared/schemas/os1/developerportal/service/application.pb';
-import { SolutionServiceClient } from 'src/shared/schemas/os1/developerportal/service/solution.pb';
 import { GetSolutionBySolutionIdResponse } from 'src/shared/schemas/os1/developerportal/solution/response.pb';
 import {
   SolutionInitializationConfiguration_AppInitializationSequence,
   SolutionPhase,
-  SolutionVersion_Application,
   SolutionVersion,
+  SolutionVersion_Application,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
-import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SubscriptionDTO } from '../dto/subscription/subscription.dto';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
@@ -22,146 +17,7 @@ export class TestHelpers extends TestHelpersBase {
       provide: name,
       useValue: {},
     };
-  }
-
-  static ApplicationServiceClientMock(): ApplicationServiceClient {
-    return {
-      registerApplication: jest.fn(),
-      addApplicationVersion: jest.fn(),
-      classifyApplication: jest.fn(),
-      addUrlOverride: jest.fn(),
-      deleteUrlOverride: jest.fn(),
-      changeApplicationDisplayAttributes: jest.fn(),
-      changeApplicationProductionSecrets: jest.fn(),
-      changeApplicationUrls: jest.fn(),
-      migrateFirstPartyApplication: jest.fn(),
-      addApplicationIcon: jest.fn(),
-      deleteApplicationUrl: jest.fn(),
-      addSolutionCompatablity: jest.fn(),
-      removeSolutionCompatablity: jest.fn(),
-      lookupRelativePath: jest.fn(),
-      listCompatibleAppsBySolutionId: jest.fn(),
-      replaceApplicationIcon: jest.fn(),
-      addApplicationDocument: jest.fn(),
-      deleteApplicationDocument: jest.fn(),
-      addApplicationPermissions: jest.fn(),
-      deleteApplicationPermissions: jest.fn(),
-      submitForTechReview: jest.fn(),
-      approveTechReview: jest.fn(),
-      declineTechReview: jest.fn(),
-      withdrawTechReview: jest.fn(),
-      submitForInternalPublishReview: jest.fn(),
-      submitForMarketplacePublishReview: jest.fn(),
-      approveInternalPublish: jest.fn(),
-      approveMarketplacePublish: jest.fn(),
-      depreciate: jest.fn(),
-      getApplicationByVersionId: jest.fn(),
-      getApplicationByApplicationId: jest.fn(),
-      listApplicationsByOrgTeamId: jest.fn(),
-      getApplicationByUrlPath: jest.fn(),
-      addApplicationNavigationMenuItem: jest.fn(),
-      deleteApplicationNavigationMenuItem: jest.fn(),
-      changeApplicationNavigationMenuItemAttributes: jest.fn(),
-      addApplicationPermissionsForWebClient: jest.fn(),
-      check: jest.fn(),
-      watch: jest.fn(),
-    };
-  }
-
-  static SolutionServiceClientMock(): SolutionServiceClient {
-    return {
-      registerSolution: jest.fn(),
-      addSolutionVersion: jest.fn(),
-      addSolutionIcon: jest.fn(),
-      replaceSolutionIcon: jest.fn(),
-      addSolutionImage: jest.fn(),
-      changeSolutionCompatibility: jest.fn(),
-      changeSolutionVisibility: jest.fn(),
-      listSolutionsByPhase: jest.fn(),
-      removeSolutionImage: jest.fn(),
-      addSolutionDocument: jest.fn(),
-      removeSolutionDocument: jest.fn(),
-      addSolutionConfigurationFile: jest.fn(),
-      addApplicationToSolution: jest.fn(),
-      removeApplicationFromSolution: jest.fn(),
-      changeSolutionDisplayAttributes: jest.fn(),
-      changeSolutionTerms: jest.fn(),
-      classifySolution: jest.fn(),
-      submitForTechReview: jest.fn(),
-      approveTechReview: jest.fn(),
-      declineTechReview: jest.fn(),
-      withdrawTechReview: jest.fn(),
-      submitForInternalPublishReview: jest.fn(),
-      submitForMarketplacePublishReview: jest.fn(),
-      approveInternalPublish: jest.fn(),
-      approveMarketplacePublish: jest.fn(),
-      depreciate: jest.fn(),
-      addSolutionInitializationConfiguration: jest.fn(),
-      getSolutionByVersionId: jest.fn(),
-      getSolutionBySolutionId: jest.fn(),
-      listSolutionsByOrgId: jest.fn(),
-      changeApplicationDisplayOrder: jest.fn(),
-      check: jest.fn(),
-      watch: jest.fn(),
-    };
-  }
-
-  static SubscriptionServiceClientMock(): SubscriptionServiceClient {
-    return {
-      changeRecordStatus: jest.fn(),
-      check: jest.fn(),
-      watch: jest.fn(),
-      disableSubscription: jest.fn(),
-      getSubscriptionsByOrganizationDomain: jest.fn(),
-      getSubscriptionsByOrganizationId: jest.fn(),
-      getSubscriptionsBySubscriptionId: jest.fn(),
-      getSubscriptionsByTenantId: jest.fn(),
-      listSubscriptionsByTenantIds: jest.fn(),
-      retryFailedSubscription: jest.fn(),
-      startApplicationTrial: jest.fn(),
-      startSolutionTrial: jest.fn(),
-      subscribeApplicationToDeveloperOrg: jest.fn(),
-      subscribeSolutionToDeveloperOrg: jest.fn(),
-      updateSubscriptionItemVersion: jest.fn(),
-      upgradeSubscription: jest.fn(),
-      changeSubscriptionExpiryDate: jest.fn(),
-      listActiveSubscriptions: jest.fn(),
-    };
-  }
-
-  static CoreosAgentServiceClientMock(): CoreosAgentServiceClient {
-    return {
-      createCoreosApp: jest.fn(),
-      addCoreosAppPermissions: jest.fn(),
-      addTenantToRegistry: jest.fn(),
-      allocateAnyAvailableTenantToOrganization: jest.fn(),
-      assignAppToTenantAdmin: jest.fn(),
-      getTenantById: jest.fn(),
-      listAllTenants: jest.fn(),
-      getAppPermissionsUploadStatus: jest.fn(),
-      getAppsForCoreosUser: jest.fn(),
-      addUmsAdminDesignationToTenant: jest.fn(),
-      changeCoreosTenantSubscriptionType: jest.fn(),
-      getTenantByOrgShortName: jest.fn(),
-      addDeveloperTenantToRegistry: jest.fn(),
-      allocateAnyAvailableDeveloperTenantToOrganization: jest.fn(),
-      changeCoreosTenantOrgDetails: jest.fn(),
-      updateTenantState: jest.fn(),
-      addUmsUser: jest.fn(),
-      check: jest.fn(),
-      watch: jest.fn(),
-    };
-  }
-
-  static FileServiceClientMock(): FileServiceClient {
-    return {
-      createFile: jest.fn(),
-      getFile: jest.fn(),
-      check: jest.fn(),
-      watch: jest.fn(),
-      createFileInBucket: jest.fn(),
-    };
-  }
+  }  
 
   static CreateGetApplicationByApplicationIdResponse(): GetApplicationByApplicationIdResponse {
     // Leaving it as json for this PR.

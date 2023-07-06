@@ -32,14 +32,7 @@ import {
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
-import {
-  ApplicationServiceClient,
-  APPLICATION_SERVICE_NAME,
-} from 'src/shared/schemas/os1/developerportal/service/application.pb';
-import {
-  SolutionServiceClient,
-  SOLUTION_SERVICE_NAME,
-} from 'src/shared/schemas/os1/developerportal/service/solution.pb';
+import { APPLICATION_SERVICE_V2_SERVICE_NAME, ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
 import { SolutionVersionIdentifier } from 'src/shared/schemas/os1/developerportal/solution/identifiers.pb';
 import { GetSolutionByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/solution/request.pb';
 import {
@@ -60,13 +53,9 @@ import {
 export class SubscriptionService {
   logger = new Logger(this.constructor.name);
 
-  @Inject(APPLICATION_SERVICE_NAME)
+  @Inject(APPLICATION_SERVICE_V2_SERVICE_NAME)
   private readonly applicationClient: ClientGrpc;
-  private applicationServiceClient: ApplicationServiceClient;
-
-  @Inject(SOLUTION_SERVICE_NAME)
-  private readonly solutionClient: ClientGrpc;
-  private solutionServiceClient: SolutionServiceClient;
+  private applicationServiceClient: ApplicationServiceV2Client;
 
   @Inject(SUBSCRIPTION_SERVICE_NAME)
   private readonly subscriptionClient: ClientGrpc;
@@ -82,13 +71,9 @@ export class SubscriptionService {
 
   onModuleInit() {
     this.applicationServiceClient =
-      this.applicationClient.getService<ApplicationServiceClient>(
-        APPLICATION_SERVICE_NAME,
-      );
-    this.solutionServiceClient =
-      this.solutionClient.getService<SolutionServiceClient>(
-        SOLUTION_SERVICE_NAME,
-      );
+      this.applicationClient.getService<ApplicationServiceV2Client>(
+        APPLICATION_SERVICE_V2_SERVICE_NAME,
+      );    
     this.subscriptionServiceClient =
       this.subscriptionClient.getService<SubscriptionServiceClient>(
         SUBSCRIPTION_SERVICE_NAME,
@@ -463,7 +448,7 @@ export class SubscriptionService {
     const request: GetSolutionByVersionIdRequest = {
       id: solutionVersionIdentifier,
     };
-    return this.solutionServiceClient
+    return this.applicationServiceClient
       .getSolutionByVersionId(request, ctx.rpcMetadata)
       .pipe(map((response) => response.solution));
   }
