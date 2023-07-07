@@ -7,7 +7,7 @@ apps:
     replicaCount: 3
     image:
       repository: 429738059147.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
-      version: 0.0.1-prod-82704e8
+      version: 0.0.1-prod-06d04ff
     resourceType: m1
     api:
       path: /app/console-api
@@ -20,6 +20,9 @@ apps:
       - X-DEVELOPERPLATFORM-USER-ID
       - X-DEVELOPERPLATFORM-ROLE
       - X-DEVELOPERPLATFORM-REQUEST-ID
+      - X-COREOS-TID
+      - X-COREOS-ACCESS
+      - X-COREOS-REQUEST-ID
       - Content-Type
     externalAccess:
       enabled: true

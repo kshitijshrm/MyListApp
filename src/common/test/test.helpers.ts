@@ -1,23 +1,50 @@
 import { faker } from '@faker-js/faker';
 import { TestHelpersBase } from '@foxtrotplatform/developer-platform-core-lib';
-import { DateTime } from 'luxon';
 import { File } from 'src/shared/schemas/os1/core/file/file.pb';
+import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
+import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
+import { DateTime } from 'luxon';
 import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
 import { GetSolutionBySolutionIdResponse } from 'src/shared/schemas/os1/developerportal/solution/response.pb';
 import {
   SolutionInitializationConfiguration_AppInitializationSequence,
   SolutionPhase,
-  SolutionVersion,
   SolutionVersion_Application,
+  SolutionVersion,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import { SubscriptionDTO } from '../dto/subscription/subscription.dto';
+import { ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
+import mock from 'jest-mock-extended/lib/Mock';
+import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
     return {
       provide: name,
       useValue: {},
     };
-  }  
+  }
+
+  static ApplicationServiceClientMock(): ApplicationServiceV2Client {
+    return mock<ApplicationServiceV2Client>();
+  }
+
+  static SubscriptionServiceClientMock(): SubscriptionServiceClient {
+    return mock<SubscriptionServiceClient>();
+  }
+
+  static CoreosAgentServiceClientMock(): CoreosAgentServiceClient {
+    return mock<CoreosAgentServiceClient>();
+  }
+
+  static FileServiceClientMock(): FileServiceClient {
+    return {
+      createFile: jest.fn(),
+      getFile: jest.fn(),
+      check: jest.fn(),
+      watch: jest.fn(),
+      createFileInBucket: jest.fn(),
+    };
+  }
 
   static CreateGetApplicationByApplicationIdResponse(): GetApplicationByApplicationIdResponse {
     // Leaving it as json for this PR.
@@ -236,7 +263,6 @@ export class TestHelpers extends TestHelpersBase {
       fileBinary: new TextEncoder().encode('file content in string'),
     };
   }
-
 
   static CreateSubscriptionDTO(): SubscriptionDTO {
     const subscriptionDTO: SubscriptionDTO = {
