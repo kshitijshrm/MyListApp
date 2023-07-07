@@ -8,7 +8,7 @@ apps:
     replicaCount: 1
     image:
       repository: 217425097687.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
-      version: 0.0.1-dev-f609c72
+      version: 0.0.1-dev-0f04fb3
     resourceType: m1
     api:
       path: /app/console-api
@@ -21,6 +21,9 @@ apps:
       - X-DEVELOPERPLATFORM-USER-ID
       - X-DEVELOPERPLATFORM-ROLE
       - X-DEVELOPERPLATFORM-REQUEST-ID
+      - X-COREOS-TID
+      - X-COREOS-ACCESS
+      - X-COREOS-REQUEST-ID
       - Content-Type
     envVars:
       - name: APPLICATION_SERVICE_ENDPOINT
