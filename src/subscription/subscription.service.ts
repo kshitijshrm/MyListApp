@@ -32,7 +32,10 @@ import {
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
 import { GetApplicationByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/application/request.pb';
-import { APPLICATION_SERVICE_V2_SERVICE_NAME, ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
+import {
+  APPLICATION_SERVICE_V2_SERVICE_NAME,
+  ApplicationServiceV2Client,
+} from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
 import { SolutionVersionIdentifier } from 'src/shared/schemas/os1/developerportal/solution/identifiers.pb';
 import { GetSolutionByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/solution/request.pb';
 import {
@@ -73,7 +76,7 @@ export class SubscriptionService {
     this.applicationServiceClient =
       this.applicationClient.getService<ApplicationServiceV2Client>(
         APPLICATION_SERVICE_V2_SERVICE_NAME,
-      );    
+      );
     this.subscriptionServiceClient =
       this.subscriptionClient.getService<SubscriptionServiceClient>(
         SUBSCRIPTION_SERVICE_NAME,
@@ -333,7 +336,8 @@ export class SubscriptionService {
           ),
         )
           .then((app) => {
-            const compatibleSolutionsForApp = app.versions[0]?.applicationCompitablity?.compitableSolutions;
+            const compatibleSolutionsForApp =
+              app.versions[0]?.applicationCompitablity?.compitableSolutions;
             if (compatibleSolutionsForApp) {
               for (const compatibleSolutionId of compatibleSolutionsForApp) {
                 const solution = this.findSolutionBySolutionId(
