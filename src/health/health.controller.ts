@@ -28,38 +28,21 @@ export class HealthController {
     return this.health.check([
       async () =>
         this.grpc.checkService<GrpcOptions>(
-          ServiceConstants.application_service.name,
-          ServiceConstants.application_service.name,
+          ServiceConstants.application_service_v2.name,
+          ServiceConstants.application_service_v2.name,
           {
-            url: ServiceConstants.application_service.url,
-            package: ServiceConstants.application_service.package,
-            protoPath: ServiceConstants.application_service.protoPath,
+            url: ServiceConstants.application_service_v2.url,
+            package: ServiceConstants.application_service_v2.package,
+            protoPath: ServiceConstants.application_service_v2.protoPath,
             loader: {
               includeDirs: [join(ServiceConstants.proto_schemas_root)],
             },
             timeout: ServiceConstants.health_check_timeout_default,
-            healthServiceName: ServiceConstants.application_service.name,
+            healthServiceName: ServiceConstants.application_service_v2.name,
             healthServiceCheck: (healthService: any, service: string) =>
               healthService.check({ service }).toPromise(),
           },
-        ),
-      async () =>
-        this.grpc.checkService<GrpcOptions>(
-          ServiceConstants.solution_service.name,
-          ServiceConstants.solution_service.name,
-          {
-            url: ServiceConstants.solution_service.url,
-            package: ServiceConstants.solution_service.package,
-            protoPath: ServiceConstants.solution_service.protoPath,
-            loader: {
-              includeDirs: [join(ServiceConstants.proto_schemas_root)],
-            },
-            timeout: ServiceConstants.health_check_timeout_default,
-            healthServiceName: ServiceConstants.solution_service.name,
-            healthServiceCheck: (healthService: any, service: string) =>
-              healthService.check({ service }).toPromise(),
-          },
-        ),
+        ),      
       async () =>
         this.grpc.checkService<GrpcOptions>(
           ServiceConstants.subscription_service.name,

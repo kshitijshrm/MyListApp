@@ -2,24 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import { TestHelpers } from 'src/common/test/test.helpers';
 import {
-  CoreosAgentServiceClient,
   COREOS_AGENT_SERVICE_NAME,
+  CoreosAgentServiceClient,
 } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import {
-  FileServiceClient,
   FILE_SERVICE_NAME,
+  FileServiceClient,
 } from 'src/shared/schemas/os1/core/service/file.pb';
+
+import { mock } from 'jest-mock-extended';
+import { APPLICATION_SERVICE_V2_SERVICE_NAME, ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
 import {
-  ApplicationServiceClient,
-  APPLICATION_SERVICE_NAME,
-} from 'src/shared/schemas/os1/developerportal/service/application.pb';
-import {
-  SolutionServiceClient,
-  SOLUTION_SERVICE_NAME,
-} from 'src/shared/schemas/os1/developerportal/service/solution.pb';
-import {
-  SubscriptionServiceClient,
   SUBSCRIPTION_SERVICE_NAME,
+  SubscriptionServiceClient,
 } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SubscriptionService } from './subscription.service';
 
@@ -28,8 +23,7 @@ describe('SubscriptionService', () => {
   jest.setTimeout(100000);
 
   let service: SubscriptionService;
-  let applicationServiceClient: ApplicationServiceClient;
-  let solutionServiceClient: SolutionServiceClient;
+  let applicationServiceClient: ApplicationServiceV2Client;  
   let subscriptionServiceClient: SubscriptionServiceClient;
   let fileServiceClient: FileServiceClient;
   let coreosAgentServiceClient: CoreosAgentServiceClient;
@@ -38,8 +32,7 @@ describe('SubscriptionService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubscriptionService,
-        TestHelpers.ClientGrpcMock(APPLICATION_SERVICE_NAME),
-        TestHelpers.ClientGrpcMock(SOLUTION_SERVICE_NAME),
+        TestHelpers.ClientGrpcMock(APPLICATION_SERVICE_V2_SERVICE_NAME),
         TestHelpers.ClientGrpcMock(SUBSCRIPTION_SERVICE_NAME),
         TestHelpers.ClientGrpcMock(FILE_SERVICE_NAME),
         TestHelpers.ClientGrpcMock(COREOS_AGENT_SERVICE_NAME),
@@ -48,14 +41,12 @@ describe('SubscriptionService', () => {
 
     service = module.get(SubscriptionService);
 
-    applicationServiceClient = TestHelpers.ApplicationServiceClientMock();
-    solutionServiceClient = TestHelpers.SolutionServiceClientMock();
-    subscriptionServiceClient = TestHelpers.SubscriptionServiceClientMock();
-    fileServiceClient = TestHelpers.FileServiceClientMock();
-    coreosAgentServiceClient = TestHelpers.CoreosAgentServiceClientMock();
+    applicationServiceClient = mock<ApplicationServiceV2Client>();    
+    subscriptionServiceClient = mock<SubscriptionServiceClient>();
+    fileServiceClient = mock<FileServiceClient>();
+    coreosAgentServiceClient = mock<CoreosAgentServiceClient>();
 
     Reflect.set(service, 'applicationServiceClient', applicationServiceClient);
-    Reflect.set(service, 'solutionServiceClient', solutionServiceClient);
     Reflect.set(
       service,
       'subscriptionServiceClient',

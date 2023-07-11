@@ -10,32 +10,18 @@ import { SubscriptionService } from './subscription.service';
   imports: [
     ClientsModule.register([
       {
-        name: ServiceConstants.application_service.name,
+        name: ServiceConstants.application_service_v2.name,
         transport: Transport.GRPC,
         options: {
-          url: ServiceConstants.application_service.url,
-          package: ServiceConstants.application_service.package,
-          protoPath: ServiceConstants.application_service.protoPath,
+          url: ServiceConstants.application_service_v2.url,
+          package: ServiceConstants.application_service_v2.package,
+          protoPath: ServiceConstants.application_service_v2.protoPath,
           loader: {
             includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
         },
       },
-    ]),
-    ClientsModule.register([
-      {
-        name: ServiceConstants.solution_service.name,
-        transport: Transport.GRPC,
-        options: {
-          url: ServiceConstants.solution_service.url,
-          package: ServiceConstants.solution_service.package,
-          protoPath: ServiceConstants.solution_service.protoPath,
-          loader: {
-            includeDirs: [join(ServiceConstants.proto_schemas_root)],
-          },
-        },
-      },
-    ]),
+    ]),    
     ClientsModule.register([
       {
         name: ServiceConstants.subscription_service.name,
