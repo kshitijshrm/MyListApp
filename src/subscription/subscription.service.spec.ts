@@ -1,50 +1,38 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import { TestHelpers } from 'src/common/test/test.helpers';
-import {
-  COREOS_AGENT_SERVICE_NAME,
-  CoreosAgentServiceClient,
-} from 'src/shared/schemas/os1/core/service/coreosagent.pb';
-import {
-  FILE_SERVICE_NAME,
-  FileServiceClient,
-} from 'src/shared/schemas/os1/core/service/file.pb';
+import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
+import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
 
 import { mock } from 'jest-mock-extended';
-import { APPLICATION_SERVICE_V2_SERVICE_NAME, ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
-import {
-  SUBSCRIPTION_SERVICE_NAME,
-  SubscriptionServiceClient,
-} from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
+import { ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
+import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SubscriptionService } from './subscription.service';
+import {
+  RedisService,
+  TestHelpersBase,
+} from '@foxtrotplatform/developer-platform-core-lib';
+import { of } from 'rxjs';
+import { Subscription } from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
 
 describe('SubscriptionService', () => {
   // setting timeout to be 100 seconds to allow aaa testing aaa permissions timed upload retries
   jest.setTimeout(100000);
 
   let service: SubscriptionService;
-  let applicationServiceClient: ApplicationServiceV2Client;  
+  let applicationServiceClient: ApplicationServiceV2Client;
   let subscriptionServiceClient: SubscriptionServiceClient;
   let fileServiceClient: FileServiceClient;
   let coreosAgentServiceClient: CoreosAgentServiceClient;
+  let redisService: RedisService;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SubscriptionService,
-        TestHelpers.ClientGrpcMock(APPLICATION_SERVICE_V2_SERVICE_NAME),
-        TestHelpers.ClientGrpcMock(SUBSCRIPTION_SERVICE_NAME),
-        TestHelpers.ClientGrpcMock(FILE_SERVICE_NAME),
-        TestHelpers.ClientGrpcMock(COREOS_AGENT_SERVICE_NAME),
-      ],
-    }).compile();
+    service = new SubscriptionService();
 
-    service = module.get(SubscriptionService);
-
-    applicationServiceClient = mock<ApplicationServiceV2Client>();    
+    applicationServiceClient = mock<ApplicationServiceV2Client>();
     subscriptionServiceClient = mock<SubscriptionServiceClient>();
     fileServiceClient = mock<FileServiceClient>();
     coreosAgentServiceClient = mock<CoreosAgentServiceClient>();
+    redisService = mock<RedisService>();
 
     Reflect.set(service, 'applicationServiceClient', applicationServiceClient);
     Reflect.set(
@@ -54,6 +42,7 @@ describe('SubscriptionService', () => {
     );
     Reflect.set(service, 'fileServiceClient', fileServiceClient);
     Reflect.set(service, 'coreosAgentServiceClient', coreosAgentServiceClient);
+    Reflect.set(service, 'redisService', redisService);
   });
 
   beforeEach(() => {
@@ -208,6 +197,162 @@ describe('SubscriptionService', () => {
 
       expect(result.length).toEqual(1);
       expect(result[0].url.url).toEqual(testUrl);
+    });
+  });
+
+  describe('getCoreosAppsAssignedToUser', () => {
+    coreosAgentServiceClient = mock<CoreosAgentServiceClient>();
+    const sampleApps = ['sample-app1', 'sample-app2'];
+    const sampleApps2 = ['sample-app3', 'sample-app4'];
+
+    it('should return sampleApps array from coreosAgent', async () => {
+      jest
+        .spyOn(coreosAgentServiceClient, 'getAppsForCoreosUser')
+        .mockImplementation(() =>
+          of({ coreosUserId: 'user-id', apps: sampleApps }),
+        );
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getCoreosAppsAssignedToUser(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        coreosAgentServiceClient.getAppsForCoreosUser,
+      ).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(sampleApps);
+    });
+
+    it('should return sampleApps array from redis', async () => {
+      jest
+        .spyOn(coreosAgentServiceClient, 'getAppsForCoreosUser')
+        .mockImplementation(() =>
+          of({ coreosUserId: 'user-id', apps: sampleApps2 }),
+        );
+      jest
+        .spyOn(redisService, 'get')
+        .mockImplementation(async () => JSON.stringify(sampleApps));
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getCoreosAppsAssignedToUser(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        coreosAgentServiceClient.getAppsForCoreosUser,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(sampleApps);
+    });
+
+    it('should return sampleApps2 array from redis', async () => {
+      jest
+        .spyOn(coreosAgentServiceClient, 'getAppsForCoreosUser')
+        .mockImplementation(() =>
+          of({ coreosUserId: 'user-id', apps: sampleApps }),
+        );
+      jest
+        .spyOn(redisService, 'get')
+        .mockImplementation(async () => JSON.stringify(sampleApps2));
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getCoreosAppsAssignedToUser(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        coreosAgentServiceClient.getAppsForCoreosUser,
+      ).toHaveBeenCalledTimes(3);
+      expect(result).toEqual(sampleApps2);
+    });
+  });
+
+  describe('getActiveSubscriptions', () => {
+    subscriptionServiceClient = mock<SubscriptionServiceClient>();
+    const sampleSubscriptions: Subscription[] = [
+      {
+        id: { subscriptionId: 'sample-subscription-id' },
+        organization: undefined,
+        tier: undefined,
+        item: undefined,
+        status: undefined,
+        recordStatus: {
+          isActive: true,
+          isDeleted: false,
+        },
+        recordAudit: undefined,
+        pendingAction: undefined,
+      },
+    ];
+    const sampleSubscriptions2: Subscription[] = [
+      {
+        id: { subscriptionId: 'sample-subscription-id2' },
+        organization: undefined,
+        tier: undefined,
+        item: undefined,
+        status: undefined,
+        recordStatus: {
+          isActive: true,
+          isDeleted: false,
+        },
+        recordAudit: undefined,
+        pendingAction: undefined,
+      },
+    ];
+
+    it('should return sampleSubscription array from subscription service', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }));
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getActiveSubscriptions(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(sampleSubscriptions);
+    });
+
+    it('should return sampleSubscription array from redis', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions2 }));
+      jest
+        .spyOn(redisService, 'get')
+        .mockImplementation(async () => JSON.stringify(sampleSubscriptions));
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getActiveSubscriptions(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(sampleSubscriptions);
+    });
+
+    it('should return sampleSubscriptions array from redis', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }));
+      jest
+        .spyOn(redisService, 'get')
+        .mockImplementation(async () => JSON.stringify(sampleSubscriptions2));
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getActiveSubscriptions(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(3);
+      expect(result).toEqual(sampleSubscriptions2);
     });
   });
 });

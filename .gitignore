@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # Dont include proto generated files
 /src/shared/schemas
+
+# Don't include .npmrc file
+.npmrc
