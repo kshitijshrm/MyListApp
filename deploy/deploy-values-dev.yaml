@@ -8,7 +8,7 @@ apps:
     replicaCount: 1
     image:
       repository: 217425097687.dkr.ecr.ap-south-1.amazonaws.com/developer-platform/console-api
-      version: 0.0.1-dev-a200421
+      version: 0.0.1-dev-236f823
     resourceType: m1
     api:
       path: /app/console-api
