@@ -62,7 +62,11 @@ When the tenant being queried is a developer tenant, there wont be any access re
     const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
-    return this.subscriptionService.getAllSubscriptionsWithAddonApps(ctx, userId, tenantId);
+    return this.subscriptionService.getAllSubscriptionsWithAddonApps(
+      ctx,
+      userId,
+      tenantId,
+    );
   }
 
   private getUserIdFromCoreosToken(headers: any): string {

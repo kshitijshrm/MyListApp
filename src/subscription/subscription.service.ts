@@ -1,4 +1,7 @@
-import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core-lib';
+import {
+  PlatformRequestContext,
+  RedisService,
+} from '@foxtrotplatform/developer-platform-core-lib';
 import {
   Inject,
   Injectable,
@@ -7,7 +10,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
+import { error } from 'console';
 import { firstValueFrom, map, Observable } from 'rxjs';
+import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
@@ -72,6 +77,9 @@ export class SubscriptionService {
   private readonly fileClient: ClientGrpc;
   private fileServiceClient: FileServiceClient;
 
+  @Inject(RedisService)
+  private redisService: RedisService;
+
   onModuleInit() {
     this.applicationServiceClient =
       this.applicationClient.getService<ApplicationServiceV2Client>(
@@ -89,7 +97,7 @@ export class SubscriptionService {
       this.fileClient.getService<FileServiceClient>(FILE_SERVICE_NAME);
   }
 
-  async getCoreosAppsAssignedToUser(
+  async getCoreosAppsAssignedToUserAndSaveToRedis(
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
@@ -114,18 +122,46 @@ export class SubscriptionService {
         throw new InternalServerErrorException(message, error);
       });
     this.logger.log('corsAppsAssignedToUser: ' + corsAppsAssignedToUser);
+
+    await this.redisService.setEx(
+      RedisConstants.getAppsForCoreosUserKey(`${userId}_${tenantId}`),
+      JSON.stringify(corsAppsAssignedToUser),
+      RedisConstants.one_day_in_seconds,
+    );
     return corsAppsAssignedToUser;
   }
 
-  async getActiveSubscriptions(
+  async getCoreosAppsAssignedToUser(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<Array<string>> {
+    const apps = await this.redisService.get(
+      RedisConstants.getAppsForCoreosUserKey(`${userId}_${tenantId}`),
+    );
+
+    if (apps) {
+      this.getCoreosAppsAssignedToUserAndSaveToRedis(
+        ctx,
+        userId,
+        tenantId,
+      ).catch((error) => {
+        this.logger.error(error.message);
+      });
+      return JSON.parse(apps);
+    } else
+      return await this.getCoreosAppsAssignedToUserAndSaveToRedis(
+        ctx,
+        userId,
+        tenantId,
+      );
+  }
+
+  async getActiveSubscriptionsAndSaveToRedis(
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
-    const stackId = await firstValueFrom(
-      await this.getStackIdByTenantId(ctx, tenantId),
-    );
-
     // get subscriptions for tenant
     let subscriptions: Subscription[] = await firstValueFrom(
       this.getSubscriptionsByTenantId(ctx, tenantId),
@@ -151,7 +187,105 @@ export class SubscriptionService {
         subscription.recordStatus.isActive &&
         !subscription.recordStatus.isDeleted,
     );
+
+    await this.redisService.setEx(
+      RedisConstants.getSubscriptionsKey(tenantId),
+      JSON.stringify(subscriptions),
+      RedisConstants.one_day_in_seconds,
+    );
     return subscriptions;
+  }
+
+  async getActiveSubscriptions(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<Array<Subscription>> {
+    const subs = await this.redisService.get(
+      RedisConstants.getSubscriptionsKey(tenantId),
+    );
+
+    if (subs) {
+      this.getActiveSubscriptionsAndSaveToRedis(ctx, userId, tenantId).catch(
+        (error) => {
+          this.logger.error(error.message);
+        },
+      );
+      return JSON.parse(subs);
+    } else
+      return await this.getActiveSubscriptionsAndSaveToRedis(
+        ctx,
+        userId,
+        tenantId,
+      );
+  }
+
+  async getSolutionByVersionIdAndSaveToRedis(
+    ctx: PlatformRequestContext,
+    solutionVersionIdentifier: SolutionVersionIdentifier,
+  ): Promise<Solution> {
+    let solution: Solution;
+    await firstValueFrom(
+      this.getSolutionsBySolutionVersionIdentifier(
+        ctx,
+        solutionVersionIdentifier,
+      ),
+    )
+      .then((response) => {
+        solution = response;
+      })
+      .catch((error) => {
+        if (error.code === 5) {
+          // app not found. no action required
+        } else {
+          const message = `Error occured while getting solution for solutionVersionIdentifier ${solutionVersionIdentifier}`;
+          this.logger.error(message, error.stack);
+          throw new InternalServerErrorException(message);
+        }
+      });
+
+    await this.redisService.setEx(
+      RedisConstants.getSolutionByVersionIdKey(
+        solutionVersionIdentifier.solutionVersionId,
+      ),
+      JSON.stringify(solution),
+      RedisConstants.one_day_in_seconds,
+    );
+    return solution;
+  }
+
+  async getApplicationByVersionIdAndSaveToRedis(
+    ctx: PlatformRequestContext,
+    appVersionIdentifier: ApplicationVersionIdentifier,
+  ): Promise<Application> {
+    let application: Application;
+    await firstValueFrom(
+      this.getApplicationByApplicationVersionIdentifier(
+        ctx,
+        appVersionIdentifier,
+      ),
+    )
+      .then((app) => {
+        application = app;
+      })
+      .catch((error) => {
+        if (error.code === 5) {
+          // app not found. no action required
+        } else {
+          const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
+          this.logger.error(message, error);
+          throw new InternalServerErrorException(message);
+        }
+      });
+
+    await this.redisService.setEx(
+      RedisConstants.getApplicationByVersionIdKey(
+        appVersionIdentifier.appVersionId,
+      ),
+      JSON.stringify(application),
+      RedisConstants.one_day_in_seconds,
+    );
+    return application;
   }
 
   // returns only one subscription for now. Should return all subscriptions for a tenant in the future
@@ -172,7 +306,7 @@ export class SubscriptionService {
     );
 
     const stackId = await firstValueFrom(
-      await this.getStackIdByTenantId(ctx, tenantId),
+      this.getStackIdByTenantId(ctx, tenantId),
     );
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     for (const subscription of subscriptions || []) {
@@ -204,27 +338,31 @@ export class SubscriptionService {
         let solution: Solution;
         let solutionDto: SolutionDTO;
 
-        await firstValueFrom(
-          this.getSolutionsBySolutionVersionIdentifier(
+        const solutionFromRedis = await this.redisService.get(
+          RedisConstants.getSolutionByVersionIdKey(
+            subscription.item.solution.id.solutionVersionId,
+          ),
+        );
+
+        if (solutionFromRedis) {
+          this.getSolutionByVersionIdAndSaveToRedis(
             ctx,
             subscription.item.solution.id,
-          ),
-        )
-          .then((response) => {
-            solution = response;
-            solutionDto =
-              SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
-            subscriptionDTO.solutions.push(solutionDto);
-          })
-          .catch((error) => {
-            if (error.code === 5) {
-              // app not found. no action required
-            } else {
-              const message = `Error occuret while getting solution for solutionVersionIdentifier ${subscription.item.solution}`;
-              this.logger.error(message, error.stack);
-              throw new InternalServerErrorException(message);
-            }
-          });
+          ).catch();
+          solution = JSON.parse(solutionFromRedis);
+          solutionDto =
+            SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
+          subscriptionDTO.solutions.push(solutionDto);
+        } else {
+          const res = await this.getSolutionByVersionIdAndSaveToRedis(
+            ctx,
+            subscription.item.solution.id,
+          );
+          solution = res;
+          solutionDto =
+            SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
+          subscriptionDTO.solutions.push(solutionDto);
+        }
 
         // return empty subscription if solution not found
         if (solution) {
@@ -236,73 +374,105 @@ export class SubscriptionService {
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
             // collect all applciations referenced in solution
-            await firstValueFrom(
-              this.getApplicationByApplicationVersionIdentifier(ctx, app.id),
-            )
-              .then((app) => {
-                if (
-                  this.isAppToBeAddedToSolution(
-                    subscriptionDTO,
-                    app,
-                    corsAppsAssignedToUser,
-                  )
-                ) {
-                  this.sortApplicationMenuItems(
-                    app.versions[0]?.appNavigation?.menuItems || [],
+
+            const appFromRedis = await this.redisService.get(
+              RedisConstants.getApplicationByVersionIdKey(app.id.appVersionId),
+            );
+
+            if (appFromRedis) {
+              this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id).catch();
+              const application: Application = JSON.parse(appFromRedis);
+              if (
+                this.isAppToBeAddedToSolution(
+                  subscriptionDTO,
+                  application,
+                  corsAppsAssignedToUser,
+                )
+              ) {
+                this.sortApplicationMenuItems(
+                  application.versions[0]?.appNavigation?.menuItems || [],
+                );
+                application.versions[0].appUrlOverrides =
+                  this.filterUrlOverridesByStackId(
+                    application.versions[0]?.appUrlOverrides || [],
+                    stackId,
                   );
-                  app.versions[0].appUrlOverrides =
-                    this.filterUrlOverridesByStackId(
-                      app.versions[0]?.appUrlOverrides || [],
-                      stackId,
-                    );
-                  solutionDto.applications.push(
-                    ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
-                      app,
-                    ),
+                solutionDto.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+                    application,
+                  ),
+                );
+              }
+            } else {
+              const application =
+                await this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id);
+              if (
+                this.isAppToBeAddedToSolution(
+                  subscriptionDTO,
+                  application,
+                  corsAppsAssignedToUser,
+                )
+              ) {
+                this.sortApplicationMenuItems(
+                  application.versions[0]?.appNavigation?.menuItems || [],
+                );
+                application.versions[0].appUrlOverrides =
+                  this.filterUrlOverridesByStackId(
+                    application.versions[0]?.appUrlOverrides || [],
+                    stackId,
                   );
-                }
-              })
-              .catch((error) => {
-                if (error.code === 5) {
-                  // app not found. no action required
-                } else {
-                  const message = `Error while getting application details for ${app.id.appId} and ${app.id.appVersionId}. Reson: ${error.message}`;
-                  this.logger.error(message, error);
-                  throw new InternalServerErrorException(message);
-                }
-              });
+                solutionDto.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+                    application,
+                  ),
+                );
+              }
+            }
           }
         }
       }
       if (subscription.item.application) {
-        await firstValueFrom(
-          this.getApplicationByApplicationVersionIdentifier(
+        const appFromRedis = await this.redisService.get(
+          RedisConstants.getApplicationByVersionIdKey(
+            subscription.item.application.id.appVersionId,
+          ),
+        );
+
+        if (appFromRedis) {
+          this.getApplicationByVersionIdAndSaveToRedis(
             ctx,
             subscription.item.application.id,
-          ),
-        )
-          .then((app) => {
-            if (
-              this.isAppToBeAddedToSolution(
-                subscriptionDTO,
-                app,
-                corsAppsAssignedToUser,
-              )
-            ) {
-              subscriptionDTO.applications.push(
-                ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-              );
-            }
-          })
-          .catch((error) => {
-            if (error.code === 5) {
-              // app not found. no action required
-            } else {
-              const message = `Error while getting application details for ${subscription.item.application.id.appId} and ${subscription.item.application.id.appVersionId}. Reson: ${error.message}`;
-              this.logger.error(message, error);
-              throw new InternalServerErrorException(message);
-            }
-          });
+          ).catch();
+          if (
+            this.isAppToBeAddedToSolution(
+              subscriptionDTO,
+              JSON.parse(appFromRedis),
+              corsAppsAssignedToUser,
+            )
+          ) {
+            subscriptionDTO.applications.push(
+              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+                JSON.parse(appFromRedis),
+              ),
+            );
+          }
+        } else {
+          const app = await this.getApplicationByVersionIdAndSaveToRedis(
+            ctx,
+            subscription.item.application.id,
+          );
+          if (
+            this.isAppToBeAddedToSolution(
+              subscriptionDTO,
+              app,
+              corsAppsAssignedToUser,
+            )
+          ) {
+            subscriptionDTO.applications.push(
+              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+            );
+          }
+        }
       }
       subscriptionResponseDTOs.push(subscriptionDTO);
     }
@@ -314,77 +484,7 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
   ): Promise<Array<SubscriptionDTO>> {
-    const allSubscriptions = await this.getAllSubscriptions(
-      ctx,
-      userId,
-      tenantId,
-    );
-    const solutions = allSubscriptions
-      .map((subscription) => subscription.solutions)
-      .flat();
-    const subscriptions = await this.getActiveSubscriptions(
-      ctx,
-      userId,
-      tenantId,
-    );
-    for (const subscription of subscriptions || []) {
-      if (subscription.item.application) {
-        await firstValueFrom(
-          this.getApplicationByApplicationVersionIdentifier(
-            ctx,
-            subscription.item.application.id,
-          ),
-        )
-          .then((app) => {
-            const compatibleSolutionsForApp =
-              app.versions[0]?.applicationCompitablity?.compitableSolutions;
-            if (compatibleSolutionsForApp) {
-              for (const compatibleSolutionId of compatibleSolutionsForApp) {
-                const solution = this.findSolutionBySolutionId(
-                  solutions,
-                  compatibleSolutionId.solutionId,
-                );
-                if (!solution) {
-                  this.logger.log(
-                    'solution not found for id: ' + compatibleSolutionId,
-                  );
-                  continue;
-                }
-                this.logger.log(
-                  'solution found for id: ' + compatibleSolutionId,
-                );
-                if (
-                  solution.applications.find(
-                    (application) => application.appId === app.id.appId,
-                  )
-                ) {
-                  this.logger.log(
-                    'application already added to solution: ' +
-                      compatibleSolutionId,
-                  );
-                  continue;
-                }
-                this.logger.log(
-                  'adding application to solution: ' + compatibleSolutionId,
-                );
-                solution.applications.push(
-                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-                );
-              }
-            }
-          })
-          .catch((error) => {
-            if (error.code === 5) {
-              // app not found. no action required
-            } else {
-              const message = `Error while getting application details for ${subscription.item.application.id.appId} and ${subscription.item.application.id.appVersionId}. Reson: ${error.message}`;
-              this.logger.error(message, error);
-              throw new InternalServerErrorException(message);
-            }
-          });
-      }
-    }
-    return allSubscriptions;
+    return await this.getAllSubscriptions(ctx, userId, tenantId);
   }
 
   findSolutionBySolutionId(

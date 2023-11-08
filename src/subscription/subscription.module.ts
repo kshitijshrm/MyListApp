@@ -5,6 +5,7 @@ import { ServiceConstants } from 'src/common/constants/service.constants';
 import { FILE_SERVICE_NAME } from 'src/shared/schemas/os1/core/service/file.pb';
 import { SubscriptionController } from './subscription.controller';
 import { SubscriptionService } from './subscription.service';
+import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { SubscriptionService } from './subscription.service';
           },
         },
       },
-    ]),    
+    ]),
     ClientsModule.register([
       {
         name: ServiceConstants.subscription_service.name,
@@ -66,6 +67,6 @@ import { SubscriptionService } from './subscription.service';
     ]),
   ],
   controllers: [SubscriptionController],
-  providers: [SubscriptionService],
+  providers: [SubscriptionService, RedisService],
 })
 export class SubscriptionModule {}
