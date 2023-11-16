@@ -223,26 +223,21 @@ export class SubscriptionService {
   async getSolutionByVersionIdAndSaveToRedis(
     ctx: PlatformRequestContext,
     solutionVersionIdentifier: SolutionVersionIdentifier,
-  ): Promise<Solution> {
-    let solution: Solution;
-    await firstValueFrom(
+  ): Promise<Solution | void> {
+    const solution = await firstValueFrom(
       this.getSolutionsBySolutionVersionIdentifier(
         ctx,
         solutionVersionIdentifier,
       ),
-    )
-      .then((response) => {
-        solution = response;
-      })
-      .catch((error) => {
-        if (error.code === 5) {
-          // app not found. no action required
-        } else {
-          const message = `Error occured while getting solution for solutionVersionIdentifier ${solutionVersionIdentifier}`;
-          this.logger.error(message, error.stack);
-          throw new InternalServerErrorException(message);
-        }
-      });
+    ).catch((error) => {
+      if (error.code === 5) {
+        // app not found. no action required
+      } else {
+        const message = `Error occured while getting solution for solutionVersionIdentifier ${solutionVersionIdentifier}`;
+        this.logger.error(message, error.stack);
+        throw new InternalServerErrorException(message);
+      }
+    });
 
     await this.redisService.setEx(
       RedisConstants.getSolutionByVersionIdKey(
@@ -257,26 +252,21 @@ export class SubscriptionService {
   async getApplicationByVersionIdAndSaveToRedis(
     ctx: PlatformRequestContext,
     appVersionIdentifier: ApplicationVersionIdentifier,
-  ): Promise<Application> {
-    let application: Application;
-    await firstValueFrom(
+  ): Promise<Application | void> {
+    const application = await firstValueFrom(
       this.getApplicationByApplicationVersionIdentifier(
         ctx,
         appVersionIdentifier,
       ),
-    )
-      .then((app) => {
-        application = app;
-      })
-      .catch((error) => {
-        if (error.code === 5) {
-          // app not found. no action required
-        } else {
-          const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
-          this.logger.error(message, error);
-          throw new InternalServerErrorException(message);
-        }
-      });
+    ).catch((error) => {
+      if (error.code === 5) {
+        // app not found. no action required
+      } else {
+        const message = `Error while getting application details for ${appVersionIdentifier.appId} and ${appVersionIdentifier.appVersionId}. Reson: ${error.message}`;
+        this.logger.error(message, error);
+        throw new InternalServerErrorException(message);
+      }
+    });
 
     await this.redisService.setEx(
       RedisConstants.getApplicationByVersionIdKey(
@@ -358,10 +348,12 @@ export class SubscriptionService {
             ctx,
             subscription.item.solution.id,
           );
-          solution = res;
-          solutionDto =
-            SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
-          subscriptionDTO.solutions.push(solutionDto);
+          if (res) {
+            solution = res;
+            solutionDto =
+              SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(solution);
+            subscriptionDTO.solutions.push(solutionDto);
+          }
         }
 
         // return empty subscription if solution not found
@@ -407,6 +399,7 @@ export class SubscriptionService {
               const application =
                 await this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id);
               if (
+                application &&
                 this.isAppToBeAddedToSolution(
                   subscriptionDTO,
                   application,
@@ -462,6 +455,7 @@ export class SubscriptionService {
             subscription.item.application.id,
           );
           if (
+            app &&
             this.isAppToBeAddedToSolution(
               subscriptionDTO,
               app,
@@ -484,7 +478,113 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
   ): Promise<Array<SubscriptionDTO>> {
-    return await this.getAllSubscriptions(ctx, userId, tenantId);
+    const allSubscriptions = await this.getAllSubscriptions(
+      ctx,
+      userId,
+      tenantId,
+    );
+    const solutions = allSubscriptions
+      .map((subscription) => subscription.solutions)
+      .flat();
+    const subscriptions = await this.getActiveSubscriptions(
+      ctx,
+      userId,
+      tenantId,
+    );
+    for (const subscription of subscriptions || []) {
+      if (subscription.item.application) {
+        const appFromRedis = await this.redisService.get(
+          RedisConstants.getApplicationByVersionIdKey(
+            subscription.item.application.id.appVersionId,
+          ),
+        );
+        if (appFromRedis) {
+          this.getApplicationByVersionIdAndSaveToRedis(
+            ctx,
+            subscription.item.application.id,
+          ).catch();
+          const app = JSON.parse(appFromRedis);
+          const compatibleSolutionsForApp =
+            app.versions[0]?.applicationCompitablity?.compitableSolutions;
+          if (compatibleSolutionsForApp) {
+            for (const compatibleSolutionId of compatibleSolutionsForApp) {
+              const solution = this.findSolutionBySolutionId(
+                solutions,
+                compatibleSolutionId.solutionId,
+              );
+              if (!solution) {
+                this.logger.log(
+                  'solution not found for id: ' + compatibleSolutionId,
+                );
+                continue;
+              }
+              this.logger.log('solution found for id: ' + compatibleSolutionId);
+              if (
+                solution.applications.find(
+                  (application) => application.appId === app.id.appId,
+                )
+              ) {
+                this.logger.log(
+                  'application already added to solution: ' +
+                    compatibleSolutionId,
+                );
+                continue;
+              }
+              this.logger.log(
+                'adding application to solution: ' + compatibleSolutionId,
+              );
+              solution.applications.push(
+                ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+              );
+            }
+          }
+        } else {
+          const app = await this.getApplicationByVersionIdAndSaveToRedis(
+            ctx,
+            subscription.item.application.id,
+          );
+          if (app) {
+            const compatibleSolutionsForApp =
+              app.versions[0]?.applicationCompitablity?.compitableSolutions;
+            if (compatibleSolutionsForApp) {
+              for (const compatibleSolutionId of compatibleSolutionsForApp) {
+                const solution = this.findSolutionBySolutionId(
+                  solutions,
+                  compatibleSolutionId.solutionId,
+                );
+                if (!solution) {
+                  this.logger.log(
+                    'solution not found for id: ' + compatibleSolutionId,
+                  );
+                  continue;
+                }
+                this.logger.log(
+                  'solution found for id: ' + compatibleSolutionId,
+                );
+                if (
+                  solution.applications.find(
+                    (application) => application.appId === app.id.appId,
+                  )
+                ) {
+                  this.logger.log(
+                    'application already added to solution: ' +
+                      compatibleSolutionId,
+                  );
+                  continue;
+                }
+                this.logger.log(
+                  'adding application to solution: ' + compatibleSolutionId,
+                );
+                solution.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+    return allSubscriptions;
   }
 
   findSolutionBySolutionId(
