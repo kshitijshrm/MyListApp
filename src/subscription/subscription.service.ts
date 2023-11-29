@@ -358,11 +358,13 @@ export class SubscriptionService {
 
         // return empty subscription if solution not found
         if (solution) {
-          const appsReferencedInSolution: Array<SolutionVersion_Application> =
+          let appsReferencedInSolution: Array<SolutionVersion_Application> =
             solution.version[0].associatedApplications ?? [];
 
           // sort applications by display order descending
-          this.sortSolutionApplications(appsReferencedInSolution);
+          appsReferencedInSolution = this.sortSolutionApplications(
+            appsReferencedInSolution,
+          );
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
             // collect all applciations referenced in solution
@@ -596,11 +598,13 @@ export class SubscriptionService {
 
   private sortSolutionApplications(
     appsReferencedInSolution: SolutionVersion_Application[],
-  ) {
-    appsReferencedInSolution.sort((a, b) => {
-      // default undefined display order to 0 so it always moved at bottom of the list
-      return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-    });
+  ): SolutionVersion_Application[] {
+    return appsReferencedInSolution
+      .sort((a, b) => {
+        // default undefined display order to 0 so it always moved at bottom of the list
+        return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+      })
+      .filter((a) => a.displayOrder > 0);
   }
 
   private sortApplicationMenuItems(
