@@ -16,6 +16,8 @@ import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
+import { SolutionSettingsResponseSchema } from 'src/common/dto/solutionSettings/response.dto.mapper';
+import { FoundationalAppsSettingsDTO, SolutionSettingsDTO, SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import {
   GetAppsForCoreosUserRequest,
@@ -45,6 +47,7 @@ import { SolutionVersionIdentifier } from 'src/shared/schemas/os1/developerporta
 import { GetSolutionByVersionIdRequest } from 'src/shared/schemas/os1/developerportal/solution/request.pb';
 import {
   Solution,
+  systemAppSettingItem,
   SolutionVersion_Application,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import {
@@ -528,7 +531,7 @@ export class SubscriptionService {
               ) {
                 this.logger.log(
                   'application already added to solution: ' +
-                    compatibleSolutionId,
+                  compatibleSolutionId,
                 );
                 continue;
               }
@@ -570,7 +573,7 @@ export class SubscriptionService {
                 ) {
                   this.logger.log(
                     'application already added to solution: ' +
-                      compatibleSolutionId,
+                    compatibleSolutionId,
                   );
                   continue;
                 }
@@ -586,7 +589,40 @@ export class SubscriptionService {
         }
       }
     }
+
     return allSubscriptions;
+  }
+
+
+  async getAllSolutionSetting(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+  ): Promise<SubscriptionSettings> {
+    const allSubscriptions = await this.getAllSubscriptionsWithAddonApps(
+      ctx,
+      userId,
+      tenantId,
+    );
+    let solutionsSettings: (SolutionSettingsDTO)[] = [];
+    let foundationalAppsSetting: (FoundationalAppsSettingsDTO)[] = [];
+    let foundationAppIdSet = new Set<string>()
+
+    for (const subscription of allSubscriptions || []) {
+      const solutions = subscription.solutions
+      for (const solution of solutions || []) {
+        const setting = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(solution);
+
+        if (solution.solutionAppSetting) {
+          this.aggregateFoundationalSettings(solution.solutionAppSetting, foundationalAppsSetting, foundationAppIdSet)
+        }
+        solutionsSettings?.push(setting)
+      }
+    }
+    return {
+      foundation: foundationalAppsSetting,
+      solutions: solutionsSettings
+    }
   }
 
   findSolutionBySolutionId(
@@ -594,6 +630,24 @@ export class SubscriptionService {
     solutionId: string,
   ): SolutionDTO {
     return solutions.find((solution) => solution.solutionId === solutionId);
+  }
+
+  private aggregateFoundationalSettings(
+    solutionAppSetting: Array<systemAppSettingItem>,
+    foundationalAppsSettingsDTO: (FoundationalAppsSettingsDTO)[],
+    foundationAppIdSet: Set<string>
+  ) {
+
+    solutionAppSetting?.map((setting) => {
+      if (!(foundationAppIdSet.has(setting.appUrn))) {
+        foundationAppIdSet.add(setting.appUrn)
+        foundationalAppsSettingsDTO.push({
+          coreAppId: setting.appUrn,
+          displayName: setting.displayName,
+          settingsUrl: setting.settingsUrl
+        })
+      }
+    })
   }
 
   private sortSolutionApplications(

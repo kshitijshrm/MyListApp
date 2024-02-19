@@ -34,6 +34,20 @@ export class FileMetadataDTO {
   })
   fileUrl?: string | undefined;
 }
+
+export class SettingsMetaDTO {
+  @ApiProperty({
+    description: 'Display Name',
+    example: 'My app',
+  })
+  displayName: string;
+  @ApiProperty({
+    description: 'Settings URL',
+    example:
+      '/my-app/settings',
+  })
+  settingsUrl?: string | undefined;
+}
 export class DocumentMetadataDTO {
   @ApiProperty({
     description: 'Document category',

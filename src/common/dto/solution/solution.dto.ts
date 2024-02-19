@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationDTO } from '../application/application.dto';
 import { FileMetadataDTO } from '../common/common.dto';
+import { systemAppSettingItem } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 
 export enum SolutionPhase {
   SOLUTION_PHASE_UNSPECIFIED = 'SOLUTION_PHASE_UNSPECIFIED',
@@ -111,4 +112,13 @@ export class SolutionDTO {
     example: true,
   })
   isConsoleCompatible: boolean;
+  @ApiProperty({
+    description: 'Displays list of system apps settings for solution',
+    example: [{
+      appUrn: "platform:app:mts",
+      displayName: "MTS",
+      settingsUrl: "/mts/settings"
+    }]
+  })
+  solutionAppSetting: Array<systemAppSettingItem>;
 }
