@@ -73,8 +73,8 @@ When the tenant being queried is a developer tenant, there wont be any access re
 
   @Get('/:tenantId/Settings')
   @ApiOperation({
-    summary: 'Get all subscriptions associated with a tenant',
-    description: `Get all subscriptions associated with a tenant. This list includes both solution and app subscriptions.
+    summary: 'Get all subscriptions settings associated with a tenant',
+    description: `Get all subscriptions settings associated with a tenant. This list includes both solution and app subscriptions.
 
 When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
 
@@ -83,7 +83,7 @@ When the tenant being queried is a developer tenant, there wont be any access re
   })
   @HttpCode(200)
   @ApiResponse({
-    type: SolutionSettingsDTO,
+    type: SubscriptionSettings,
     isArray: true,
     status: 200,
   })

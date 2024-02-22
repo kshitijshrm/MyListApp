@@ -327,7 +327,7 @@ export class TestHelpers extends TestHelpersBase {
     return solutionDTO;
   }
 
-  static createApplicationDTO(hasSettings: boolean): ApplicationDTO {
+  static createApplicationDTO(hasSettings: boolean, hasIcon = true): ApplicationDTO {
     const applicationDTO: ApplicationDTO = {
       appId: faker.datatype.uuid(),
       appVersionId: faker.datatype.uuid(),
@@ -352,12 +352,12 @@ export class TestHelpers extends TestHelpersBase {
           url: `/analytics/${faker.random.word()}/`,
         } as ApplicationUrlDTO,
       ],
-      icon: {
+      icon:hasIcon? {
         fileId: faker.datatype.uuid(),
         fileName: faker.system.fileName(),
         fileDescription: faker.system.mimeType(),
-        fileUrl: faker.internet.url(),
-      } as FileMetadataDTO,
+        fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+      } as FileMetadataDTO : undefined,
       images: [],
       shortDescription: faker.lorem.sentence(),
       description: '',

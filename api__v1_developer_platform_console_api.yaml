@@ -367,7 +367,7 @@ components:
     Settings:
       type: object
       properties:
-        DisplayName:
+        displayName:
           type: string
           description: The name of the application
           example: My App
@@ -375,8 +375,12 @@ components:
           type: string
           description: The relative path of the menu item
           example: /my-app/settings
+        icon:
+          type: string
+          description: icon that needs to be shown for application solution settings
+          example: icon.png
       required:
-        - DisplayName
+        - displayName
         - settingsUrl
     SolutionDTO:
       type: object
