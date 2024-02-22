@@ -32,7 +32,8 @@ export class SolutionSettingsResponseSchema {
             if (settingsUrl !== "") {
                 return {
                     displayName: application.listingName,
-                    settingsUrl: settingsUrl
+                    settingsUrl: settingsUrl,
+                    icon: application?.icon?.fileUrl
                 };
             }
 

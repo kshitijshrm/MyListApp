@@ -64,6 +64,21 @@ describe('response dto mapper tests', () => {
                 {
                     displayName: applicationWithSetting.listingName,
                     settingsUrl: '/settings',
+                    icon: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png' ,
+                } as SettingsMetaDTO,
+            ]);
+        });
+
+        test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL', () => {
+            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, false);
+
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
+
+            expect(result).toEqual([
+                {
+                    displayName: applicationWithSetting.listingName,
+                    settingsUrl: '/settings',
+                    icon: undefined ,
                 } as SettingsMetaDTO,
             ]);
         });
