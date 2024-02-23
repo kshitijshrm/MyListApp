@@ -16,6 +16,9 @@ import { SubscriptionDTO } from '../dto/subscription/subscription.dto';
 import { ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerportal/service/application-v2.pb';
 import mock from 'jest-mock-extended/lib/Mock';
 import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
+import { SolutionDTO } from '../dto/solution/solution.dto';
+import { AppType, ApplicationDTO, ApplicationUrlDTO } from '../dto/application/application.dto';
+import { FileMetadataDTO } from '../dto/common/common.dto';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
     return {
@@ -128,8 +131,7 @@ export class TestHelpers extends TestHelpersBase {
           {
             id: {
               solutionId: solutionId ?? this.CreateRandomSolutionId(),
-              solutionVersionId:
-                solutionVersionId ?? this.CreateRandomSolutionVersionId(),
+              solutionVersionId: solutionVersionId ?? this.CreateRandomSolutionVersionId(),
             },
             version: this.CreateRandomSemver(),
             displayAttributes: {
@@ -176,6 +178,9 @@ export class TestHelpers extends TestHelpersBase {
             associatedApplications: [],
           } as SolutionVersion,
         ],
+        solutionType: 0,
+        productFamily: this.CreateRandomSolutionId(),
+        supportedCountries: []
       },
     };
 
@@ -205,6 +210,8 @@ export class TestHelpers extends TestHelpersBase {
           appVersionId: this.CreateRandomAppVersionId(),
         },
         displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string()
       },
       {
         id: {
@@ -212,6 +219,8 @@ export class TestHelpers extends TestHelpersBase {
           appVersionId: this.CreateRandomAppVersionId(),
         },
         displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string()
       },
       {
         id: {
@@ -219,6 +228,8 @@ export class TestHelpers extends TestHelpersBase {
           appVersionId: this.CreateRandomAppVersionId(),
         },
         displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string()
       },
       {
         id: {
@@ -226,6 +237,8 @@ export class TestHelpers extends TestHelpersBase {
           appVersionId: this.CreateRandomAppVersionId(),
         },
         displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string()
       },
     ];
 
@@ -281,5 +294,77 @@ export class TestHelpers extends TestHelpersBase {
       },
     };
     return subscriptionDTO;
+  }
+  static createSolutionDTO(): SolutionDTO {
+    const solutionDTO: SolutionDTO = {
+      solutionId: faker.datatype.uuid(),
+      solutionVersionId: faker.datatype.uuid(),
+      displayName: faker.random.words(),
+      shortDescription: faker.lorem.sentence(),
+      longDescription: faker.lorem.paragraph(),
+      version: faker.system.semver(),
+      images: [],
+      icon: {
+        fileId: faker.datatype.uuid(),
+        fileName: faker.system.fileName(),
+        fileUrl: faker.internet.url(),
+        fileDescription: ''
+      },
+      applications: [
+        this.createApplicationDTO(false)
+      ],
+      isMarketplaceCompatible: faker.datatype.boolean(),
+      isConsoleCompatible: faker.datatype.boolean(),
+      solutionAppSetting: [
+        {
+          appUrn: faker.random.word(),
+          displayName: faker.random.words(),
+          settingsUrl: faker.internet.url(),
+        },
+      ],
+    };
+
+    return solutionDTO;
+  }
+
+  static createApplicationDTO(hasSettings: boolean, hasIcon = true): ApplicationDTO {
+    const applicationDTO: ApplicationDTO = {
+      appId: faker.datatype.uuid(),
+      appVersionId: faker.datatype.uuid(),
+      listingName: faker.random.words(),
+      version: faker.system.semver(),
+      urlPath: faker.random.word(),
+      appType: faker.random.word() as AppType,
+      isPrivate: faker.datatype.boolean(),
+      consoleCompatible: faker.datatype.boolean(),
+      appUrls: [hasSettings ? ({
+        name: 'setting',
+        url: '/settings',
+      } as ApplicationUrlDTO) :
+        ({
+          name: 'relativePath',
+          url: `/analytics/${faker.random.word()}/`,
+        } as ApplicationUrlDTO),
+      ],
+      urlOverrides: [
+        {
+          name: 'interface',
+          url: `/analytics/${faker.random.word()}/`,
+        } as ApplicationUrlDTO,
+      ],
+      icon:hasIcon? {
+        fileId: faker.datatype.uuid(),
+        fileName: faker.system.fileName(),
+        fileDescription: faker.system.mimeType(),
+        fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+      } as FileMetadataDTO : undefined,
+      images: [],
+      shortDescription: faker.lorem.sentence(),
+      description: '',
+      longDescription: '',
+      applicationMenu: []
+    };
+
+    return applicationDTO;
   }
 }

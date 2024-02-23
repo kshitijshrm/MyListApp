@@ -142,7 +142,7 @@ describe('SubscriptionService', () => {
       for (let i = 0; i < associatedApplications.length - 1; i++) {
         expect(
           associatedApplications[i].displayOrder >=
-            associatedApplications[i + 1].displayOrder,
+          associatedApplications[i + 1].displayOrder,
         ).toEqual(true);
       }
     });
@@ -162,7 +162,7 @@ describe('SubscriptionService', () => {
       for (let i = 0; i < associatedApplications.length - 1; i++) {
         expect(
           (associatedApplications[i].displayOrder ?? 0) >=
-            (associatedApplications[i + 1].displayOrder ?? 0),
+          (associatedApplications[i + 1].displayOrder ?? 0),
         ).toEqual(true);
       }
     });
@@ -282,6 +282,8 @@ describe('SubscriptionService', () => {
         },
         recordAudit: undefined,
         pendingAction: undefined,
+        documents: undefined,
+        metadata: undefined
       },
     ];
     const sampleSubscriptions2: Subscription[] = [
@@ -297,6 +299,8 @@ describe('SubscriptionService', () => {
         },
         recordAudit: undefined,
         pendingAction: undefined,
+        documents: undefined,
+        metadata: undefined
       },
     ];
 

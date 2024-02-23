@@ -36,6 +36,40 @@ paths:
                   $ref: "#/components/schemas/SubscriptionDTO"
       tags:
         - Subscription
+  "/app/console-api/subscription/{tenantId}/settings":
+    get:
+      operationId: getAllSolutionsSettings
+      summary: Get all settings that are associated with apps for a solution
+      description: >
+        Get all settings url for a solutions that are associated with apps. App needs to set settings url while being onboarded. It takes that particular url from there.
+
+        When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+
+
+        **Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
+      parameters:
+        - name: x-coreos-access
+          in: header
+          description: coreos access token
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionSettings"
+      tags:
+        - Settings
   /app/console-api/health:
     get:
       operationId: check
@@ -330,6 +364,24 @@ components:
         - shortDescription
         - longDescription
         - applicationMenu
+    Settings:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: The name of the application
+          example: My App
+        settingsUrl:
+          type: string
+          description: The relative path of the menu item
+          example: /my-app/settings
+        icon:
+          type: string
+          description: icon that needs to be shown for application solution settings
+          example: icon.png
+      required:
+        - displayName
+        - settingsUrl
     SolutionDTO:
       type: object
       properties:
@@ -400,6 +452,68 @@ components:
         - applications
         - isMarketplaceCompatible
         - isConsoleCompatible
+    SolutionSettingsDTO:
+      type: object
+      properties:
+        solutionId:
+          type: string
+          description: Solution identifier in the OS1 platform
+          example: solution:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        solutionVersionId:
+          type: string
+          description: Identifier for the solution version whis is unique within the
+            solution
+          example: solutionVersion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+        displayName:
+          type: string
+          description: Name of the solution to be displayed in the UI
+          example: My Solution
+        version:
+          type: string
+          description: Human readable semantic version of the solution
+          example: 1.0.0
+        settings:
+          description: settings
+          type: array
+          items:
+            $ref: "#/components/schemas/Settings"
+      required:
+        - solutionId
+        - solutionVersionId
+        - displayName
+        - settings
+    FoundationalAppsSettingsDTO:
+      type: object
+      properties:
+        coreAppId:
+          type: string
+          description: appId for foundational apps
+          example: platform:app:foundationalApp
+        displayName:
+          type: string
+          description: Name of the app to be displayed in the UI
+          example: FoundationalApp
+        settingsUrl:
+          type: string
+          description: Settings Url for foundational apps
+          example: /app/FoundationalApp/settings
+      required:
+        - coreAppId
+        - displayName
+        - settingsUrl
+    SubscriptionSettings:
+      type: object
+      properties:
+        foundation:
+          description: contains all settings for foundational apps.
+          type: array
+          items:
+            $ref: "#/components/schemas/FoundationalAppsSettingsDTO"
+        solutions:
+          description: contains all settings for solutions.
+          type: array
+          items:
+            $ref: "#/components/schemas/SolutionSettingsDTO"
     SubscriptionStatusDTO:
       type: object
       properties:
