@@ -286,6 +286,7 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    fetchSettingsCompatible: boolean
   ): Promise<Array<SubscriptionDTO>> {
     const subscriptions = await this.getActiveSubscriptions(
       ctx,
@@ -367,6 +368,7 @@ export class SubscriptionService {
           // sort applications by display order descending
           appsReferencedInSolution = this.sortSolutionApplications(
             appsReferencedInSolution,
+            fetchSettingsCompatible
           );
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
@@ -384,6 +386,7 @@ export class SubscriptionService {
                   subscriptionDTO,
                   application,
                   corsAppsAssignedToUser,
+                  fetchSettingsCompatible
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -409,6 +412,7 @@ export class SubscriptionService {
                   subscriptionDTO,
                   application,
                   corsAppsAssignedToUser,
+                  fetchSettingsCompatible
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -446,6 +450,7 @@ export class SubscriptionService {
               subscriptionDTO,
               JSON.parse(appFromRedis),
               corsAppsAssignedToUser,
+              fetchSettingsCompatible
             )
           ) {
             subscriptionDTO.applications.push(
@@ -465,6 +470,7 @@ export class SubscriptionService {
               subscriptionDTO,
               app,
               corsAppsAssignedToUser,
+              fetchSettingsCompatible
             )
           ) {
             subscriptionDTO.applications.push(
@@ -482,11 +488,13 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    fetchSettingsCompatible = false
   ): Promise<Array<SubscriptionDTO>> {
     const allSubscriptions = await this.getAllSubscriptions(
       ctx,
       userId,
       tenantId,
+      fetchSettingsCompatible
     );
     const solutions = allSubscriptions
       .map((subscription) => subscription.solutions)
@@ -603,6 +611,7 @@ export class SubscriptionService {
       ctx,
       userId,
       tenantId,
+      true
     );
     let solutionsSettings: (SolutionSettingsDTO)[] = [];
     let foundationalAppsSetting: (FoundationalAppsSettingsDTO)[] = [];
@@ -652,13 +661,16 @@ export class SubscriptionService {
 
   private sortSolutionApplications(
     appsReferencedInSolution: SolutionVersion_Application[],
+    fetchSettingsCompatible: boolean
+
   ): SolutionVersion_Application[] {
-    return appsReferencedInSolution
-      .sort((a, b) => {
+    return fetchSettingsCompatible?  appsReferencedInSolution.sort((a, b) => {
         // default undefined display order to 0 so it always moved at bottom of the list
         return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-      })
-      .filter((a) => a.displayOrder > 0);
+      }) : appsReferencedInSolution.sort((a, b) => {
+        // default undefined display order to 0 so it always moved at bottom of the list
+        return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+      }).filter((a) => a.displayOrder > 0);
   }
 
   private sortApplicationMenuItems(
@@ -674,13 +686,15 @@ export class SubscriptionService {
     subscriptionDTO: SubscriptionDTO,
     app: Application,
     corsAppsAssignedToUser: string[],
+    fetchSettingsCompatible: boolean
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
     // return all apps for developer subscription
     return (
-      app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
-      (this.isDeveloperSubscription(subscriptionDTO) ||
-        corsAppsAssignedToUser?.includes(app.urn))
+      fetchSettingsCompatible? (this.isDeveloperSubscription(subscriptionDTO) ||
+      corsAppsAssignedToUser?.includes(app.urn)) : (app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
+          (this.isDeveloperSubscription(subscriptionDTO) ||
+            corsAppsAssignedToUser?.includes(app.urn)))
     );
   }
 

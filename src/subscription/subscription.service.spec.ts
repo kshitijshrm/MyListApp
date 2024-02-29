@@ -73,6 +73,19 @@ describe('SubscriptionService', () => {
       expect(result).toEqual(false);
     });
 
+    it('should return true when app is not console compatible and is called for settings and getting all settings and subscription is of type developer', async () => {
+      app.versions[0].applicationCompitablity.isConsoleCompatible = false;
+      subscriptionDTO.tier.planType = 'DEVELOPER';
+      const servicePrototype = Object.getPrototypeOf(service);
+      const result = servicePrototype.isAppToBeAddedToSolution(
+        subscriptionDTO,
+        app,
+        corsAppsAssignedToUser,
+        true
+      );
+      expect(result).toEqual(true);
+    });
+
     it('should return true when subscription is of type developer', async () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = true;
       subscriptionDTO.tier.planType = 'DEVELOPER';
@@ -123,6 +136,20 @@ describe('SubscriptionService', () => {
         subscriptionDTO,
         app,
         corsAppsAssignedToUser,
+      );
+      expect(result).toEqual(true);
+    });
+
+    it('should return true when app is not console compatible and is called for getting all settings and subscription is in trial and app is assigned to user', async () => {
+      app.versions[0].applicationCompitablity.isConsoleCompatible = false;
+      subscriptionDTO.tier.planType = 'TRIAL';
+      corsAppsAssignedToUser.push(app.urn);
+      const servicePrototype = Object.getPrototypeOf(service);
+      const result = servicePrototype.isAppToBeAddedToSolution(
+        subscriptionDTO,
+        app,
+        corsAppsAssignedToUser,
+        true
       );
       expect(result).toEqual(true);
     });
