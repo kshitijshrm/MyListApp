@@ -327,7 +327,7 @@ export class TestHelpers extends TestHelpersBase {
     return solutionDTO;
   }
 
-  static createApplicationDTO(hasSettings: boolean, hasIcon = true): ApplicationDTO {
+  static createApplicationDTO(hasSettings: boolean, hasIcon = true, hasDescription= true): ApplicationDTO {
     const applicationDTO: ApplicationDTO = {
       appId: faker.datatype.uuid(),
       appVersionId: faker.datatype.uuid(),
@@ -340,6 +340,7 @@ export class TestHelpers extends TestHelpersBase {
       appUrls: [hasSettings ? ({
         name: 'setting',
         url: '/settings',
+        description: hasDescription?"description": undefined
       } as ApplicationUrlDTO) :
         ({
           name: 'relativePath',
@@ -352,17 +353,24 @@ export class TestHelpers extends TestHelpersBase {
           url: `/analytics/${faker.random.word()}/`,
         } as ApplicationUrlDTO,
       ],
-      icon:hasIcon? {
+      icon:{
         fileId: faker.datatype.uuid(),
         fileName: faker.system.fileName(),
         fileDescription: faker.system.mimeType(),
         fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
-      } as FileMetadataDTO : undefined,
+      } as FileMetadataDTO,
       images: [],
       shortDescription: faker.lorem.sentence(),
       description: '',
       longDescription: '',
-      applicationMenu: []
+      applicationMenu: [],
+      settingsIcon: hasIcon? {
+        fileId: faker.datatype.uuid(),
+        fileName: faker.system.fileName(),
+        fileDescription: faker.system.mimeType(),
+        fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+      } as FileMetadataDTO : undefined
+
     };
 
     return applicationDTO;

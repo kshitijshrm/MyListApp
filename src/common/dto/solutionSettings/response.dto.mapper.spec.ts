@@ -28,6 +28,18 @@ describe('response dto mapper tests', () => {
             {
                 name: 'setting',
                 url: '/settings',
+                description: "description"
+            },
+        ];
+
+        const appUrlsWithSettingAndWithoutDescription: ApplicationUrlDTO[] = [
+            {
+                name: 'relativePath',
+                url: `/analytics/${faker.random.word()}/`,
+            },
+            {
+                name: 'setting',
+                url: '/settings'
             },
         ];
 
@@ -43,20 +55,26 @@ describe('response dto mapper tests', () => {
 
         // Test when there is an ApplicationUrl with the name 'setting'
         const resultWithSetting = SolutionSettingsResponseSchema.mapToApplicationUrlDTO(appUrlsWithSetting);
-        expect(resultWithSetting).toBe('/settings');
+        expect(resultWithSetting.url).toBe('/settings');
+        expect(resultWithSetting.description).toBe('description');
+
+        // Test when there is an ApplicationUrl with the name 'setting'
+        const resultWithSettingWithoutDescription = SolutionSettingsResponseSchema.mapToApplicationUrlDTO(appUrlsWithSettingAndWithoutDescription);
+        expect(resultWithSettingWithoutDescription.url).toBe('/settings');
+        expect(resultWithSettingWithoutDescription.description).toBe(undefined);
 
         // Test when there is no ApplicationUrl with the name 'setting'
         const resultWithoutSetting = SolutionSettingsResponseSchema.mapToApplicationUrlDTO(appUrlsWithoutSetting);
-        expect(resultWithoutSetting).toBe('');
+        expect(resultWithoutSetting.url).toBe('');
 
 
         // Test when there is no ApplicationUrl and it is empty
         const emptyArrayResult = SolutionSettingsResponseSchema.mapToApplicationUrlDTO(emptyAppUrl);
-        expect(emptyArrayResult).toBe('');
+        expect(emptyArrayResult.url).toBe('');
     });
     describe('mapSettingsDTO', () => {
         test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL', () => {
-            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true);
+            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, true);
 
             const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
 
@@ -65,6 +83,22 @@ describe('response dto mapper tests', () => {
                     displayName: applicationWithSetting.listingName,
                     settingsUrl: '/settings',
                     icon: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png' ,
+                    description: 'description',
+                } as SettingsMetaDTO,
+            ]);
+        });
+
+        test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL and description is not present', () => {
+            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, true, false);
+
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
+
+            expect(result).toEqual([
+                {
+                    displayName: applicationWithSetting.listingName,
+                    settingsUrl: '/settings',
+                    icon: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png' ,
+                    description: undefined,
                 } as SettingsMetaDTO,
             ]);
         });
@@ -79,6 +113,7 @@ describe('response dto mapper tests', () => {
                     displayName: applicationWithSetting.listingName,
                     settingsUrl: '/settings',
                     icon: undefined ,
+                    description: 'description'
                 } as SettingsMetaDTO,
             ]);
         });

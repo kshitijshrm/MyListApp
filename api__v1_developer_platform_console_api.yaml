@@ -379,6 +379,10 @@ components:
           type: string
           description: icon that needs to be shown for application solution settings
           example: icon.png
+        description:
+          type: string
+          description: description of app that has settings url
+          example: this is an app that contains settings
       required:
         - displayName
         - settingsUrl
@@ -497,6 +501,14 @@ components:
           type: string
           description: Settings Url for foundational apps
           example: /app/FoundationalApp/settings
+        description:
+          type: string
+          description: description of foundational app that has settings url
+          example: this is a foundational app that contains settings
+        icon:
+          type: string
+          description: icon url for foundational app
+          example: https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
       required:
         - coreAppId
         - displayName

@@ -18,22 +18,30 @@ export class SolutionSettingsResponseSchema {
         return response;
     }
 
-    static mapToApplicationUrlDTO(appUrls: ApplicationUrl[]): string {
+    static mapToApplicationUrlDTO(appUrls: ApplicationUrl[]) {
         const settingUrl = appUrls.find((appUrl) => appUrl.name === "setting");
         if (settingUrl) {
-            return settingUrl.url;
+            
+            return {
+                url: settingUrl.url,
+                description: settingUrl?.description
+            }  
         }
-        return "";
+        return {
+            url: "",
+            description: undefined
+        };
     }
     static mapSettingsDTO(applications: ApplicationDTO[]): SettingsMetaDTO[] {
         const applicationSettings = applications.map((application) => {
             const settingsUrl = SolutionSettingsResponseSchema.mapToApplicationUrlDTO(application.appUrls);
 
-            if (settingsUrl !== "") {
+            if (settingsUrl?.url && settingsUrl?.url !== "" ) {
                 return {
                     displayName: application.listingName,
-                    settingsUrl: settingsUrl,
-                    icon: application?.icon?.fileUrl
+                    settingsUrl: settingsUrl.url,
+                    icon: application?.settingsIcon?.fileUrl,
+                    description: settingsUrl?.description
                 };
             }
 

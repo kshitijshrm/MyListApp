@@ -59,6 +59,11 @@ export class ApplicationResponseSchemaToDtoMapper {
       applicationMenu: application.versions[0].appNavigation?.menuItems?.map(
         ApplicationResponseSchemaToDtoMapper.mapToApplicationMenuDTO,
       ),
+      settingsIcon:  application.versions[0].appSettingsIcon 
+        ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+            application.versions[0].appSettingsIcon
+          )
+        : undefined,
     };
     return response;
   }
@@ -89,6 +94,7 @@ export class ApplicationResponseSchemaToDtoMapper {
     return {
       name: appUrl.name,
       url: appUrl.url,
+      description: appUrl?.description
     };
   }
 

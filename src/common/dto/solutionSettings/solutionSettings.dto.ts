@@ -55,6 +55,18 @@ export class FoundationalAppsSettingsDTO {
       '/my-app/settings',
   })
   settingsUrl?: string | undefined;
+  @ApiProperty({
+    description: 'description of foundational app settings',
+    example:
+      'payment app for all solutions',
+  })
+  description?: string | undefined;
+  @ApiProperty({
+    description: 'icon url for foundational apps',
+    example:
+      '/my-app/settings-icon',
+  })
+  icon?: string | undefined;
 }
 
 export class SubscriptionSettings {

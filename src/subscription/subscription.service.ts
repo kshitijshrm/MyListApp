@@ -653,7 +653,9 @@ export class SubscriptionService {
         foundationalAppsSettingsDTO.push({
           coreAppId: setting.appUrn,
           displayName: setting.displayName,
-          settingsUrl: setting.settingsUrl
+          settingsUrl: setting.settingsUrl,
+          description: setting.description,
+          icon: setting.iconUrl
         })
       }
     })
