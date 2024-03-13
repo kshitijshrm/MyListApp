@@ -52,6 +52,11 @@ export class SettingsMetaDTO {
     example: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
   })
   icon?: string | undefined
+  @ApiProperty({
+    description: 'The actual item description',
+    example: 'this is the description of app settings',
+  })
+  description?: string | undefined
 }
 export class DocumentMetadataDTO {
   @ApiProperty({
