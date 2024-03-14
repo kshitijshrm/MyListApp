@@ -46,6 +46,11 @@ export class ApplicationUrlDTO {
     examples: ['/app/my-app', 'https://mytenant.os1.delhivery.com/app/my-app'],
   })
   url: string;
+  @ApiProperty({
+    description: 'The actual item description',
+    example: 'this is the description of app settings',
+  })
+  description?: string | undefined;
 }
 
 export class ApplicationMenuDTO {
@@ -169,4 +174,9 @@ For exmaple, When the console is being accessed from the tenant mytenant.os1.del
     isArray: true,
   })
   applicationMenu: Array<ApplicationMenuDTO>;
+  @ApiProperty({
+    description: 'The icon associated with the application',
+    type: FileMetadataDTO,
+  })
+  settingsIcon?: FileMetadataDTO;;
 }
