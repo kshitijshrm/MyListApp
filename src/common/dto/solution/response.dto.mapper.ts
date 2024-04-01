@@ -36,7 +36,7 @@ export class SolutionResponseSchemaToDtoMapper {
         solution.version[0].compatibility?.isMarketplaceCompatible,
       isConsoleCompatible:
         solution.version[0].compatibility?.isConsoleCompatible,
-      solutionAppSetting: solution.version[0].systemAppSettings
+      solutionAppSetting: solution.version[0].systemAppSettings ?? []
     };
     return response;
   }
