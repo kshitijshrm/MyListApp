@@ -15,6 +15,7 @@ describe('response dto mapper tests', () => {
             displayName: solutionDTO.displayName,
             version: solutionDTO.version,
             settings: solutionDTO.applications ? SolutionSettingsResponseSchema.mapSettingsDTO(solutionDTO.applications) : [],
+            icon: solutionDTO.icon.fileUrl
         });
     });
 
