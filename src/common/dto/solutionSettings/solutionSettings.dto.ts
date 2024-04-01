@@ -36,6 +36,11 @@ export class SolutionSettingsDTO {
       ],
   })
   settings: Array<SettingsMetaDTO>;
+  @ApiProperty({
+    description: 'Solution Icon Url',
+    example: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+  })
+  icon?: string | undefined
 }
 
 export class FoundationalAppsSettingsDTO {

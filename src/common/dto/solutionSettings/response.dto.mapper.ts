@@ -13,7 +13,8 @@ export class SolutionSettingsResponseSchema {
             solutionVersionId: solution.solutionVersionId,
             displayName: solution.displayName,
             version: solution.version,
-            settings: solution.applications ? this.mapSettingsDTO(solution.applications) : []
+            settings: solution.applications ? this.mapSettingsDTO(solution.applications) : [],
+            icon: solution?.icon?.fileUrl
         };
         return response;
     }
