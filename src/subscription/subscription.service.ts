@@ -691,20 +691,10 @@ export class SubscriptionService {
     fetchSettingsCompatible: boolean
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
-    // return all apps for developer subscription
-    return (
-      fetchSettingsCompatible? (this.isDeveloperSubscription(subscriptionDTO) ||
-      corsAppsAssignedToUser?.includes(app.urn)) : (app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
-          (this.isDeveloperSubscription(subscriptionDTO) ||
-            corsAppsAssignedToUser?.includes(app.urn)))
-    );
-  }
-
-  private isDeveloperSubscription(subscriptionDTO: SubscriptionDTO) {
-    return (
-      subscriptionDTO.tier.planType === 'DEVELOPER' ||
-      subscriptionDTO.tier.planType === 'SANDBOX'
-    );
+    return fetchSettingsCompatible
+      ? corsAppsAssignedToUser?.includes(app.urn)
+      : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
+          corsAppsAssignedToUser?.includes(app.urn);
   }
 
   private getSubscriptionsByTenantId(
