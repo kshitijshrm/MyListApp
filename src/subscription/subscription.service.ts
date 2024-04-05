@@ -23,6 +23,7 @@ import {
   GetAppsForCoreosUserRequest,
   GetTenantByIdRequest,
 } from 'src/shared/schemas/os1/core/coreosagent/request.pb';
+import { Tenant } from 'src/shared/schemas/os1/core/coreosagent/tenant.pb';
 
 import {
   CoreosAgentServiceClient,
@@ -286,7 +287,7 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-    fetchSettingsCompatible: boolean
+    fetchSettingsCompatible: boolean,
   ): Promise<Array<SubscriptionDTO>> {
     const subscriptions = await this.getActiveSubscriptions(
       ctx,
@@ -299,9 +300,10 @@ export class SubscriptionService {
       tenantId,
     );
 
-    const stackId = await firstValueFrom(
-      this.getStackIdByTenantId(ctx, tenantId),
+    const tenant = await firstValueFrom(
+      this.getTenantByTenantId(ctx, tenantId),
     );
+    const stackId = tenant.stackId;
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     for (const subscription of subscriptions || []) {
       this.logger.log(
@@ -368,7 +370,7 @@ export class SubscriptionService {
           // sort applications by display order descending
           appsReferencedInSolution = this.sortSolutionApplications(
             appsReferencedInSolution,
-            fetchSettingsCompatible
+            fetchSettingsCompatible,
           );
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
@@ -383,10 +385,10 @@ export class SubscriptionService {
               const application: Application = JSON.parse(appFromRedis);
               if (
                 this.isAppToBeAddedToSolution(
-                  subscriptionDTO,
                   application,
+                  tenant,
                   corsAppsAssignedToUser,
-                  fetchSettingsCompatible
+                  fetchSettingsCompatible,
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -409,10 +411,10 @@ export class SubscriptionService {
               if (
                 application &&
                 this.isAppToBeAddedToSolution(
-                  subscriptionDTO,
                   application,
+                  tenant,
                   corsAppsAssignedToUser,
-                  fetchSettingsCompatible
+                  fetchSettingsCompatible,
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -447,10 +449,10 @@ export class SubscriptionService {
           ).catch();
           if (
             this.isAppToBeAddedToSolution(
-              subscriptionDTO,
               JSON.parse(appFromRedis),
+              tenant,
               corsAppsAssignedToUser,
-              fetchSettingsCompatible
+              fetchSettingsCompatible,
             )
           ) {
             subscriptionDTO.applications.push(
@@ -467,10 +469,10 @@ export class SubscriptionService {
           if (
             app &&
             this.isAppToBeAddedToSolution(
-              subscriptionDTO,
               app,
+              tenant,
               corsAppsAssignedToUser,
-              fetchSettingsCompatible
+              fetchSettingsCompatible,
             )
           ) {
             subscriptionDTO.applications.push(
@@ -488,13 +490,13 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-    fetchSettingsCompatible = false
+    fetchSettingsCompatible = false,
   ): Promise<Array<SubscriptionDTO>> {
     const allSubscriptions = await this.getAllSubscriptions(
       ctx,
       userId,
       tenantId,
-      fetchSettingsCompatible
+      fetchSettingsCompatible,
     );
     const solutions = allSubscriptions
       .map((subscription) => subscription.solutions)
@@ -539,7 +541,7 @@ export class SubscriptionService {
               ) {
                 this.logger.log(
                   'application already added to solution: ' +
-                  compatibleSolutionId,
+                    compatibleSolutionId,
                 );
                 continue;
               }
@@ -581,7 +583,7 @@ export class SubscriptionService {
                 ) {
                   this.logger.log(
                     'application already added to solution: ' +
-                    compatibleSolutionId,
+                      compatibleSolutionId,
                   );
                   continue;
                 }
@@ -601,7 +603,6 @@ export class SubscriptionService {
     return allSubscriptions;
   }
 
-
   async getAllSolutionSetting(
     ctx: PlatformRequestContext,
     userId: string,
@@ -611,27 +612,32 @@ export class SubscriptionService {
       ctx,
       userId,
       tenantId,
-      true
+      true,
     );
-    let solutionsSettings: (SolutionSettingsDTO)[] = [];
-    let foundationalAppsSetting: (FoundationalAppsSettingsDTO)[] = [];
-    let foundationAppIdSet = new Set<string>()
+    let solutionsSettings: SolutionSettingsDTO[] = [];
+    let foundationalAppsSetting: FoundationalAppsSettingsDTO[] = [];
+    let foundationAppIdSet = new Set<string>();
 
     for (const subscription of allSubscriptions || []) {
-      const solutions = subscription.solutions
+      const solutions = subscription.solutions;
       for (const solution of solutions || []) {
-        const setting = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(solution);
+        const setting =
+          SolutionSettingsResponseSchema.mapSolutionSettingsDTO(solution);
 
         if (solution.solutionAppSetting) {
-          this.aggregateFoundationalSettings(solution.solutionAppSetting, foundationalAppsSetting, foundationAppIdSet)
+          this.aggregateFoundationalSettings(
+            solution.solutionAppSetting,
+            foundationalAppsSetting,
+            foundationAppIdSet,
+          );
         }
-        solutionsSettings?.push(setting)
+        solutionsSettings?.push(setting);
       }
     }
     return {
       foundation: foundationalAppsSetting,
-      solutions: solutionsSettings
-    }
+      solutions: solutionsSettings,
+    };
   }
 
   findSolutionBySolutionId(
@@ -643,36 +649,38 @@ export class SubscriptionService {
 
   private aggregateFoundationalSettings(
     solutionAppSetting: Array<systemAppSettingItem>,
-    foundationalAppsSettingsDTO: (FoundationalAppsSettingsDTO)[],
-    foundationAppIdSet: Set<string>
+    foundationalAppsSettingsDTO: FoundationalAppsSettingsDTO[],
+    foundationAppIdSet: Set<string>,
   ) {
-
     solutionAppSetting?.map((setting) => {
-      if (!(foundationAppIdSet.has(setting.appUrn))) {
-        foundationAppIdSet.add(setting.appUrn)
+      if (!foundationAppIdSet.has(setting.appUrn)) {
+        foundationAppIdSet.add(setting.appUrn);
         foundationalAppsSettingsDTO.push({
           coreAppId: setting.appUrn,
           displayName: setting.displayName,
           settingsUrl: setting.settingsUrl,
           description: setting.description,
-          icon: setting.iconUrl
-        })
+          icon: setting.iconUrl,
+        });
       }
-    })
+    });
   }
 
   private sortSolutionApplications(
     appsReferencedInSolution: SolutionVersion_Application[],
-    fetchSettingsCompatible: boolean
-
+    fetchSettingsCompatible: boolean,
   ): SolutionVersion_Application[] {
-    return fetchSettingsCompatible?  appsReferencedInSolution.sort((a, b) => {
-        // default undefined display order to 0 so it always moved at bottom of the list
-        return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-      }) : appsReferencedInSolution.sort((a, b) => {
-        // default undefined display order to 0 so it always moved at bottom of the list
-        return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-      }).filter((a) => a.displayOrder > 0);
+    return fetchSettingsCompatible
+      ? appsReferencedInSolution.sort((a, b) => {
+          // default undefined display order to 0 so it always moved at bottom of the list
+          return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+        })
+      : appsReferencedInSolution
+          .sort((a, b) => {
+            // default undefined display order to 0 so it always moved at bottom of the list
+            return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+          })
+          .filter((a) => a.displayOrder > 0);
   }
 
   private sortApplicationMenuItems(
@@ -685,16 +693,17 @@ export class SubscriptionService {
   }
 
   private isAppToBeAddedToSolution(
-    subscriptionDTO: SubscriptionDTO,
     app: Application,
+    tenant: Tenant,
     corsAppsAssignedToUser: string[],
-    fetchSettingsCompatible: boolean
+    fetchSettingsCompatible: boolean,
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
     return fetchSettingsCompatible
-      ? corsAppsAssignedToUser?.includes(app.urn)
+      ? tenant.isDeveloperTenant || corsAppsAssignedToUser?.includes(app.urn)
       : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
-          corsAppsAssignedToUser?.includes(app.urn);
+          (tenant.isDeveloperTenant ||
+            corsAppsAssignedToUser?.includes(app.urn));
   }
 
   private getSubscriptionsByTenantId(
@@ -733,16 +742,16 @@ export class SubscriptionService {
       .pipe(map((response) => response.application));
   }
 
-  private getStackIdByTenantId(
+  private getTenantByTenantId(
     ctx: PlatformRequestContext,
     tenantId: string,
-  ): Observable<string> {
+  ): Observable<Tenant> {
     const request: GetTenantByIdRequest = {
       tenantId,
     };
     return this.coreosAgentServiceClient
       .getTenantById(request, ctx.rpcMetadata)
-      .pipe(map((response) => response.tenant.stackId));
+      .pipe(map((response) => response.tenant));
   }
 
   private filterUrlOverridesByStackId(
