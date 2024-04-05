@@ -59,6 +59,8 @@ describe('SubscriptionService', () => {
     app.versions[0].applicationCompitablity.isConsoleCompatible = undefined;
     app.versions[0].applicationCompitablity.isMarketplaceCompatible = undefined;
 
+    const tenant = TestHelpers.CreateGetTenantByIdResponse().tenant;
+
     const subscriptionDTO: SubscriptionDTO =
       TestHelpers.CreateSubscriptionDTO();
     const corsAppsAssignedToUser: Array<string> = [];
@@ -66,90 +68,49 @@ describe('SubscriptionService', () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = false;
       const servicePrototype = Object.getPrototypeOf(service);
       const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
         app,
+        tenant,
         corsAppsAssignedToUser,
       );
       expect(result).toEqual(false);
     });
 
-    it('should return true when app is not console compatible and is called for settings and getting all settings and subscription is of type developer', async () => {
-      app.versions[0].applicationCompitablity.isConsoleCompatible = false;
-      subscriptionDTO.tier.planType = 'DEVELOPER';
-      const servicePrototype = Object.getPrototypeOf(service);
-      const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
-        app,
-        corsAppsAssignedToUser,
-        true
-      );
-      expect(result).toEqual(true);
-    });
-
-    it('should return true when subscription is of type developer', async () => {
+    it('should return false if the app is not assigned to the user', async () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = true;
-      subscriptionDTO.tier.planType = 'DEVELOPER';
 
       const servicePrototype = Object.getPrototypeOf(service);
       const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
         app,
+        tenant,
         corsAppsAssignedToUser,
       );
       expect(result).toEqual(true);
     });
 
-    it('should return true when subscription is of type sandbox', async () => {
+    it('should return false when tenant is not a developer tenant and app is not assigned to user', async () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = true;
-      subscriptionDTO.tier.planType = 'SANDBOX';
-
-      const servicePrototype = Object.getPrototypeOf(service);
-      const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
-        app,
-        corsAppsAssignedToUser,
-      );
-      expect(result).toEqual(true);
-    });
-
-    it('should return false when subscription is in trail and app is not assigned to user', async () => {
-      app.versions[0].applicationCompitablity.isConsoleCompatible = true;
-      subscriptionDTO.tier.planType = 'TRIAL';
+      tenant.isDeveloperTenant = false;
       corsAppsAssignedToUser.push('some:random:app');
 
       const servicePrototype = Object.getPrototypeOf(service);
       const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
         app,
+        tenant,
         corsAppsAssignedToUser,
       );
       expect(result).toEqual(false);
     });
 
-    it('should return true when subscription is in trail and app is assigned to user', async () => {
-      app.versions[0].applicationCompitablity.isConsoleCompatible = true;
-      subscriptionDTO.tier.planType = 'TRIAL';
-      corsAppsAssignedToUser.push(app.urn);
-
-      const servicePrototype = Object.getPrototypeOf(service);
-      const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
-        app,
-        corsAppsAssignedToUser,
-      );
-      expect(result).toEqual(true);
-    });
-
-    it('should return true when app is not console compatible and is called for getting all settings and subscription is in trial and app is assigned to user', async () => {
+    it('should return true when app is not console compatible and is called for getting all settings and app is assigned to user and the tenant is of developer type', async () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = false;
-      subscriptionDTO.tier.planType = 'TRIAL';
+      tenant.isDeveloperTenant = false;
       corsAppsAssignedToUser.push(app.urn);
       const servicePrototype = Object.getPrototypeOf(service);
       const result = servicePrototype.isAppToBeAddedToSolution(
-        subscriptionDTO,
         app,
+        tenant,
         corsAppsAssignedToUser,
-        true
+        true,
       );
       expect(result).toEqual(true);
     });
