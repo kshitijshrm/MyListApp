@@ -19,6 +19,7 @@ import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/se
 import { SolutionDTO } from '../dto/solution/solution.dto';
 import { AppType, ApplicationDTO, ApplicationUrlDTO } from '../dto/application/application.dto';
 import { FileMetadataDTO } from '../dto/common/common.dto';
+import { GetTenantByIdResponse } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
     return {
@@ -112,6 +113,25 @@ export class TestHelpers extends TestHelpersBase {
       },
     });
   }
+
+  static CreateGetTenantByIdResponse(
+    isDeveloperTenant: boolean = true,
+  ): GetTenantByIdResponse {
+    // Leaving it as json for this PR.
+    // All testing utils needs to be moved to a shared testing library.
+    return GetTenantByIdResponse.fromJSON({
+      tenant: {
+        tenantId: 'random',
+        tenantName: 'random',
+        tenantDescription: 'dummy tenant',
+        tenantStatus: 'ALLOCATED',
+        tenantDns: 'random.getos1.com',
+        stackId: 'sb1',
+        isDeveloperTenant,
+      },
+    });
+  }
+
   static CreateGetSolutionBySolutionIdResponse(
     solutionId?: string,
     solutionVersionId?: string,
@@ -131,7 +151,8 @@ export class TestHelpers extends TestHelpersBase {
           {
             id: {
               solutionId: solutionId ?? this.CreateRandomSolutionId(),
-              solutionVersionId: solutionVersionId ?? this.CreateRandomSolutionVersionId(),
+              solutionVersionId:
+                solutionVersionId ?? this.CreateRandomSolutionVersionId(),
             },
             version: this.CreateRandomSemver(),
             displayAttributes: {
@@ -180,7 +201,7 @@ export class TestHelpers extends TestHelpersBase {
         ],
         solutionType: 0,
         productFamily: this.CreateRandomSolutionId(),
-        supportedCountries: []
+        supportedCountries: [],
       },
     };
 
@@ -211,7 +232,7 @@ export class TestHelpers extends TestHelpersBase {
         },
         displayOrder: faker.datatype.number(),
         listingId: faker.datatype.string(),
-        semver: faker.datatype.string()
+        semver: faker.datatype.string(),
       },
       {
         id: {
@@ -220,7 +241,7 @@ export class TestHelpers extends TestHelpersBase {
         },
         displayOrder: faker.datatype.number(),
         listingId: faker.datatype.string(),
-        semver: faker.datatype.string()
+        semver: faker.datatype.string(),
       },
       {
         id: {
@@ -229,7 +250,7 @@ export class TestHelpers extends TestHelpersBase {
         },
         displayOrder: faker.datatype.number(),
         listingId: faker.datatype.string(),
-        semver: faker.datatype.string()
+        semver: faker.datatype.string(),
       },
       {
         id: {
@@ -238,7 +259,7 @@ export class TestHelpers extends TestHelpersBase {
         },
         displayOrder: faker.datatype.number(),
         listingId: faker.datatype.string(),
-        semver: faker.datatype.string()
+        semver: faker.datatype.string(),
       },
     ];
 
@@ -308,11 +329,9 @@ export class TestHelpers extends TestHelpersBase {
         fileId: faker.datatype.uuid(),
         fileName: faker.system.fileName(),
         fileUrl: faker.internet.url(),
-        fileDescription: ''
+        fileDescription: '',
       },
-      applications: [
-        this.createApplicationDTO(false)
-      ],
+      applications: [this.createApplicationDTO(false)],
       isMarketplaceCompatible: faker.datatype.boolean(),
       isConsoleCompatible: faker.datatype.boolean(),
       solutionAppSetting: [
@@ -327,7 +346,11 @@ export class TestHelpers extends TestHelpersBase {
     return solutionDTO;
   }
 
-  static createApplicationDTO(hasSettings: boolean, hasIcon = true, hasDescription= true): ApplicationDTO {
+  static createApplicationDTO(
+    hasSettings: boolean,
+    hasIcon = true,
+    hasDescription = true,
+  ): ApplicationDTO {
     const applicationDTO: ApplicationDTO = {
       appId: faker.datatype.uuid(),
       appVersionId: faker.datatype.uuid(),
@@ -337,15 +360,17 @@ export class TestHelpers extends TestHelpersBase {
       appType: faker.random.word() as AppType,
       isPrivate: faker.datatype.boolean(),
       consoleCompatible: faker.datatype.boolean(),
-      appUrls: [hasSettings ? ({
-        name: 'setting',
-        url: '/settings',
-        description: hasDescription?"description": undefined
-      } as ApplicationUrlDTO) :
-        ({
-          name: 'relativePath',
-          url: `/analytics/${faker.random.word()}/`,
-        } as ApplicationUrlDTO),
+      appUrls: [
+        hasSettings
+          ? ({
+              name: 'setting',
+              url: '/settings',
+              description: hasDescription ? 'description' : undefined,
+            } as ApplicationUrlDTO)
+          : ({
+              name: 'relativePath',
+              url: `/analytics/${faker.random.word()}/`,
+            } as ApplicationUrlDTO),
       ],
       urlOverrides: [
         {
@@ -353,24 +378,27 @@ export class TestHelpers extends TestHelpersBase {
           url: `/analytics/${faker.random.word()}/`,
         } as ApplicationUrlDTO,
       ],
-      icon:{
+      icon: {
         fileId: faker.datatype.uuid(),
         fileName: faker.system.fileName(),
         fileDescription: faker.system.mimeType(),
-        fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+        fileUrl:
+          'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
       } as FileMetadataDTO,
       images: [],
       shortDescription: faker.lorem.sentence(),
       description: '',
       longDescription: '',
       applicationMenu: [],
-      settingsIcon: hasIcon? {
-        fileId: faker.datatype.uuid(),
-        fileName: faker.system.fileName(),
-        fileDescription: faker.system.mimeType(),
-        fileUrl: 'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
-      } as FileMetadataDTO : undefined
-
+      settingsIcon: hasIcon
+        ? ({
+            fileId: faker.datatype.uuid(),
+            fileName: faker.system.fileName(),
+            fileDescription: faker.system.mimeType(),
+            fileUrl:
+              'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
+          } as FileMetadataDTO)
+        : undefined,
     };
 
     return applicationDTO;
