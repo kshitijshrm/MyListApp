@@ -271,7 +271,8 @@ describe('SubscriptionService', () => {
         recordAudit: undefined,
         pendingAction: undefined,
         documents: undefined,
-        metadata: undefined
+        metadata: undefined,
+        skuUsage: {}
       },
     ];
     const sampleSubscriptions2: Subscription[] = [
@@ -288,7 +289,8 @@ describe('SubscriptionService', () => {
         recordAudit: undefined,
         pendingAction: undefined,
         documents: undefined,
-        metadata: undefined
+        metadata: undefined,
+        skuUsage: {}
       },
     ];
 
