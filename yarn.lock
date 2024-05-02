@@ -1082,9 +1082,9 @@
     uuid "^8.3.2"
 
 "@foxtrotplatform/developer-platform-proto-schemas@^0.22.0":
-  version "0.22.0"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.0/20b72d844e790ee795a2540586b601c2f08279d5#20b72d844e790ee795a2540586b601c2f08279d5"
-  integrity sha512-nfQE+CGlZldthys8O5KyTzX39Q/mbG4cTTgSprCpm2Y7QBdjDTwlq3fM8RMHFrY300IkNt7uAke7G6Z+BeCYVg==
+  version "0.22.13"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.13/7e7ee0c319914d0ba0a1770ecf32e41b7dbe6384#7e7ee0c319914d0ba0a1770ecf32e41b7dbe6384"
+  integrity sha512-B7XazdjyM94Rj8jty15FJM40cQwJYeFhDyR+iwbVUEqdC+o23pJ0gim+8d8a+pewxBAP7eOUI+enAhdZ48AC9Q==
   dependencies:
     "@grpc/grpc-js" "^1.6.8"
     "@nestjs/axios" "^0.1.0"
@@ -1093,12 +1093,12 @@
     "@nestjs/core" "^9.0.0"
     "@nestjs/cqrs" "^9.0.3"
     "@nestjs/microservices" "^9.4.3"
-    "@types/google-protobuf" "^3.2.7"
-    google-protobuf "^3.8.0-rc.1"
+    "@types/google-protobuf" "^3.15.12"
+    google-protobuf "^3.21.2"
     reflect-metadata "0.1.13"
     rxjs "^7.2.0"
-    ts-proto "^1.121.5"
-    ts-proto-descriptors "^1.7.1"
+    ts-proto "^1.169.0"
+    ts-proto-descriptors "^1.15.0"
     ts-protoc-gen "^0.15.0"
     typescript latest
 
@@ -2609,7 +2609,7 @@
   dependencies:
     generic-pool "*"
 
-"@types/google-protobuf@^3.2.7":
+"@types/google-protobuf@^3.15.12":
   version "3.15.12"
   resolved "https://registry.yarnpkg.com/@types/google-protobuf/-/google-protobuf-3.15.12.tgz#eb2ba0eddd65712211a2b455dc6071d665ccf49b"
   integrity sha512-40um9QqwHjRS92qnOaDpL7RmDK15NuZYo9HihiJRbYkMQZlWnuH8AdvbMy8/o6lgLmKbDUKa+OALCltHdbOTpQ==
@@ -2810,10 +2810,17 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=8":
+"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=8":
   version "20.11.25"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.25.tgz#0f50d62f274e54dd7a49f7704cc16bfbcccaf49f"
   integrity sha512-TBHyJxk2b7HceLVGFcpAUjsa5zIdsPWlR6XHfyGzd0SFu+/NFgQgMAl96MSDZgQDvJAvV6BKsFOrt6zIL09JDw==
+  dependencies:
+    undici-types "~5.26.4"
+
+"@types/node@>=13.7.0":
+  version "20.12.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.8.tgz#35897bf2bfe3469847ab04634636de09552e8256"
+  integrity sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==
   dependencies:
     undici-types "~5.26.4"
 
@@ -5099,7 +5106,7 @@ globby@^11.1.0:
     merge2 "^1.4.1"
     slash "^3.0.0"
 
-google-protobuf@^3.15.5, google-protobuf@^3.8.0-rc.1:
+google-protobuf@^3.15.5, google-protobuf@^3.21.2:
   version "3.21.2"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.21.2.tgz#4580a2bea8bbb291ee579d1fefb14d6fa3070ea4"
   integrity sha512-3MSOYFO5U9mPGikIYCzK0SaThypfGgS6bHqrUGXG3DPHCrb+txNqeEcns1W0lkGfk0rCyNXm7xB9rMxnCiZOoA==
@@ -8182,13 +8189,13 @@ ts-node@^10.0.0:
     yn "3.1.1"
 
 ts-poet@^6.7.0:
-  version "6.7.0"
-  resolved "https://registry.yarnpkg.com/ts-poet/-/ts-poet-6.7.0.tgz#6b2ff3b7b0c70ea650d6d570dfe6899f73fb3c38"
-  integrity sha512-A0wvFtpkTCWPw7ftTIwbEH+L+7ul4CU0x3jXKQ+kCnmEQIAOwhpUaBmcAYKxZCxHae9/MUl4LbyTqw25BpzW5Q==
+  version "6.9.0"
+  resolved "https://registry.yarnpkg.com/ts-poet/-/ts-poet-6.9.0.tgz#e63ac8d8a9e91a2e0e5d2bf0755db71346728bd2"
+  integrity sha512-roe6W6MeZmCjRmppyfOURklO5tQFQ6Sg7swURKkwYJvV7dbGCrK28um5+51iW3twdPRKtwarqFAVMU6G1mvnuQ==
   dependencies:
     dprint-node "^1.0.8"
 
-ts-proto-descriptors@1.15.0, ts-proto-descriptors@^1.7.1:
+ts-proto-descriptors@1.15.0, ts-proto-descriptors@^1.15.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.15.0.tgz#e859e3a2887da2d954c552524719b80bdb6ee355"
   integrity sha512-TYyJ7+H+7Jsqawdv+mfsEpZPTIj9siDHS6EMCzG/z3b/PZiphsX+mWtqFfFVe5/N0Th6V3elK9lQqjnrgTOfrg==
@@ -8196,10 +8203,20 @@ ts-proto-descriptors@1.15.0, ts-proto-descriptors@^1.7.1:
     long "^5.2.3"
     protobufjs "^7.2.4"
 
-ts-proto@^1.120.0, ts-proto@^1.121.5:
+ts-proto@^1.120.0:
   version "1.167.9"
   resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.167.9.tgz#b91df6a1db8f689efcac6a2e20d71cdd5c2af8ab"
   integrity sha512-zqZ15CzqvupSpoTl/fzOs5gG7SFvj1ENmWeKMgD4Yl2BSx8I5F+qgYkr9EZYMu7Ho7u+QtwzfudROo+/jwM2pg==
+  dependencies:
+    case-anything "^2.1.13"
+    protobufjs "^7.2.4"
+    ts-poet "^6.7.0"
+    ts-proto-descriptors "1.15.0"
+
+ts-proto@^1.169.0:
+  version "1.174.0"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.174.0.tgz#423748c4556496a55740f483d605e7254835f1c1"
+  integrity sha512-hptQp5Nu5Vj3Mrj70fx5ccw3rTwPPpKXpa5RJ/WlmWiliVMqNPGYzUuBvd9N/EKsxiSQHiw62aGlZezzF19fKA==
   dependencies:
     case-anything "^2.1.13"
     protobufjs "^7.2.4"
@@ -8352,9 +8369,9 @@ typescript@4.9.5, typescript@^4.3.5:
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 typescript@latest:
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.2.tgz#0ae9cebcfae970718474fe0da2c090cad6577372"
-  integrity sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==
+  version "5.4.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
+  integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
 
 uid@2.0.2:
   version "2.0.2"
