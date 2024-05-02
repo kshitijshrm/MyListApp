@@ -300,6 +300,22 @@ export class SubscriptionService {
       tenantId,
     );
 
+    const userGroups = await firstValueFrom(
+      this.coreosAgentServiceClient
+        .getCoreosUserById(
+          {
+            tenantId,
+            coreosUserId: userId,
+          },
+          ctx.rpcMetadata,
+        )
+        .pipe(
+          map((response) => {
+            return response.groups;
+          }),
+        ),
+    );
+
     const tenant = await firstValueFrom(
       this.getTenantByTenantId(ctx, tenantId),
     );
@@ -433,6 +449,9 @@ export class SubscriptionService {
               }
             }
           }
+
+          //add solution landing page to the DTO
+          solutionDto.landingPage = this.getSolutionLandingPage(solutionDto, solution, userGroups)
         }
       }
       if (subscription.item.application) {
@@ -759,5 +778,36 @@ export class SubscriptionService {
     stackId: string,
   ): ApplicationUrlOverride[] {
     return urlOverrides.filter((override) => override.stackId === stackId);
+  }
+
+  private getSolutionLandingPage(
+    solutionDto: SolutionDTO,
+    solution: Solution,
+    userGroups: string[],
+  ) {
+    const usersLandingPage = solution.version[0].usersLandingPage;
+    const solutionLandingPage = solution.version[0].solutionUrls?.find(
+      (url) => url.name === 'landingPage',
+    );
+    if (usersLandingPage) {
+      const userMatchedGroups = usersLandingPage.filter((uGroup) =>
+        userGroups.includes(uGroup.userGroupName.trim()),
+      );
+      if (userMatchedGroups.length) {
+        const highestRankedGroup = userMatchedGroups.sort((groupA, groupB) => groupB.rank - groupA.rank).shift();
+        return highestRankedGroup.url;
+      }
+    }
+    if (solutionLandingPage) {
+      return solutionLandingPage.url;
+    }
+    const firstSideNavAppInSolution = solutionDto.applications[0];
+    const appRelPath = firstSideNavAppInSolution.appUrls?.find(
+      (url) => url.name === 'relativePath',
+    );
+    if (appRelPath) {
+      return appRelPath.url;
+    }
+    return '';
   }
 }
