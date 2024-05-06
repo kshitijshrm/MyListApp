@@ -797,7 +797,9 @@ export class SubscriptionService {
     );
     if (usersLandingPage) {
       const userMatchedGroups = usersLandingPage.filter((uGroup) =>
-        userGroups.includes(uGroup.userGroupName.trim()),
+        userGroups.includes(
+          `platform:${tenantId}:group:${uGroup.userGroupName.trim()}`,
+        ),
       );
       if (userMatchedGroups.length) {
         const highestRankedGroup = userMatchedGroups
