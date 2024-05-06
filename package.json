@@ -33,17 +33,17 @@
     "@faker-js/faker": "^7.4.0",
     "@foxtrotplatform/developer-platform-core-lib": "0.2.11",
     "@foxtrotplatform/developer-platform-proto-schemas": "^0.22.0",
-    "@foxtrotplatform/tracer": "^0.1.2",
+    "@foxtrotplatform/tracer": "0.3.10",
     "@grpc/grpc-js": "^1.6.8",
     "@nestjs/axios": "^0.1.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/microservices": "^9.0.5",
-    "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-express": "10.3.8",
     "@nestjs/swagger": "^6.0.4",
     "@nestjs/terminus": "^9.1.2",
     "@types/multer": "^1.4.7",
-    "axios": "^0.27.2",
+    "axios": "1.6.8",
     "axios-oauth-client": "^1.5.0",
     "class-transformer": "^0.5.1",
     "husky": "^8.0.1",
@@ -126,5 +126,14 @@
     "test/**/*.ts": [
       "prettier --write"
     ]
+  },
+  "resolutions": {
+    "axios": "^0.28.0",
+    "express": "^4.19.2",
+    "semver": "^7.5.2",
+    "fast-xml-parser": "^4.1.2",
+    "xml2js": "^0.5.0",
+    "@opentelemetry/instrumentation": "0.41.2",
+    "import-in-the-middle": "1.4.2"
   }
 }
