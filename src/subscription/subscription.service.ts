@@ -451,7 +451,12 @@ export class SubscriptionService {
           }
 
           //add solution landing page to the DTO
-          solutionDto.landingPage = this.getSolutionLandingPage(solutionDto, solution, userGroups)
+          solutionDto.landingPage = this.getSolutionLandingPage(
+            tenantId,
+            solutionDto,
+            solution,
+            userGroups,
+          );
         }
       }
       if (subscription.item.application) {
@@ -781,6 +786,7 @@ export class SubscriptionService {
   }
 
   private getSolutionLandingPage(
+    tenantId: string,
     solutionDto: SolutionDTO,
     solution: Solution,
     userGroups: string[],
@@ -794,7 +800,9 @@ export class SubscriptionService {
         userGroups.includes(uGroup.userGroupName.trim()),
       );
       if (userMatchedGroups.length) {
-        const highestRankedGroup = userMatchedGroups.sort((groupA, groupB) => groupB.rank - groupA.rank).shift();
+        const highestRankedGroup = userMatchedGroups
+          .sort((groupA, groupB) => groupB.rank - groupA.rank)
+          .shift();
         return highestRankedGroup.url;
       }
     }
@@ -802,12 +810,15 @@ export class SubscriptionService {
       return solutionLandingPage.url;
     }
     const firstSideNavAppInSolution = solutionDto.applications[0];
-    const appRelPath = firstSideNavAppInSolution.appUrls?.find(
+    const appRelPath = firstSideNavAppInSolution?.appUrls?.find(
       (url) => url.name === 'relativePath',
     );
     if (appRelPath) {
       return appRelPath.url;
     }
+    this.logger.error(
+      `No landing page configured for ${tenantId} - ${solutionDto.solutionVersionId}`,
+    );
     return '';
   }
 }
