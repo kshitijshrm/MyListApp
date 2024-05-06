@@ -175,7 +175,7 @@ export class SubscriptionService {
           `No subscriptions found for tenant ${tenantId}`,
         );
       }
-      const message = `Error occuret while getting subscriptions for tenant ${tenantId}`;
+      const message = `Error occured while getting subscriptions for tenant ${tenantId}`;
       this.logger.error(message, error.stack);
       throw new InternalServerErrorException(message);
     });
