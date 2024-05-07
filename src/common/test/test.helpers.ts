@@ -336,12 +336,13 @@ export class TestHelpers extends TestHelpersBase {
       isConsoleCompatible: faker.datatype.boolean(),
       solutionAppSetting: [
         {
+          appName: faker.random.word(),
           appUrn: faker.random.word(),
           displayName: faker.random.words(),
           settingsUrl: faker.internet.url(),
-          appName: ''
         },
       ],
+      landingPage: faker.system.directoryPath(),
     };
 
     return solutionDTO;

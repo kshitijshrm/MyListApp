@@ -1,4 +1,3 @@
-require('@foxtrotplatform/tracer');
 import { PlatformLogger } from '@foxtrotplatform/developer-platform-core-lib';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -12,6 +11,10 @@ import { AppModule } from './app.module';
 import { GlobalHttpExceptionFilter } from './common/filters/global.http.exception.filter';
 import { GlobalGrpcToHttpExceptionInterceptor } from './common/interceptor/global.grpc.exception.interceptor';
 import { GlobalResponseTransformInterceptor } from './common/interceptor/global.response.transformer.interceptor';
+
+if (process.env.f_stage != 'local') {
+  require('@foxtrotplatform/tracer');
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

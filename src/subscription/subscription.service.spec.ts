@@ -272,7 +272,7 @@ describe('SubscriptionService', () => {
         pendingAction: undefined,
         documents: undefined,
         metadata: undefined,
-        skuUsage: {}
+        skuUsage: {},
       },
     ];
     const sampleSubscriptions2: Subscription[] = [
@@ -290,7 +290,7 @@ describe('SubscriptionService', () => {
         pendingAction: undefined,
         documents: undefined,
         metadata: undefined,
-        skuUsage: {}
+        skuUsage: {},
       },
     ];
 

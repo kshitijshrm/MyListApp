@@ -105,7 +105,7 @@ export class ApplicationDTO {
   @ApiProperty({
     deprecated: true,
     description: `
-The relative url path of the application. This field is deprecated. User **appUrls:relativePath** instead`,
+The relative url path of the application. This field is deprecated. Use **appUrls:relativePath** instead`,
   })
   urlPath: string;
   @ApiProperty({
@@ -178,5 +178,5 @@ For exmaple, When the console is being accessed from the tenant mytenant.os1.del
     description: 'The icon associated with the application',
     type: FileMetadataDTO,
   })
-  settingsIcon?: FileMetadataDTO;;
+  settingsIcon?: FileMetadataDTO;
 }

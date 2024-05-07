@@ -10,14 +10,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { error } from 'console';
 import { firstValueFrom, map, Observable } from 'rxjs';
 import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
 import { SolutionSettingsResponseSchema } from 'src/common/dto/solutionSettings/response.dto.mapper';
-import { FoundationalAppsSettingsDTO, SolutionSettingsDTO, SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
+import {
+  FoundationalAppsSettingsDTO,
+  SolutionSettingsDTO,
+  SubscriptionSettings,
+} from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import {
   GetAppsForCoreosUserRequest,
@@ -175,7 +178,7 @@ export class SubscriptionService {
           `No subscriptions found for tenant ${tenantId}`,
         );
       }
-      const message = `Error occuret while getting subscriptions for tenant ${tenantId}`;
+      const message = `Error occured while getting subscriptions for tenant ${tenantId}`;
       this.logger.error(message, error.stack);
       throw new InternalServerErrorException(message);
     });
@@ -298,6 +301,22 @@ export class SubscriptionService {
       ctx,
       userId,
       tenantId,
+    );
+
+    const userGroups = await firstValueFrom(
+      this.coreosAgentServiceClient
+        .getCoreosUserById(
+          {
+            tenantId,
+            coreosUserId: userId,
+          },
+          ctx.rpcMetadata,
+        )
+        .pipe(
+          map((response) => {
+            return response.groups;
+          }),
+        ),
     );
 
     const tenant = await firstValueFrom(
@@ -433,6 +452,14 @@ export class SubscriptionService {
               }
             }
           }
+
+          //add solution landing page to the DTO
+          solutionDto.landingPage = this.getSolutionLandingPage(
+            tenantId,
+            solutionDto,
+            solution,
+            userGroups,
+          );
         }
       }
       if (subscription.item.application) {
@@ -759,5 +786,44 @@ export class SubscriptionService {
     stackId: string,
   ): ApplicationUrlOverride[] {
     return urlOverrides.filter((override) => override.stackId === stackId);
+  }
+
+  private getSolutionLandingPage(
+    tenantId: string,
+    solutionDto: SolutionDTO,
+    solution: Solution,
+    userGroups: string[],
+  ) {
+    const usersLandingPage = solution.version[0].usersLandingPage;
+    const solutionLandingPage = solution.version[0].solutionUrls?.find(
+      (url) => url.name === 'landingPage',
+    );
+    if (usersLandingPage) {
+      const userMatchedGroups = usersLandingPage.filter((uGroup) =>
+        (userGroups ?? []).includes(
+          `platform:${tenantId}:group:${uGroup.userGroupName.trim()}`,
+        ),
+      );
+      if (userMatchedGroups.length) {
+        const highestRankedGroup = userMatchedGroups
+          .sort((groupA, groupB) => groupB.rank - groupA.rank)
+          .shift();
+        return highestRankedGroup.url;
+      }
+    }
+    if (solutionLandingPage) {
+      return solutionLandingPage.url;
+    }
+    const firstSideNavAppInSolution = solutionDto.applications[0];
+    const appRelPath = firstSideNavAppInSolution?.appUrls?.find(
+      (url) => url.name === 'relativePath',
+    );
+    if (appRelPath) {
+      return appRelPath.url;
+    }
+    this.logger.error(
+      `No landing page configured for ${tenantId} - ${solutionDto.solutionVersionId}`,
+    );
+    return '';
   }
 }
