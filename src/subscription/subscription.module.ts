@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import * as grpc from '@grpc/grpc-js';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ServiceConstants } from 'src/common/constants/service.constants';
@@ -20,6 +21,10 @@ import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
           loader: {
             includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
+          credentials:
+            process.env.f_stage === 'local'
+              ? grpc.ChannelCredentials.createSsl()
+              : undefined,
         },
       },
     ]),
@@ -34,6 +39,10 @@ import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
           loader: {
             includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
+          credentials:
+            process.env.f_stage === 'local'
+              ? grpc.ChannelCredentials.createSsl()
+              : undefined,
         },
       },
     ]),
@@ -48,6 +57,10 @@ import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
           loader: {
             includeDirs: [join(ServiceConstants.proto_schemas_root)],
           },
+          credentials:
+            process.env.f_stage === 'local'
+              ? grpc.ChannelCredentials.createSsl()
+              : undefined,
         },
       },
     ]),

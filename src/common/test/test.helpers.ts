@@ -340,7 +340,6 @@ export class TestHelpers extends TestHelpersBase {
           appUrn: faker.random.word(),
           displayName: faker.random.words(),
           settingsUrl: faker.internet.url(),
-          appName: ''
         },
       ],
       landingPage: faker.system.directoryPath(),

@@ -10,14 +10,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { error } from 'console';
 import { firstValueFrom, map, Observable } from 'rxjs';
 import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
 import { SolutionSettingsResponseSchema } from 'src/common/dto/solutionSettings/response.dto.mapper';
-import { FoundationalAppsSettingsDTO, SolutionSettingsDTO, SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
+import {
+  FoundationalAppsSettingsDTO,
+  SolutionSettingsDTO,
+  SubscriptionSettings,
+} from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import {
   GetAppsForCoreosUserRequest,
@@ -797,7 +800,7 @@ export class SubscriptionService {
     );
     if (usersLandingPage) {
       const userMatchedGroups = usersLandingPage.filter((uGroup) =>
-        userGroups.includes(
+        (userGroups ?? []).includes(
           `platform:${tenantId}:group:${uGroup.userGroupName.trim()}`,
         ),
       );

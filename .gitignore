@@ -39,4 +39,3 @@ lerna-debug.log*
 
 # Don't include .npmrc file
 .npmrc
-.env.*
