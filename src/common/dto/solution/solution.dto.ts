@@ -114,11 +114,19 @@ export class SolutionDTO {
   isConsoleCompatible: boolean;
   @ApiProperty({
     description: 'Displays list of system apps settings for solution',
-    example: [{
-      appUrn: "platform:app:mts",
-      displayName: "MTS",
-      settingsUrl: "/mts/settings"
-    }]
+    example: [
+      {
+        appUrn: 'platform:app:mts',
+        displayName: 'MTS',
+        settingsUrl: '/mts/settings',
+      },
+    ],
   })
   solutionAppSetting: Array<systemAppSettingItem>;
+  @ApiProperty({
+    name: 'Landing Page',
+    description: 'relative url path of the landing page (launch page)',
+    example: '/launch/control-tower',
+  })
+  landingPage: string;
 }

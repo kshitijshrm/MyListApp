@@ -1,6 +1,6 @@
 ARG F_REGISTRY
 
-FROM ${F_REGISTRY}fxtrt-base-node:18.17.0  AS builder
+FROM ${F_REGISTRY}fxtrt-base-node:20  AS builder
 ARG F_GITHUB_TOKEN
 WORKDIR /usr/app
 COPY . .
@@ -13,7 +13,7 @@ RUN echo -e "@foxtrotplatform:registry=https://npm.pkg.github.com\n//npm.pkg.git
     && yarn install \
     && yarn build
 
-FROM ${F_REGISTRY}fxtrt-base-node:18.17.0
+FROM ${F_REGISTRY}fxtrt-base-node:20
 WORKDIR /usr/opt/app
 COPY --from=builder /usr/app ./
 RUN yarn install --production && yarn cache clean
