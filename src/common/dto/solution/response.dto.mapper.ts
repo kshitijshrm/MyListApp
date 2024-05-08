@@ -23,20 +23,21 @@ export class SolutionResponseSchemaToDtoMapper {
       icon:
         solution.version[0].icons && solution.version[0].icons.length > 0
           ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
-            solution.version[0].icons[0],
-          )
+              solution.version[0].icons[0],
+            )
           : undefined,
       images: solution.version[0].displayImages
         ? solution.version[0].displayImages.map(
-          SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
-        )
+            SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
+          )
         : undefined,
       applications: [],
       isMarketplaceCompatible:
         solution.version[0].compatibility?.isMarketplaceCompatible,
       isConsoleCompatible:
         solution.version[0].compatibility?.isConsoleCompatible,
-      solutionAppSetting: solution.version[0].systemAppSettings ?? []
+      solutionAppSetting: solution.version[0].systemAppSettings ?? [],
+      landingPage: '',
     };
     return response;
   }

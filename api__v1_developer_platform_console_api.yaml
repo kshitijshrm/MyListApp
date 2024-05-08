@@ -1,20 +1,26 @@
 openapi: 3.0.0
 paths:
-  "/app/console-api/subscription/{tenantId}":
+  /app/console-api/subscription/{tenantId}:
     get:
       operationId: getAllSubscriptions
       summary: Get all subscriptions associated with a tenant
       description: >
-        Get all subscriptions associated with a tenant. This list includes
-        both solution and app subscriptions.
+        Get all subscriptions associated with a tenant. This list includes both
+        solution and app subscriptions.
 
 
-        When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+        When the tenant being queried is a developer tenant, there wont be any
+        access restrictions applied and the user will be able to see all
+        solution and application subscriptions associated with the tenant.
 
 
-        **Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
+        **Access:**  Inorder to access this api, one must porvide the tenant
+        specific user id in x-coreos-access header. In cause of a non-developer
+        tenants, this user id is used to filter the list of subscriptions to
+        only those that the user has access to. 
       parameters:
-        - name: x-coreos-access
+        - &a1
+          name: x-coreos-access
           in: header
           description: coreos access token
           required: true
@@ -34,26 +40,28 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SubscriptionDTO"
-      tags:
+      tags: &a2
         - Subscription
-  "/app/console-api/subscription/{tenantId}/settings":
+  /app/console-api/subscription/{tenantId}/Settings:
     get:
-      operationId: getAllSolutionsSettings
-      summary: Get all settings that are associated with apps for a solution
+      operationId: getAllSolutionSettings
+      summary: Get all subscriptions settings associated with a tenant
       description: >
-        Get all settings url for a solutions that are associated with apps. App needs to set settings url while being onboarded. It takes that particular url from there.
+        Get all subscriptions settings associated with a tenant. This list
+        includes both solution and app subscriptions.
 
-        When the tenant being queried is a developer tenant, there wont be any access restrictions applied and the user will be able to see all solution and application subscriptions associated with the tenant.
+
+        When the tenant being queried is a developer tenant, there wont be any
+        access restrictions applied and the user will be able to see all
+        solution and application subscriptions associated with the tenant.
 
 
-        **Access:**  Inorder to access this api, one must porvide the tenant specific user id in x-coreos-access header. In cause of a non-developer tenants, this user id is used to filter the list of subscriptions to only those that the user has access to. 
+        **Access:**  Inorder to access this api, one must porvide the tenant
+        specific user id in x-coreos-access header. In cause of a non-developer
+        tenants, this user id is used to filter the list of subscriptions to
+        only those that the user has access to. 
       parameters:
-        - name: x-coreos-access
-          in: header
-          description: coreos access token
-          required: true
-          schema:
-            type: string
+        - *a1
         - name: tenantId
           required: true
           in: path
@@ -68,8 +76,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SubscriptionSettings"
-      tags:
-        - Settings
+      tags: *a2
   /app/console-api/health:
     get:
       operationId: check
@@ -87,8 +94,8 @@ paths:
                     example: ok
                   info:
                     type: object
-                    example: &a1
-                      database: &a2
+                    example: &a3
+                      database: &a4
                         status: up
                     additionalProperties:
                       type: object
@@ -111,7 +118,7 @@ paths:
                     nullable: true
                   details:
                     type: object
-                    example: *a1
+                    example: *a3
                     additionalProperties:
                       type: object
                       properties:
@@ -131,7 +138,7 @@ paths:
                     example: error
                   info:
                     type: object
-                    example: *a1
+                    example: *a3
                     additionalProperties:
                       type: object
                       properties:
@@ -143,7 +150,7 @@ paths:
                   error:
                     type: object
                     example:
-                      redis: &a3
+                      redis: &a5
                         status: down
                         message: Could not connect
                     additionalProperties:
@@ -157,8 +164,8 @@ paths:
                   details:
                     type: object
                     example:
-                      database: *a2
-                      redis: *a3
+                      database: *a4
+                      redis: *a5
                     additionalProperties:
                       type: object
                       properties:
@@ -181,7 +188,10 @@ info:
   title: Developer Platform Console API
   description: >
     
-    Console API is a <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends"> Backend for frontend </a> REST API that provides the data and functionality required by the Console UI.
+    Console API is a <a
+    href="https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends">
+    Backend for frontend </a> REST API that provides the data and functionality
+    required by the Console UI.
   version: 1.0.0
   contact: {}
 tags: []
@@ -205,9 +215,14 @@ components:
           examples:
             - /app/my-app
             - https://mytenant.os1.delhivery.com/app/my-app
+        description:
+          type: string
+          description: The actual item description
+          example: this is the description of app settings
       required:
         - name
         - url
+        - description
     FileMetadataDTO:
       type: object
       properties:
@@ -285,7 +300,8 @@ components:
           deprecated: true
           description: >-
             
-            The relative url path of the application. This field is deprecated. User **appUrls:relativePath** instead
+            The relative url path of the application. This field is deprecated.
+            Use **appUrls:relativePath** instead
         appType:
           type: string
           description: The Type of the application
@@ -308,17 +324,26 @@ components:
         appUrls:
           description: >-
             
-            The list of url paths that are associated with the application. For web apps, relativePath should be used to access the application. In the presense of interface in the urlOverrides, the interface should be used to access the application
+            The list of url paths that are associated with the application. For
+            web apps, relativePath should be used to access the application. In
+            the presense of interface in the urlOverrides, the interface should
+            be used to access the application
           type: array
           items:
             $ref: "#/components/schemas/ApplicationUrlDTO"
         urlOverrides:
           description: >
             
-            Url overrides are stack specific urls that needs to take periority over the appUrls when the application is accessed from the tenant that belongs to the stack that is configured in the urlOverrides.
+            Url overrides are stack specific urls that needs to take periority
+            over the appUrls when the application is accessed from the tenant
+            that belongs to the stack that is configured in the urlOverrides.
 
 
-            For exmaple, When the console is being accessed from the tenant mytenant.os1.delhivery.com, and the teant mytenant belongs to stack logistax and the urlOverrides contains an entry for logistax, then the urlOverrides should be used to access the application insteand of appUrls. This logic is already performed as part of the API.
+            For exmaple, When the console is being accessed from the tenant
+            mytenant.os1.delhivery.com, and the teant mytenant belongs to stack
+            logistax and the urlOverrides contains an entry for logistax, then
+            the urlOverrides should be used to access the application insteand
+            of appUrls. This logic is already performed as part of the API.
           type: array
           items:
             $ref: "#/components/schemas/ApplicationUrlDTO"
@@ -347,6 +372,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApplicationMenuDTO"
+        settingsIcon:
+          description: The icon associated with the application
+          allOf:
+            - $ref: "#/components/schemas/FileMetadataDTO"
       required:
         - appId
         - appVersionId
@@ -364,28 +393,7 @@ components:
         - shortDescription
         - longDescription
         - applicationMenu
-    Settings:
-      type: object
-      properties:
-        displayName:
-          type: string
-          description: The name of the application
-          example: My App
-        settingsUrl:
-          type: string
-          description: The relative path of the menu item
-          example: /my-app/settings
-        icon:
-          type: string
-          description: icon that needs to be shown for application solution settings
-          example: icon.png
-        description:
-          type: string
-          description: description of app that has settings url
-          example: this is an app that contains settings
-      required:
-        - displayName
-        - settingsUrl
+        - settingsIcon
     SolutionDTO:
       type: object
       properties:
@@ -444,6 +452,19 @@ components:
           type: boolean
           description: Is the solution compatible with the console
           example: true
+        solutionAppSetting:
+          description: Displays list of system apps settings for solution
+          example:
+            - appUrn: platform:app:mts
+              displayName: MTS
+              settingsUrl: /mts/settings
+          type: array
+          items:
+            type: string
+        Landing Page:
+          type: string
+          description: relative url path of the landing page (launch page)
+          example: /launch/control-tower
       required:
         - solutionId
         - solutionVersionId
@@ -456,76 +477,8 @@ components:
         - applications
         - isMarketplaceCompatible
         - isConsoleCompatible
-    SolutionSettingsDTO:
-      type: object
-      properties:
-        solutionId:
-          type: string
-          description: Solution identifier in the OS1 platform
-          example: solution:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
-        solutionVersionId:
-          type: string
-          description: Identifier for the solution version whis is unique within the
-            solution
-          example: solutionVersion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
-        displayName:
-          type: string
-          description: Name of the solution to be displayed in the UI
-          example: My Solution
-        version:
-          type: string
-          description: Human readable semantic version of the solution
-          example: 1.0.0
-        settings:
-          description: settings
-          type: array
-          items:
-            $ref: "#/components/schemas/Settings"
-      required:
-        - solutionId
-        - solutionVersionId
-        - displayName
-        - settings
-    FoundationalAppsSettingsDTO:
-      type: object
-      properties:
-        coreAppId:
-          type: string
-          description: appId for foundational apps
-          example: platform:app:foundationalApp
-        displayName:
-          type: string
-          description: Name of the app to be displayed in the UI
-          example: FoundationalApp
-        settingsUrl:
-          type: string
-          description: Settings Url for foundational apps
-          example: /app/FoundationalApp/settings
-        description:
-          type: string
-          description: description of foundational app that has settings url
-          example: this is a foundational app that contains settings
-        icon:
-          type: string
-          description: icon url for foundational app
-          example: https://cdn.os1.delhivery.com/5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
-      required:
-        - coreAppId
-        - displayName
-        - settingsUrl
-    SubscriptionSettings:
-      type: object
-      properties:
-        foundation:
-          description: contains all settings for foundational apps.
-          type: array
-          items:
-            $ref: "#/components/schemas/FoundationalAppsSettingsDTO"
-        solutions:
-          description: contains all settings for solutions.
-          type: array
-          items:
-            $ref: "#/components/schemas/SolutionSettingsDTO"
+        - solutionAppSetting
+        - Landing Page
     SubscriptionStatusDTO:
       type: object
       properties:
@@ -533,7 +486,8 @@ components:
           type: string
           description: >
             
-            Status of the subscription. Possible values are: Active, Inactive, Deleted
+            Status of the subscription. Possible values are: Active, Inactive,
+            Deleted
           enum:
             - Active
             - Inactive
@@ -543,13 +497,16 @@ components:
           type: string
           description: >
             
-            Date and time when the subscription was requested. This will be present for all subscriptions.
+            Date and time when the subscription was requested. This will be
+            present for all subscriptions.
           example: 2020-12-01T00:00:00.000Z
         activatedAt:
           type: string
           description: >
             
-            Date and time when the subscription was activated. This will be present for all subscriptions. This will not be present if failed to activate because of technical issues.
+            Date and time when the subscription was activated. This will be
+            present for all subscriptions. This will not be present if failed to
+            activate because of technical issues.
           example: 2020-12-01T00:00:00.000Z
       required:
         - status
@@ -590,25 +547,35 @@ components:
             
             Subscription identifier for the subscription product. 
 
-            Application and solution subsctiptions on a organization unique subscription product
+            Application and solution subsctiptions on a organization unique
+            subscription product
           example: subscription:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
         applications:
           description: >-
             
-            List of applications associated with the subscription. This array will be present only for application subscriptions
+            List of applications associated with the subscription. This array
+            will be present only for application subscriptions
 
 
-            **Note:** applications are defined as collection but one subscription will mostly have only one application. This is because, one subscription product can have only one application or solution associated with it.
+            **Note:** applications are defined as collection but one
+            subscription will mostly have only one application. This is because,
+            one subscription product can have only one application or solution
+            associated with it.
           type: array
           items:
             $ref: "#/components/schemas/ApplicationDTO"
         solutions:
           description: >-
             
-            List of solutions associated with the subscription. This array will be present only for solution subscriptions. Under the solution, there can exist multiple application that are part of the solution.
+            List of solutions associated with the subscription. This array will
+            be present only for solution subscriptions. Under the solution,
+            there can exist multiple application that are part of the solution.
 
 
-            **Note:** solutions are defined as collection but one subscription will mostly have only one solution. This is because, one subscription product can have only one application or solution associated with it.
+            **Note:** solutions are defined as collection but one subscription
+            will mostly have only one solution. This is because, one
+            subscription product can have only one application or solution
+            associated with it.
           type: array
           items:
             $ref: "#/components/schemas/SolutionDTO"
@@ -620,7 +587,9 @@ components:
         tier:
           description: >-
             
-            This filed indicates the subscription tier. This will be present for all subscriptions. This will help to idetify the number of days in which the subscription is active or exired.
+            This filed indicates the subscription tier. This will be present for
+            all subscriptions. This will help to idetify the number of days in
+            which the subscription is active or exired.
           allOf:
             - $ref: "#/components/schemas/SubscriptionTierDTO"
       required:
@@ -629,3 +598,31 @@ components:
         - solutions
         - status
         - tier
+    SubscriptionSettings:
+      type: object
+      properties:
+        foundation:
+          description: Foundational apps identifier in the OS1 platform
+          example:
+            - coreAppId: platform:app:payments
+              displayName: Payments
+              settingsUrl: /app/payments/settings
+          type: array
+          items:
+            type: string
+        solutions:
+          description: Contains all solution settings
+          example:
+            - solutionId: solution:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+              solutionVersionId: solutionVersion:5f9b9c0e-7c1e-4b5d-8f9c-0e7c1eab5d8f
+              displayName: My Solution
+              version: 1.0.0
+              settings:
+                - DisplayName: My App
+                  settingsUrl: /my-app/settings
+          type: array
+          items:
+            type: string
+      required:
+        - foundation
+        - solutions
