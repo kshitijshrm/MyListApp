@@ -1578,6 +1578,13 @@
     path-to-regexp "3.2.0"
     tslib "2.5.3"
 
+"@nestjs/cqrs@^10.2.7":
+  version "10.2.7"
+  resolved "https://registry.yarnpkg.com/@nestjs/cqrs/-/cqrs-10.2.7.tgz#67e129d481c86a2b3153374af688abfd19819994"
+  integrity sha512-RXhgQOfuT+KzvkueR4S++SB6+6333PL71pOtCzbJAAU/DY3KY56yTCncWRsIdorKfDX5AEwTiQHHJi69XJWdkA==
+  dependencies:
+    uuid "9.0.1"
+
 "@nestjs/cqrs@^9.0.3":
   version "9.0.4"
   resolved "https://registry.yarnpkg.com/@nestjs/cqrs/-/cqrs-9.0.4.tgz#be1a01971944869e8eed64f0d69a0514b5f21e29"
