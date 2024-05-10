@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^7.4.0",
-    "@foxtrotplatform/developer-platform-core-lib": "0.2.11",
+    "@foxtrotplatform/developer-platform-core-lib": "0.5.4",
     "@foxtrotplatform/developer-platform-proto-schemas": "^0.22.0",
     "@foxtrotplatform/tracer": "0.3.10",
     "@grpc/grpc-js": "^1.6.8",
