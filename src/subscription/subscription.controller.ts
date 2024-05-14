@@ -7,22 +7,23 @@ import {
   HttpCode,
   Inject,
   Logger,
-  NotImplementedException,
   Param,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiHeaders,
   ApiOperation,
-  ApiProperty,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import jwtDecode from 'jwt-decode';
-import { Observable } from 'rxjs';
-import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
-import { FoundationalAppsSettingsDTO, SolutionSettingsDTO, SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
-
+import {
+  SubscriptionDTO,
+  SubscriptionsResponseDTO,
+} from 'src/common/dto/subscription/subscription.dto';
+import { SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionService } from './subscription.service';
+import { GetAllSubscriptionsResponseInterceptor } from 'src/common/interceptor/custom.response.interceptor';
 
 const X_COREOS_ACCESS = 'x-coreos-access';
 
@@ -57,10 +58,11 @@ When the tenant being queried is a developer tenant, there wont be any access re
     isArray: true,
     status: 200,
   })
+  @UseInterceptors(GetAllSubscriptionsResponseInterceptor)
   private getAllSubscriptions(
     @Param('tenantId') tenantId: string,
     @Headers() headers,
-  ): Promise<Array<SubscriptionDTO>> {
+  ): Promise<SubscriptionsResponseDTO> {
     const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);

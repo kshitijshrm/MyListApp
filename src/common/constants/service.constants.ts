@@ -14,6 +14,7 @@ export const ServiceConstants = {
   global_filter_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
+    '/app/console-api/subscription/.*',
   ],
 
   health_check_timeout_default: 2000,
@@ -24,7 +25,7 @@ export const ServiceConstants = {
     package: OS1_DEVELOPERPORTAL_SERVICE_PACKAGE_NAME,
     url: process.env.APPLICATION_SERVICE_ENDPOINT || 'localhost:50052',
     protoPath: 'os1/developerportal/service/application-v2.proto',
-  },  
+  },
   subscription_service: {
     name: SUBSCRIPTION_SERVICE_NAME,
     package: OS1_MARKETPLACE_SERVICE_PACKAGE_NAME,

@@ -82,3 +82,14 @@ This filed indicates the subscription tier. This will be present for all subscri
   })
   tier: SubscriptionTierDTO;
 }
+
+export class SubscriptionsResponseDTO {
+  @ApiProperty({
+    description: 'whether or not console settings is enabled for this tenant',
+  })
+  isSettingsAvailable: boolean;
+  @ApiProperty({
+    description: 'list of all subscriptions',
+  })
+  subscriptions: Array<SubscriptionDTO>;
+}
