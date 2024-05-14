@@ -42,7 +42,7 @@ export class HealthController {
             healthServiceCheck: (healthService: any, service: string) =>
               healthService.check({ service }).toPromise(),
           },
-        ),      
+        ),
       async () =>
         this.grpc.checkService<GrpcOptions>(
           ServiceConstants.subscription_service.name,
@@ -99,7 +99,7 @@ export class HealthController {
           transport: Transport.REDIS,
           options: {
             host: process.env.f_redis_host,
-            port: parseInt(process.env.f_redis_port),
+            port: parseInt(process.env.REDIS_CLUSTER_HOST),
           },
         }),
     ]);

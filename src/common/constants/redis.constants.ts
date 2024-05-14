@@ -13,6 +13,8 @@ export const RedisConstants = {
   getApplicationByVersionIdKey: (applicationVersionId: string) => {
     return `get-application-by-version-id:${applicationVersionId}`;
   },
+  dpaaa_app_listing_id_key: (appUrn: string) =>
+    `dpaaa::listingIdFromUrn::${appUrn}`,
   one_day_in_seconds: 86400,
   ten_seconds: 10,
 };

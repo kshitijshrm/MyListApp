@@ -147,21 +147,61 @@ export class SubscriptionService {
       RedisConstants.getAppsForCoreosUserKey(`${userId}_${tenantId}`),
     );
 
+    let coreosAppsAssignerToUserFromAAA: string[] = [];
     if (apps) {
-      this.getCoreosAppsAssignedToUserAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-      ).catch((error) => {
-        this.logger.error(error.message);
-      });
-      return JSON.parse(apps);
+      coreosAppsAssignerToUserFromAAA = JSON.parse(apps);
     } else
-      return await this.getCoreosAppsAssignedToUserAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-      );
+      coreosAppsAssignerToUserFromAAA =
+        await this.getCoreosAppsAssignedToUserAndSaveToRedis(
+          ctx,
+          userId,
+          tenantId,
+        );
+
+    coreosAppsAssignerToUserFromAAA = await Promise.all(
+      coreosAppsAssignerToUserFromAAA.map(async (app) => {
+        const appParts = app.split(':');
+        if (appParts.length === 1) {
+          // Role:<listingId>:<roleName>
+          return app;
+        }
+        const appIdentifier = appParts.at(-1);
+        if (
+          new RegExp(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+          ).test(appIdentifier)
+        ) {
+          const appListingId = await this.getListingIdFromUrn(
+            ctx,
+            `platform:app:${appIdentifier}`,
+          );
+          return appListingId;
+        }
+        return appIdentifier;
+      }),
+    );
+
+    return coreosAppsAssignerToUserFromAAA;
+  }
+
+  private async getListingIdFromUrn(
+    ctx: PlatformRequestContext,
+    appUrn: string,
+  ) {
+    const key = RedisConstants.dpaaa_app_listing_id_key(appUrn);
+
+    const listingId = await this.redisService.get(key);
+    if (listingId) {
+      return listingId;
+    }
+
+    const appFromUrn = await firstValueFrom(
+      this.applicationServiceClient
+        .getApplicationByAppUrn({ appUrn }, ctx.rpcMetadata)
+    );
+
+    await this.redisService.set(key, appFromUrn.application.listingId);
+    return appFromUrn.application.listingId;
   }
 
   async getActiveSubscriptionsAndSaveToRedis(
@@ -727,10 +767,11 @@ export class SubscriptionService {
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
     return fetchSettingsCompatible
-      ? tenant.isDeveloperTenant || corsAppsAssignedToUser?.includes(app.urn)
+      ? tenant.isDeveloperTenant ||
+          corsAppsAssignedToUser?.includes(app.listingId)
       : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
           (tenant.isDeveloperTenant ||
-            corsAppsAssignedToUser?.includes(app.urn));
+            corsAppsAssignedToUser?.includes(app.listingId));
   }
 
   private getSubscriptionsByTenantId(
