@@ -800,7 +800,11 @@ export class SubscriptionService {
     };
     return this.coreosAgentServiceClient
       .getTenantById(request, ctx.rpcMetadata)
-      .pipe(map((response) => response.tenant));
+      .pipe(
+        map((response) => {
+          return response.tenant;
+        }),
+      );
   }
 
   private filterUrlOverridesByStackId(
