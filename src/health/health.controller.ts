@@ -42,7 +42,7 @@ export class HealthController {
             healthServiceCheck: (healthService: any, service: string) =>
               healthService.check({ service }).toPromise(),
           },
-        ),      
+        ),
       async () =>
         this.grpc.checkService<GrpcOptions>(
           ServiceConstants.subscription_service.name,
@@ -98,8 +98,16 @@ export class HealthController {
         this.microservice.pingCheck<RedisOptions>('redis', {
           transport: Transport.REDIS,
           options: {
-            host: process.env.f_redis_host,
-            port: parseInt(process.env.f_redis_port),
+            host: process.env['REDIS_CLUSTER_HOST'],
+            port: parseInt(process.env['REDIS_CLUSTER_PORT'] as string, 10),
+            tls:
+              process.env['f_stage'] != 'local'
+                ? {
+                    servername: process.env['REDIS_CLUSTER_HOST'],
+                    minVersion: 'TLSv1.2',
+                    rejectUnauthorized: false,
+                  }
+                : undefined,
           },
         }),
     ]);
