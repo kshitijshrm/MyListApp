@@ -42,7 +42,7 @@ export class HealthController {
             healthServiceCheck: (healthService: any, service: string) =>
               healthService.check({ service }).toPromise(),
           },
-        ),      
+        ),
       async () =>
         this.grpc.checkService<GrpcOptions>(
           ServiceConstants.subscription_service.name,

@@ -434,7 +434,7 @@ export class SubscriptionService {
                 if (
                   application.versions[0].appUrls?.find(
                     (url) => url.name === 'setting',
-                  ).url.length > 0
+                  )?.url?.length > 0
                 ) {
                   isSettingsAvailable = true;
                 }
@@ -467,7 +467,7 @@ export class SubscriptionService {
                 if (
                   application.versions[0].appUrls?.find(
                     (url) => url.name === 'setting',
-                  ).url.length > 0
+                  )?.url?.length > 0
                 ) {
                   isSettingsAvailable = true;
                 }
