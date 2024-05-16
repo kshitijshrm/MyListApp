@@ -4,8 +4,14 @@ import { File } from 'src/shared/schemas/os1/core/file/file.pb';
 import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
 import { DateTime } from 'luxon';
-import { GetApplicationByApplicationIdResponse } from 'src/shared/schemas/os1/developerportal/application/response.pb';
-import { GetSolutionBySolutionIdResponse } from 'src/shared/schemas/os1/developerportal/solution/response.pb';
+import {
+  GetApplicationByApplicationIdResponse,
+  GetApplicationByVersionIdResponse,
+} from 'src/shared/schemas/os1/developerportal/application/response.pb';
+import {
+  GetSolutionBySolutionIdResponse,
+  GetSolutionByVersionIdResponse,
+} from 'src/shared/schemas/os1/developerportal/solution/response.pb';
 import {
   SolutionInitializationConfiguration_AppInitializationSequence,
   SolutionPhase,
@@ -17,7 +23,11 @@ import { ApplicationServiceV2Client } from 'src/shared/schemas/os1/developerport
 import mock from 'jest-mock-extended/lib/Mock';
 import { SubscriptionServiceClient } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 import { SolutionDTO } from '../dto/solution/solution.dto';
-import { AppType, ApplicationDTO, ApplicationUrlDTO } from '../dto/application/application.dto';
+import {
+  AppType,
+  ApplicationDTO,
+  ApplicationUrlDTO,
+} from '../dto/application/application.dto';
 import { FileMetadataDTO } from '../dto/common/common.dto';
 import { GetTenantByIdResponse } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 export class TestHelpers extends TestHelpersBase {
@@ -114,6 +124,69 @@ export class TestHelpers extends TestHelpersBase {
     });
   }
 
+  static CreateGetApplicationByVersionIdResponse(): GetApplicationByVersionIdResponse {
+    // Leaving it as json for this PR.
+    // All testing utils needs to be moved to a shared testing library.
+    return GetApplicationByApplicationIdResponse.fromJSON({
+      application: {
+        id: {
+          appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
+        },
+        name: faker.random.word(),
+        urlPath: faker.random.word(),
+        urn: 'platform:app:undefined',
+        orgTeam: {
+          organization: {
+            organizationId: '5d5e08b5-b989-4c72-b5b6-134071fe7bd4',
+            domain: 'platformcoreos',
+            dns: 'platformcoreos.dev.fxtrt.io',
+          },
+          teamId: '126939ff-e9c1-4da7-866c-aa727d5eef6a',
+        },
+        clientCredentials: {
+          clientId: 'platform:app:undefined-backend',
+          clientSecretPlainText: 'df5f683a-2445-4f96-9b1b-9c30065798bd',
+          clientSecretEncrypted: {
+            iv: '6d86d58d1fefc078a0523b3728ff5f09',
+            encryptedText:
+              '4d89ba67ff5aab22c1e3ce6e3c5f55ef8a59fc3e65f09254fa96eed8051879515469ae30',
+          },
+        },
+        appType: 'BACKEND',
+        versions: [
+          {
+            id: {
+              appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
+              appVersionId: 'appversion:8710fa5d-f11c-525d-a702-ed5aae7ce86a',
+            },
+            displayName: 'Schultz Group',
+            version: '1.0.0',
+            description: '',
+            applicationCompitablity: {
+              isMarketplaceCompatible: false,
+              isConsoleCompatible: false,
+            },
+            privacy: {
+              type: 'PRIVATE',
+            },
+            record_status: {
+              isActive: true,
+              isDeleted: false,
+            },
+            recordAudit: {
+              createdBy: '49ff2aa4-568c-4471-b534-50e5491d7596',
+              createdAt:
+                'Thu Aug 25 2022 12:17:23 GMT-0400 (Eastern Daylight Time)',
+              updatedBy: '707c8d2d-53f6-4faf-a614-cffbe0e77fe6',
+              updatedAt:
+                'Thu Aug 25 2022 12:17:28 GMT-0400 (Eastern Daylight Time)',
+            },
+          },
+        ],
+      },
+    });
+  }
+
   static CreateGetTenantByIdResponse(
     isDeveloperTenant: boolean = true,
   ): GetTenantByIdResponse {
@@ -132,10 +205,177 @@ export class TestHelpers extends TestHelpersBase {
     });
   }
 
+  static CreateRandomAppVersionId(): string {
+    return `appversion:${faker.datatype.uuid()}`;
+  }
+
+  static CreateRandomSolutionId(): string {
+    return `solution:${faker.datatype.uuid()}`;
+  }
+
+  static CreateRandomSolutionVersionId(): string {
+    return `solutionversion:${faker.datatype.uuid()}`;
+  }
+
+  static CreateRandomOrganizationId(): string {
+    return faker.datatype.uuid();
+  }
+
   static CreateGetSolutionBySolutionIdResponse(
     solutionId?: string,
     solutionVersionId?: string,
   ): GetSolutionBySolutionIdResponse {
+    const solutionResponse: GetSolutionBySolutionIdResponse = {
+      solution: {
+        id: {
+          solutionId: solutionId ?? this.CreateRandomSolutionId(),
+        },
+        urn: this.CreateRandomSolutionUrn(),
+        organization: {
+          organizationId: this.CreateRandomOrganizationId(),
+          domain: this.CreateRandomorganizationDomain(),
+          dns: this.CreateRandomOrganizationDns(),
+        },
+        version: [
+          {
+            id: {
+              solutionId: solutionId ?? this.CreateRandomSolutionId(),
+              solutionVersionId:
+                solutionVersionId ?? this.CreateRandomSolutionVersionId(),
+            },
+            version: this.CreateRandomSemver(),
+            displayAttributes: {
+              displayName: this.CreateRandomDisplayName(),
+              shortDescription: faker.lorem.paragraph(),
+              longDescription: faker.lorem.paragraphs(),
+            },
+            classification: {
+              categories: [faker.random.word()],
+            },
+            phase: SolutionPhase.DRAFT,
+            compatibility: {
+              isMarketplaceCompatible: true,
+              isConsoleCompatible: true,
+            },
+            applications: [],
+            recordStatus: {
+              isActive: true,
+              isDeleted: false,
+            },
+            recordAudit: {
+              createdBy: faker.datatype.uuid(),
+              createdAt: DateTime.local().toISO(),
+              updatedBy: faker.datatype.uuid(),
+              updatedAt: DateTime.local().toISO(),
+            },
+            submissionId: '0',
+            configurations: [],
+            terms: {
+              isCopyrightFree: faker.datatype.boolean(),
+            },
+            displayImages: [],
+            documents: [],
+            icons: [],
+            initializationConfiguration: {
+              appInitializationSequence: [],
+            },
+            solutionState: {
+              status: 'Active',
+              requestedAt: DateTime.utc().toISO(),
+              activatedAt: DateTime.utc().toISO(),
+              logs: [],
+            },
+            associatedApplications: [],
+          } as SolutionVersion,
+        ],
+        solutionType: 0,
+        productFamily: this.CreateRandomSolutionId(),
+        supportedCountries: [],
+      },
+    };
+
+    const applicationsReferenced = [
+      {
+        appId: this.CreateRandomAppId(),
+        appVersionId: this.CreateRandomAppVersionId(),
+      },
+      {
+        appId: this.CreateRandomAppId(),
+        appVersionId: this.CreateRandomAppVersionId(),
+      },
+      {
+        appId: this.CreateRandomAppId(),
+        appVersionId: this.CreateRandomAppVersionId(),
+      },
+      {
+        appId: this.CreateRandomAppId(),
+        appVersionId: this.CreateRandomAppVersionId(),
+      },
+    ];
+
+    const associatedApplications: SolutionVersion_Application[] = [
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string(),
+      },
+      {
+        id: {
+          appId: this.CreateRandomAppId(),
+          appVersionId: this.CreateRandomAppVersionId(),
+        },
+        displayOrder: faker.datatype.number(),
+        listingId: faker.datatype.string(),
+        semver: faker.datatype.string(),
+      },
+    ];
+
+    solutionResponse.solution.version[0].applications = applicationsReferenced;
+    solutionResponse.solution.version[0].associatedApplications =
+      associatedApplications;
+
+    // update intialization configuration based on available applications
+    for (const app of associatedApplications) {
+      solutionResponse.solution.version[0].initializationConfiguration.appInitializationSequence.push(
+        {
+          appUrn: this.CreateRandomAppUrn(),
+          id: app.id,
+          initilizationSequenceNumber: faker.datatype.number({
+            min: 1,
+            max: 10,
+          }),
+        } as SolutionInitializationConfiguration_AppInitializationSequence,
+      );
+    }
+    return solutionResponse;
+  }
+
+  static CreateGetSolutionByVersionIdResponse(
+    solutionId?: string,
+    solutionVersionId?: string,
+  ): GetSolutionByVersionIdResponse {
     const solutionResponse: GetSolutionBySolutionIdResponse = {
       solution: {
         id: {

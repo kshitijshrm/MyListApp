@@ -19,7 +19,9 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
 
     // skip response transformation for health check and ping
     if (
-      ServiceConstants.global_filter_skip_routes.includes(request.originalUrl)
+      ServiceConstants.global_filter_skip_routes.findIndex((routeRe) =>
+        new RegExp(routeRe).test(request.originalUrl),
+      ) !== -1
     ) {
       return next.handle();
     }

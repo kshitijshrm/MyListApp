@@ -11,8 +11,12 @@ import {
   RedisService,
   TestHelpersBase,
 } from '@foxtrotplatform/developer-platform-core-lib';
-import { of } from 'rxjs';
-import { Subscription } from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
+import { Observable, of } from 'rxjs';
+import {
+  Subscription,
+  SubscriptionTier_PlanType,
+} from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
+import { faker } from '@faker-js/faker';
 
 describe('SubscriptionService', () => {
   // setting timeout to be 100 seconds to allow aaa testing aaa permissions timed upload retries
@@ -130,7 +134,7 @@ describe('SubscriptionService', () => {
       for (let i = 0; i < associatedApplications.length - 1; i++) {
         expect(
           associatedApplications[i].displayOrder >=
-          associatedApplications[i + 1].displayOrder,
+            associatedApplications[i + 1].displayOrder,
         ).toEqual(true);
       }
     });
@@ -150,7 +154,7 @@ describe('SubscriptionService', () => {
       for (let i = 0; i < associatedApplications.length - 1; i++) {
         expect(
           (associatedApplications[i].displayOrder ?? 0) >=
-          (associatedApplications[i + 1].displayOrder ?? 0),
+            (associatedApplications[i + 1].displayOrder ?? 0),
         ).toEqual(true);
       }
     });
@@ -347,6 +351,165 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(3);
       expect(result).toEqual(sampleSubscriptions2);
+    });
+  });
+
+  describe('getTenantSubscriptionsWithAddOns', () => {
+    subscriptionServiceClient = mock<SubscriptionServiceClient>();
+    const sampleSubscriptions: Subscription[] = [
+      {
+        id: { subscriptionId: 'sample-subscription-id' },
+        organization: undefined,
+        status: {
+          activatedAt: '2024-02-07T00:49:47.917Z',
+          expiresAt: '2025-02-06T00:49:47.818Z',
+          log: [],
+          requestedAt: '2024-02-07T00:49:46.167Z',
+          status: 'Active',
+          reason: '',
+        },
+        tier: {
+          displayName: 'Sample',
+          periodInDays: 365,
+          planType: SubscriptionTier_PlanType.DEVELOPER,
+          productTierId: {
+            id: `tier:${faker.datatype.uuid()}`,
+          },
+        },
+        item: {
+          solution: {
+            id: {
+              solutionId: TestHelpers.CreateRandomSolutionId(),
+              solutionVersionId: TestHelpers.CreateRandomSolutionVersionId(),
+            },
+          },
+        },
+        recordStatus: {
+          isActive: true,
+          isDeleted: false,
+        },
+        recordAudit: undefined,
+        pendingAction: undefined,
+        documents: undefined,
+        metadata: undefined,
+        skuUsage: {},
+      },
+    ];
+
+    beforeEach(() => {
+      applicationServiceClient.getSolutionByVersionId = jest
+        .fn()
+        .mockImplementation(() =>
+          of(TestHelpers.CreateGetSolutionByVersionIdResponse()),
+        );
+      applicationServiceClient.getApplicationByVersionId = jest
+        .fn()
+        .mockImplementation(() =>
+          of(TestHelpers.CreateGetApplicationByVersionIdResponse()),
+        );
+      coreosAgentServiceClient.getAppsForCoreosUser = jest
+        .fn()
+        .mockImplementation((tenantId, coreosUserId) =>
+          of({ coreosUserId, apps: [] }),
+        );
+      coreosAgentServiceClient.getCoreosUserById = jest
+        .fn()
+        .mockImplementation((coreosUserId) =>
+          of({
+            coreosUserId,
+            groups: [],
+          }),
+        );
+      coreosAgentServiceClient.getTenantById = jest
+        .fn()
+        .mockImplementation(() =>
+          of(TestHelpers.CreateGetTenantByIdResponse(true)),
+        );
+    });
+
+    it('should return subscription response', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockClear();
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getAllSubscriptionsWithAddonApps(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toBeDefined();
+      expect(result.isSettingsAvailable).toBe(false);
+      expect(result.subscriptions).toHaveLength(1);
+    });
+    it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockClear();
+      applicationServiceClient.getSolutionByVersionId = jest
+        .fn()
+        .mockImplementation(() => {
+          const mockedSolution =
+            TestHelpers.CreateGetSolutionByVersionIdResponse();
+          mockedSolution.solution.version[0].systemAppSettings = [
+            {
+              displayName: 'system',
+              settingsUrl: '/system',
+              appName: 'systemApp',
+              appUrn: 'platform:app:systemapp',
+            },
+          ];
+          return of(mockedSolution);
+        });
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getAllSubscriptionsWithAddonApps(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toBeDefined();
+      expect(result.isSettingsAvailable).toBe(true);
+      expect(result.subscriptions).toHaveLength(1);
+    });
+    it('should return subscription response with isSettingsAvailable flag as true when system settings is defined for a solution app', async () => {
+      applicationServiceClient.getApplicationByVersionId = jest
+        .fn()
+        .mockImplementation(() => {
+          const mockedApp =
+            TestHelpers.CreateGetApplicationByVersionIdResponse();
+          mockedApp.application.versions[0].applicationCompitablity.isConsoleCompatible =
+            true;
+          mockedApp.application.versions[0].appUrls = [
+            { name: 'setting', url: '/app/settings' },
+          ];
+          return of(mockedApp);
+        });
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockClear();
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getAllSubscriptionsWithAddonApps(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toBeDefined();
+      expect(result.isSettingsAvailable).toBe(true);
+      expect(result.subscriptions).toHaveLength(1);
     });
   });
 });

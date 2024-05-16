@@ -21,7 +21,10 @@ import {
   SolutionSettingsDTO,
   SubscriptionSettings,
 } from 'src/common/dto/solutionSettings/solutionSettings.dto';
-import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
+import {
+  SubscriptionDTO,
+  SubscriptionsResponseDTO,
+} from 'src/common/dto/subscription/subscription.dto';
 import {
   GetAppsForCoreosUserRequest,
   GetTenantByIdRequest,
@@ -331,7 +334,7 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
     fetchSettingsCompatible: boolean,
-  ): Promise<Array<SubscriptionDTO>> {
+  ): Promise<SubscriptionsResponseDTO> {
     const subscriptions = await this.getActiveSubscriptions(
       ctx,
       userId,
@@ -364,6 +367,7 @@ export class SubscriptionService {
     );
     const stackId = tenant.stackId;
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
+    let isSettingsAvailable = false;
     for (const subscription of subscriptions || []) {
       this.logger.log(
         'processing subscriptions: ' + subscription.id.subscriptionId,
@@ -423,6 +427,10 @@ export class SubscriptionService {
 
         // return empty subscription if solution not found
         if (solution) {
+          if (solution.version[0].systemAppSettings?.length > 0) {
+            isSettingsAvailable = true;
+          }
+
           let appsReferencedInSolution: Array<SolutionVersion_Application> =
             solution.version[0].associatedApplications ?? [];
 
@@ -463,6 +471,13 @@ export class SubscriptionService {
                     application,
                   ),
                 );
+                if (
+                  application.versions[0].appUrls?.find(
+                    (url) => url.name === 'setting',
+                  ).url.length > 0
+                ) {
+                  isSettingsAvailable = true;
+                }
               }
             } else {
               const application =
@@ -489,6 +504,13 @@ export class SubscriptionService {
                     application,
                   ),
                 );
+                if (
+                  application.versions[0].appUrls?.find(
+                    (url) => url.name === 'setting',
+                  ).url.length > 0
+                ) {
+                  isSettingsAvailable = true;
+                }
               }
             }
           }
@@ -550,7 +572,7 @@ export class SubscriptionService {
       }
       subscriptionResponseDTOs.push(subscriptionDTO);
     }
-    return subscriptionResponseDTOs;
+    return { isSettingsAvailable, subscriptions: subscriptionResponseDTOs };
   }
 
   async getAllSubscriptionsWithAddonApps(
@@ -558,14 +580,14 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
     fetchSettingsCompatible = false,
-  ): Promise<Array<SubscriptionDTO>> {
-    const allSubscriptions = await this.getAllSubscriptions(
+  ): Promise<SubscriptionsResponseDTO> {
+    const subscriptionsResponse = await this.getAllSubscriptions(
       ctx,
       userId,
       tenantId,
       fetchSettingsCompatible,
     );
-    const solutions = allSubscriptions
+    const solutions = subscriptionsResponse.subscriptions
       .map((subscription) => subscription.solutions)
       .flat();
     const subscriptions = await this.getActiveSubscriptions(
@@ -667,7 +689,7 @@ export class SubscriptionService {
       }
     }
 
-    return allSubscriptions;
+    return subscriptionsResponse;
   }
 
   async getAllSolutionSetting(
@@ -685,7 +707,7 @@ export class SubscriptionService {
     let foundationalAppsSetting: FoundationalAppsSettingsDTO[] = [];
     let foundationAppIdSet = new Set<string>();
 
-    for (const subscription of allSubscriptions || []) {
+    for (const subscription of allSubscriptions.subscriptions || []) {
       const solutions = subscription.solutions;
       for (const solution of solutions || []) {
         const setting =
@@ -819,7 +841,11 @@ export class SubscriptionService {
     };
     return this.coreosAgentServiceClient
       .getTenantById(request, ctx.rpcMetadata)
-      .pipe(map((response) => response.tenant));
+      .pipe(
+        map((response) => {
+          return response.tenant;
+        }),
+      );
   }
 
   private filterUrlOverridesByStackId(
