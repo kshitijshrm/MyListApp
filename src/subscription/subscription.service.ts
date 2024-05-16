@@ -152,6 +152,13 @@ export class SubscriptionService {
 
     let coreosAppsAssignerToUserFromAAA: string[] = [];
     if (apps) {
+      this.getCoreosAppsAssignedToUserAndSaveToRedis(
+        ctx,
+        userId,
+        tenantId,
+      ).catch((error) => {
+        this.logger.error(error.message);
+      });
       coreosAppsAssignerToUserFromAAA = JSON.parse(apps);
     } else
       coreosAppsAssignerToUserFromAAA =
