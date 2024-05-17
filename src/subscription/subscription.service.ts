@@ -832,7 +832,7 @@ export class SubscriptionService {
       );
       if (userMatchedGroups.length) {
         const highestRankedGroup = userMatchedGroups
-          .sort((groupA, groupB) => groupB.rank - groupA.rank)
+          .sort((groupA, groupB) => groupA.rank - groupB.rank)
           .shift();
         return highestRankedGroup.url;
       }
