@@ -1,5 +1,6 @@
+import { RedisHealthIndicator } from '@liaoliaots/nestjs-redis-health';
 import { Controller, Get, Inject } from '@nestjs/common';
-import { GrpcOptions, RedisOptions, Transport } from '@nestjs/microservices';
+import { GrpcOptions } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import {
   GRPCHealthIndicator,
@@ -7,14 +8,54 @@ import {
   HealthCheckService,
   MicroserviceHealthIndicator,
 } from '@nestjs/terminus';
+import { Cluster, ClusterOptions } from 'ioredis';
 import { join } from 'path';
 import { ServiceConstants } from 'src/common/constants/service.constants';
 
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
-  @Inject(HealthCheckService)
-  private health: HealthCheckService;
+  private readonly redis: Cluster;
+
+  constructor(
+    private readonly health: HealthCheckService,
+    private readonly redisIndicator: RedisHealthIndicator,
+  ) {
+    const host = process.env['REDIS_CLUSTER_HOST'] as string;
+    const hostsString =
+      (process.env['REDIS_CLUSTER_MULTI_HOST'] as string) || host;
+    const password = process.env['REDIS_CLUSTER_PASSWORD'] as string;
+    const port = parseInt(process.env['REDIS_CLUSTER_PORT'] as string, 10);
+    const retryCount =
+      parseInt(process.env['REDIS_RETRIES'] as string, 10) || 3;
+    const namespace = process.env['f_redis_namespace'];
+
+    const hosts = hostsString.split(',').map((host) => ({
+      host: host.trim(),
+      port: port,
+    }));
+    const options: ClusterOptions = {
+      redisOptions: {
+        password: password,
+        maxRetriesPerRequest: retryCount,
+        tls:
+          process.env['f_stage'] != 'local'
+            ? {
+                servername: host,
+                minVersion: 'TLSv1.2',
+                rejectUnauthorized: false,
+              }
+            : undefined,
+      },
+      slotsRefreshTimeout: 10000,
+      slotsRefreshInterval: 50000,
+    };
+    if (namespace) {
+      options.keyPrefix = namespace;
+    }
+
+    this.redis = new Cluster(hosts, options);
+  }
 
   @Inject(GRPCHealthIndicator)
   private grpc: GRPCHealthIndicator;
@@ -95,12 +136,9 @@ export class HealthController {
           },
         ),
       async () =>
-        this.microservice.pingCheck<RedisOptions>('redis', {
-          transport: Transport.REDIS,
-          options: {
-            host: process.env.f_redis_host,
-            port: parseInt(process.env.REDIS_CLUSTER_HOST),
-          },
+        this.redisIndicator.checkHealth('redis', {
+          type: 'cluster',
+          client: this.redis,
         }),
     ]);
   }
