@@ -168,29 +168,6 @@ export class SubscriptionService {
           tenantId,
         );
 
-    coreosAppsAssignerToUserFromAAA = await Promise.all(
-      coreosAppsAssignerToUserFromAAA.map(async (app) => {
-        const appParts = app.split(':');
-        if (appParts.length === 1) {
-          // Role:<listingId>:<roleName>
-          return app;
-        }
-        const appIdentifier = appParts.at(-1);
-        if (
-          new RegExp(
-            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-          ).test(appIdentifier)
-        ) {
-          const appListingId = await this.getListingIdFromUrn(
-            ctx,
-            `platform:app:${appIdentifier}`,
-          );
-          return appListingId;
-        }
-        return appIdentifier;
-      }),
-    );
-
     return coreosAppsAssignerToUserFromAAA;
   }
 
@@ -206,8 +183,10 @@ export class SubscriptionService {
     }
 
     const appFromUrn = await firstValueFrom(
-      this.applicationServiceClient
-        .getApplicationByAppUrn({ appUrn }, ctx.rpcMetadata)
+      this.applicationServiceClient.getApplicationByAppUrn(
+        { appUrn },
+        ctx.rpcMetadata,
+      ),
     );
 
     await this.redisService.set(key, appFromUrn.application.listingId);
@@ -791,16 +770,15 @@ export class SubscriptionService {
   private isAppToBeAddedToSolution(
     app: Application,
     tenant: Tenant,
-    corsAppsAssignedToUser: string[],
+    coreosAppsAssignedToUser: string[],
     fetchSettingsCompatible: boolean,
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
     return fetchSettingsCompatible
-      ? tenant.isDeveloperTenant ||
-          corsAppsAssignedToUser?.includes(app.listingId)
+      ? tenant.isDeveloperTenant || coreosAppsAssignedToUser?.includes(app.urn)
       : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
           (tenant.isDeveloperTenant ||
-            corsAppsAssignedToUser?.includes(app.listingId));
+            coreosAppsAssignedToUser?.includes(app.urn));
   }
 
   private getSubscriptionsByTenantId(
