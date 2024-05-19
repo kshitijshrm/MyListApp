@@ -171,28 +171,6 @@ export class SubscriptionService {
     return coreosAppsAssignerToUserFromAAA;
   }
 
-  private async getListingIdFromUrn(
-    ctx: PlatformRequestContext,
-    appUrn: string,
-  ) {
-    const key = RedisConstants.dpaaa_app_listing_id_key(appUrn);
-
-    const listingId = await this.redisService.get(key);
-    if (listingId) {
-      return listingId;
-    }
-
-    const appFromUrn = await firstValueFrom(
-      this.applicationServiceClient.getApplicationByAppUrn(
-        { appUrn },
-        ctx.rpcMetadata,
-      ),
-    );
-
-    await this.redisService.set(key, appFromUrn.application.listingId);
-    return appFromUrn.application.listingId;
-  }
-
   async getActiveSubscriptionsAndSaveToRedis(
     ctx: PlatformRequestContext,
     userId: string,

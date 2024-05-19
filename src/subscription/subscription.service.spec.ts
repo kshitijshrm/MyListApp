@@ -108,7 +108,7 @@ describe('SubscriptionService', () => {
     it('should return true when app is not console compatible and is called for getting all settings and app is assigned to user and the tenant is of developer type', async () => {
       app.versions[0].applicationCompitablity.isConsoleCompatible = false;
       tenant.isDeveloperTenant = false;
-      corsAppsAssignedToUser.push(app.listingId);
+      corsAppsAssignedToUser.push(app.urn);
       const servicePrototype = Object.getPrototypeOf(service);
       const result = servicePrototype.isAppToBeAddedToSolution(
         app,
