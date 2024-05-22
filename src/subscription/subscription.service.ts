@@ -161,12 +161,14 @@ export class SubscriptionService {
       });
       coreosAppsAssignerToUserFromAAA = JSON.parse(apps);
     } else
-      coreosAppsAssignerToUserFromAAA =
-        await this.getCoreosAppsAssignedToUserAndSaveToRedis(
-          ctx,
-          userId,
-          tenantId,
-        );
+     {
+       coreosAppsAssignerToUserFromAAA =
+         await this.getCoreosAppsAssignedToUserAndSaveToRedis(
+           ctx,
+           userId,
+           tenantId,
+         );
+     }
 
     return coreosAppsAssignerToUserFromAAA;
   }
