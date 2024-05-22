@@ -511,5 +511,34 @@ describe('SubscriptionService', () => {
       expect(result.isSettingsAvailable).toBe(true);
       expect(result.subscriptions).toHaveLength(1);
     });
+    it('should return subscription response with isSettingsAvailable flag as false when setting url do not exist for a solution app', async () => {
+      applicationServiceClient.getApplicationByVersionId = jest
+        .fn()
+        .mockImplementation(() => {
+          const mockedApp =
+            TestHelpers.CreateGetApplicationByVersionIdResponse();
+          mockedApp.application.versions[0].applicationCompitablity.isConsoleCompatible =
+            true;
+          mockedApp.application.versions[0].appUrls = [];
+          return of(mockedApp);
+        });
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockClear();
+      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getAllSubscriptionsWithAddonApps(
+        ctx,
+        'user-id',
+        'tenant-id',
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(2);
+      expect(result).toBeDefined();
+      expect(result.isSettingsAvailable).toBe(false);
+      expect(result.subscriptions).toHaveLength(1);
+    });
   });
 });

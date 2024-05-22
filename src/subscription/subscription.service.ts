@@ -150,6 +150,7 @@ export class SubscriptionService {
       RedisConstants.getAppsForCoreosUserKey(`${userId}_${tenantId}`),
     );
 
+    let coreosAppsAssignerToUserFromAAA: string[] = [];
     if (apps) {
       this.getCoreosAppsAssignedToUserAndSaveToRedis(
         ctx,
@@ -158,13 +159,18 @@ export class SubscriptionService {
       ).catch((error) => {
         this.logger.error(error.message);
       });
-      return JSON.parse(apps);
+      coreosAppsAssignerToUserFromAAA = JSON.parse(apps);
     } else
-      return await this.getCoreosAppsAssignedToUserAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-      );
+     {
+       coreosAppsAssignerToUserFromAAA =
+         await this.getCoreosAppsAssignedToUserAndSaveToRedis(
+           ctx,
+           userId,
+           tenantId,
+         );
+     }
+
+    return coreosAppsAssignerToUserFromAAA;
   }
 
   async getActiveSubscriptionsAndSaveToRedis(
@@ -434,7 +440,7 @@ export class SubscriptionService {
                 if (
                   application.versions[0].appUrls?.find(
                     (url) => url.name === 'setting',
-                  ).url.length > 0
+                  )?.url?.length > 0
                 ) {
                   isSettingsAvailable = true;
                 }
@@ -467,7 +473,7 @@ export class SubscriptionService {
                 if (
                   application.versions[0].appUrls?.find(
                     (url) => url.name === 'setting',
-                  ).url.length > 0
+                  )?.url?.length > 0
                 ) {
                   isSettingsAvailable = true;
                 }
@@ -744,15 +750,15 @@ export class SubscriptionService {
   private isAppToBeAddedToSolution(
     app: Application,
     tenant: Tenant,
-    corsAppsAssignedToUser: string[],
+    coreosAppsAssignedToUser: string[],
     fetchSettingsCompatible: boolean,
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
     return fetchSettingsCompatible
-      ? tenant.isDeveloperTenant || corsAppsAssignedToUser?.includes(app.urn)
+      ? tenant.isDeveloperTenant || coreosAppsAssignedToUser?.includes(app.urn)
       : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
           (tenant.isDeveloperTenant ||
-            corsAppsAssignedToUser?.includes(app.urn));
+            coreosAppsAssignedToUser?.includes(app.urn));
   }
 
   private getSubscriptionsByTenantId(
@@ -832,7 +838,7 @@ export class SubscriptionService {
       );
       if (userMatchedGroups.length) {
         const highestRankedGroup = userMatchedGroups
-          .sort((groupA, groupB) => groupB.rank - groupA.rank)
+          .sort((groupA, groupB) => groupA.rank - groupB.rank)
           .shift();
         return highestRankedGroup.url;
       }
