@@ -24,6 +24,7 @@ import {
 import { SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionService } from './subscription.service';
 import { GetAllSubscriptionsResponseInterceptor } from 'src/common/interceptor/custom.response.interceptor';
+import { parse } from 'cache-control-parser';
 
 const X_COREOS_ACCESS = 'x-coreos-access';
 
@@ -66,10 +67,12 @@ When the tenant being queried is a developer tenant, there wont be any access re
     const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
+    const shouldInvalidateCache = this.shouldInvalidateCaches(headers);
     return this.subscriptionService.getAllSubscriptionsWithAddonApps(
       ctx,
       userId,
       tenantId,
+      shouldInvalidateCache,
     );
   }
 
@@ -110,5 +113,16 @@ When the tenant being queried is a developer tenant, there wont be any access re
       headers[X_COREOS_ACCESS],
     );
     return decodedToken.userId;
+  }
+
+  private shouldInvalidateCaches(headers: any): boolean {
+    const cacheControlHeader = headers['cache-control'];
+    if (cacheControlHeader) {
+      const cacheControlDirectives = parse(cacheControlHeader);
+      if (cacheControlDirectives['no-cache']) {
+        return true;
+      }
+    }
+    return false;
   }
 }

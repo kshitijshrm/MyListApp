@@ -4,6 +4,9 @@ export const RedisConstants = {
   getSubscriptionsKey: (tenant: string) => {
     return `subscriptions-for-tenant:${tenant}`;
   },
+  getConfigKey: (tenantId: string) => {
+    return `console::configs-for-tenant:${tenantId}`;
+  },
   getAppsForCoreosUserKey: (user: string) => {
     return `get-apps-for-coreos-user:${user}`;
   },
