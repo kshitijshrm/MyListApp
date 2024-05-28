@@ -1074,9 +1074,9 @@
     uuid "^8.3.2"
 
 "@foxtrotplatform/developer-platform-proto-schemas@^0.22.0":
-  version "0.22.14"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.14/32345dd5e43015545d483705b9d19469b4e30ce3#32345dd5e43015545d483705b9d19469b4e30ce3"
-  integrity sha512-DOBmyMJc4VHxT5TLMn2aJo5w3pY6Cvkc1WAb1QmLgXSoMo5tCk0VovsfR+Vpmyh5rRQHOwv9Md82l/vPQ2P4qw==
+  version "0.22.16"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.16/f4a57ed57a2617e67c028e2bd503d72e439274cf#f4a57ed57a2617e67c028e2bd503d72e439274cf"
+  integrity sha512-gH8BmaLBt/G6ytk7QmWtBzV9znhEHRcrB+IEYElCLF6etzBxISWm7SDV5G8A0MsAaKFOf7dewY5uRBYVbDRPww==
   dependencies:
     "@grpc/grpc-js" "^1.6.8"
     "@nestjs/axios" "^0.1.0"
@@ -8292,10 +8292,18 @@ ts-poet@^6.7.0:
   dependencies:
     dprint-node "^1.0.8"
 
-ts-proto-descriptors@1.15.0, ts-proto-descriptors@^1.15.0:
+ts-proto-descriptors@1.15.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.15.0.tgz#e859e3a2887da2d954c552524719b80bdb6ee355"
   integrity sha512-TYyJ7+H+7Jsqawdv+mfsEpZPTIj9siDHS6EMCzG/z3b/PZiphsX+mWtqFfFVe5/N0Th6V3elK9lQqjnrgTOfrg==
+  dependencies:
+    long "^5.2.3"
+    protobufjs "^7.2.4"
+
+ts-proto-descriptors@1.16.0, ts-proto-descriptors@^1.15.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.16.0.tgz#e9f15d5d23774088f8573fa5a2d75130c64a565a"
+  integrity sha512-3yKuzMLpltdpcyQji1PJZRfoo4OJjNieKTYkQY8pF7xGKsYz/RHe3aEe4KiRxcinoBmnEhmuI+yJTxLb922ULA==
   dependencies:
     long "^5.2.3"
     protobufjs "^7.2.4"
@@ -8311,14 +8319,14 @@ ts-proto@^1.120.0:
     ts-proto-descriptors "1.15.0"
 
 ts-proto@^1.169.0:
-  version "1.175.0"
-  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.175.0.tgz#b8076b0a6713afbb4bd9b0749a916a50418f0aa3"
-  integrity sha512-JH60AFESM7KzzhmX/7rOabi5BlE94RGU/mq0Q73GTQqKW5Mck6CCEay/Ts/Ld/kuayCZpdSTfM+opOUD/A2oFw==
+  version "1.176.1"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.176.1.tgz#43188226b3eac5dd395de0e5e48ee2fe16b5a343"
+  integrity sha512-oZtvXcAe/4ILiHSvNhrQAqZ3MHpwHXZ+J0gN1rBLvTQ7NBAmM8Ccl2kTiUqybDBs/48FFEalAqtErcjvO6ePPQ==
   dependencies:
     case-anything "^2.1.13"
     protobufjs "^7.2.4"
     ts-poet "^6.7.0"
-    ts-proto-descriptors "1.15.0"
+    ts-proto-descriptors "1.16.0"
 
 ts-protoc-gen@^0.15.0:
   version "0.15.0"
