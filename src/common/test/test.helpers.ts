@@ -29,7 +29,10 @@ import {
   ApplicationUrlDTO,
 } from '../dto/application/application.dto';
 import { FileMetadataDTO } from '../dto/common/common.dto';
-import { GetTenantByIdResponse } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
+import {
+  GetTenantByIdResponse,
+  GetTenantConfigsByTenantIdResponse,
+} from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
     return {
@@ -203,6 +206,21 @@ export class TestHelpers extends TestHelpersBase {
         isDeveloperTenant,
       },
     });
+  }
+
+  static CreateGetTenantConfigsByTenantIdResponse(): GetTenantConfigsByTenantIdResponse {
+    return {
+      configs: [
+        {
+          typeName: 'type',
+          alias: {
+            singular: 'dummy',
+            plural: 'dummies',
+          },
+          attributes: {},
+        },
+      ],
+    };
   }
 
   static CreateRandomAppVersionId(): string {

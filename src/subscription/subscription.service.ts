@@ -10,7 +10,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import * as _ from 'lodash';
+import * as pluralize from 'pluralize';
+import { catchError, firstValueFrom, map, Observable } from 'rxjs';
 import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
@@ -28,9 +30,10 @@ import {
 import {
   GetAppsForCoreosUserRequest,
   GetTenantByIdRequest,
+  GetTenantConfigsByTenantIdRequest,
 } from 'src/shared/schemas/os1/core/coreosagent/request.pb';
+import { GetTenantConfigsByTenantIdResponse_Config } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 import { Tenant } from 'src/shared/schemas/os1/core/coreosagent/tenant.pb';
-
 import {
   CoreosAgentServiceClient,
   COREOS_AGENT_SERVICE_NAME,
@@ -160,15 +163,14 @@ export class SubscriptionService {
         this.logger.error(error.message);
       });
       coreosAppsAssignerToUserFromAAA = JSON.parse(apps);
-    } else
-     {
-       coreosAppsAssignerToUserFromAAA =
-         await this.getCoreosAppsAssignedToUserAndSaveToRedis(
-           ctx,
-           userId,
-           tenantId,
-         );
-     }
+    } else {
+      coreosAppsAssignerToUserFromAAA =
+        await this.getCoreosAppsAssignedToUserAndSaveToRedis(
+          ctx,
+          userId,
+          tenantId,
+        );
+    }
 
     return coreosAppsAssignerToUserFromAAA;
   }
@@ -299,6 +301,7 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
     fetchSettingsCompatible: boolean,
   ): Promise<SubscriptionsResponseDTO> {
     const subscriptions = await this.getActiveSubscriptions(
@@ -432,6 +435,10 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
+                this.updateAppDisplayNameBasedOnConfig(
+                  application,
+                  tenantConfigs,
+                );
                 solutionDto.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
                     application,
@@ -465,6 +472,10 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
+                this.updateAppDisplayNameBasedOnConfig(
+                  application as Application,
+                  tenantConfigs,
+                );
                 solutionDto.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
                     application,
@@ -510,6 +521,10 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
+            this.updateAppDisplayNameBasedOnConfig(
+              JSON.parse(appFromRedis),
+              tenantConfigs,
+            );
             subscriptionDTO.applications.push(
               ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
                 JSON.parse(appFromRedis),
@@ -530,6 +545,7 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
+            this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
             subscriptionDTO.applications.push(
               ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
             );
@@ -545,12 +561,19 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    shouldInvalidateCache: boolean,
     fetchSettingsCompatible = false,
   ): Promise<SubscriptionsResponseDTO> {
+    if (shouldInvalidateCache) {
+      await this.invalidateCaches(ctx, tenantId);
+    }
+    const tenantConfigs = await this.getTenantConfigsByTenantId(ctx, tenantId);
+
     const subscriptionsResponse = await this.getAllSubscriptions(
       ctx,
       userId,
       tenantId,
+      tenantConfigs,
       fetchSettingsCompatible,
     );
     const solutions = subscriptionsResponse.subscriptions
@@ -603,6 +626,7 @@ export class SubscriptionService {
               this.logger.log(
                 'adding application to solution: ' + compatibleSolutionId,
               );
+              this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
               solution.applications.push(
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
               );
@@ -645,6 +669,7 @@ export class SubscriptionService {
                 this.logger.log(
                   'adding application to solution: ' + compatibleSolutionId,
                 );
+                this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
@@ -813,6 +838,59 @@ export class SubscriptionService {
       );
   }
 
+  private async getTenantConfigsByTenantId(
+    ctx: PlatformRequestContext,
+    tenantId: string,
+  ): Promise<GetTenantConfigsByTenantIdResponse_Config[]> {
+    const cachedConfigs = await this.redisService.get(
+      RedisConstants.getConfigKey(tenantId),
+    );
+    if (cachedConfigs) {
+      return JSON.parse(cachedConfigs);
+    }
+    const request: GetTenantConfigsByTenantIdRequest = {
+      tenantId,
+    };
+    const configs = await firstValueFrom(
+      this.coreosAgentServiceClient
+        .getTenantConfigsByTenantId(request, ctx.rpcMetadata)
+        .pipe(
+          map((response) => {
+            return response.configs;
+          }),
+          catchError((err) => {
+            const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
+            this.logger.error(message, err);
+            throw new InternalServerErrorException(message);
+          }),
+        ),
+    ).catch((error) => {
+      return [];
+    });
+
+    if (configs && configs.length) {
+      await this.redisService.set(
+        RedisConstants.getConfigKey(tenantId),
+        JSON.stringify(configs),
+      );
+    }
+
+    return configs;
+  }
+
+  private async invalidateCaches(
+    ctx: PlatformRequestContext,
+    tenantId: string,
+  ) {
+    await this.redisService
+      .del(RedisConstants.getConfigKey(tenantId))
+      .then((response) => {
+        this.logger.log(
+          `Tenant Config cache has been successfully reset for: ${tenantId}`,
+        );
+      });
+  }
+
   private filterUrlOverridesByStackId(
     urlOverrides: ApplicationUrlOverride[],
     stackId: string,
@@ -857,5 +935,58 @@ export class SubscriptionService {
       `No landing page configured for ${tenantId} - ${solutionDto.solutionVersionId}`,
     );
     return '';
+  }
+
+  private updateAppDisplayNameBasedOnConfig(
+    application: Application,
+    tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
+  ) {
+    const appDisplayName = application.versions[0]?.displayName;
+    if (appDisplayName) {
+      const appDisplayNameSingular = pluralize.singular(appDisplayName.trim());
+      const appTenantConfig = tenantConfigs.find(
+        (config) =>
+          config.typeName === appDisplayNameSingular.trim().toLocaleLowerCase(),
+      );
+      if (appTenantConfig) {
+        if (pluralize.isSingular(appDisplayName.trim())) {
+          application.versions[0].displayName = _.capitalize(
+            appTenantConfig.alias.singular,
+          );
+        }
+        if (pluralize.isPlural(appDisplayName.trim())) {
+          application.versions[0].displayName = _.capitalize(
+            appTenantConfig.alias.plural,
+          );
+        }
+      }
+    }
+    if (application.versions[0]?.appNavigation?.menuItems) {
+      application.versions[0]?.appNavigation?.menuItems.forEach((menuItem) => {
+        const menuItemDisplayName = menuItem.displayName;
+        if (menuItemDisplayName) {
+          const menuItemDisplayNameSingular = pluralize.singular(
+            menuItemDisplayName.trim(),
+          );
+          const itemTenantConfig = tenantConfigs.find(
+            (config) =>
+              config.typeName ===
+              menuItemDisplayNameSingular.trim().toLocaleLowerCase(),
+          );
+          if (itemTenantConfig) {
+            if (pluralize.isSingular(menuItemDisplayName.trim())) {
+              menuItem.displayName = _.capitalize(
+                itemTenantConfig.alias.singular,
+              );
+            }
+            if (pluralize.isPlural(menuItemDisplayName.trim())) {
+              menuItem.displayName = _.capitalize(
+                itemTenantConfig.alias.plural,
+              );
+            }
+          }
+        }
+      });
+    }
   }
 }
