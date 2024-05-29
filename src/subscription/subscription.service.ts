@@ -842,40 +842,48 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     tenantId: string,
   ): Promise<GetTenantConfigsByTenantIdResponse_Config[]> {
-    const cachedConfigs = await this.redisService.get(
-      RedisConstants.getConfigKey(tenantId),
-    );
-    if (cachedConfigs) {
-      return JSON.parse(cachedConfigs);
-    }
-    const request: GetTenantConfigsByTenantIdRequest = {
-      tenantId,
-    };
-    const configs = await firstValueFrom(
-      this.coreosAgentServiceClient
-        .getTenantConfigsByTenantId(request, ctx.rpcMetadata)
-        .pipe(
-          map((response) => {
-            return response.configs;
-          }),
-          catchError((err) => {
-            const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
-            this.logger.error(message, err);
-            throw new InternalServerErrorException(message);
-          }),
-        ),
-    ).catch((error) => {
-      return [];
-    });
-
-    if (configs && configs.length) {
-      await this.redisService.set(
+    try {
+      const cachedConfigs = await this.redisService.get(
         RedisConstants.getConfigKey(tenantId),
-        JSON.stringify(configs),
       );
-    }
+      if (cachedConfigs) {
+        return JSON.parse(cachedConfigs);
+      }
+      const request: GetTenantConfigsByTenantIdRequest = {
+        tenantId,
+      };
+      const configs = await firstValueFrom(
+        this.coreosAgentServiceClient
+          .getTenantConfigsByTenantId(request, ctx.rpcMetadata)
+          .pipe(
+            map((response) => {
+              return response.configs;
+            }),
+            catchError((err) => {
+              const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
+              this.logger.error(message, err);
+              throw new InternalServerErrorException(message);
+            }),
+          ),
+      ).catch((error) => {
+        return [];
+      });
 
-    return configs;
+      if (configs && configs.length) {
+        await this.redisService.set(
+          RedisConstants.getConfigKey(tenantId),
+          JSON.stringify(configs),
+        );
+      }
+
+      return configs;
+    } catch (error) {
+      // should catch any error and return empty array.
+      this.logger.error(
+        `Error fetching tenant configs from coreos-agent for ${tenantId}: ${error.message}`,
+      );
+      return [];
+    }
   }
 
   private async invalidateCaches(
