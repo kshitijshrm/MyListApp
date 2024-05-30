@@ -435,7 +435,7 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
-                this.updateAppDisplayNameBasedOnConfig(
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   application,
                   tenantConfigs,
                 );
@@ -472,7 +472,7 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
-                this.updateAppDisplayNameBasedOnConfig(
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   application as Application,
                   tenantConfigs,
                 );
@@ -521,7 +521,7 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
-            this.updateAppDisplayNameBasedOnConfig(
+            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
               JSON.parse(appFromRedis),
               tenantConfigs,
             );
@@ -545,7 +545,10 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
-            this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+              app,
+              tenantConfigs,
+            );
             subscriptionDTO.applications.push(
               ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
             );
@@ -626,7 +629,10 @@ export class SubscriptionService {
               this.logger.log(
                 'adding application to solution: ' + compatibleSolutionId,
               );
-              this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+              this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                app,
+                tenantConfigs,
+              );
               solution.applications.push(
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
               );
@@ -669,7 +675,10 @@ export class SubscriptionService {
                 this.logger.log(
                   'adding application to solution: ' + compatibleSolutionId,
                 );
-                this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                  app,
+                  tenantConfigs,
+                );
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
@@ -687,11 +696,13 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    shouldInvalidateCache: boolean,
   ): Promise<SubscriptionSettings> {
     const allSubscriptions = await this.getAllSubscriptionsWithAddonApps(
       ctx,
       userId,
       tenantId,
+      shouldInvalidateCache,
       true,
     );
     let solutionsSettings: SolutionSettingsDTO[] = [];
@@ -846,7 +857,7 @@ export class SubscriptionService {
       const cachedConfigs = await this.redisService.get(
         RedisConstants.getConfigKey(tenantId),
       );
-      if (cachedConfigs) {
+      if (cachedConfigs && typeof cachedConfigs == 'string') {
         return JSON.parse(cachedConfigs);
       }
       const request: GetTenantConfigsByTenantIdRequest = {
@@ -945,7 +956,7 @@ export class SubscriptionService {
     return '';
   }
 
-  private updateAppDisplayNameBasedOnConfig(
+  private updateAppAndSubMenuDisplayNameBasedOnConfig(
     application: Application,
     tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
   ) {
