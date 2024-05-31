@@ -435,7 +435,7 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
-                this.updateAppDisplayNameBasedOnConfig(
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   application,
                   tenantConfigs,
                 );
@@ -472,7 +472,7 @@ export class SubscriptionService {
                     application.versions[0]?.appUrlOverrides || [],
                     stackId,
                   );
-                this.updateAppDisplayNameBasedOnConfig(
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   application as Application,
                   tenantConfigs,
                 );
@@ -521,7 +521,7 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
-            this.updateAppDisplayNameBasedOnConfig(
+            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
               JSON.parse(appFromRedis),
               tenantConfigs,
             );
@@ -545,7 +545,10 @@ export class SubscriptionService {
               fetchSettingsCompatible,
             )
           ) {
-            this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+              app,
+              tenantConfigs,
+            );
             subscriptionDTO.applications.push(
               ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
             );
@@ -626,7 +629,10 @@ export class SubscriptionService {
               this.logger.log(
                 'adding application to solution: ' + compatibleSolutionId,
               );
-              this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+              this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                app,
+                tenantConfigs,
+              );
               solution.applications.push(
                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
               );
@@ -669,7 +675,10 @@ export class SubscriptionService {
                 this.logger.log(
                   'adding application to solution: ' + compatibleSolutionId,
                 );
-                this.updateAppDisplayNameBasedOnConfig(app, tenantConfigs);
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                  app,
+                  tenantConfigs,
+                );
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
@@ -687,11 +696,13 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
+    shouldInvalidateCache: boolean,
   ): Promise<SubscriptionSettings> {
     const allSubscriptions = await this.getAllSubscriptionsWithAddonApps(
       ctx,
       userId,
       tenantId,
+      shouldInvalidateCache,
       true,
     );
     let solutionsSettings: SolutionSettingsDTO[] = [];
@@ -842,40 +853,48 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     tenantId: string,
   ): Promise<GetTenantConfigsByTenantIdResponse_Config[]> {
-    const cachedConfigs = await this.redisService.get(
-      RedisConstants.getConfigKey(tenantId),
-    );
-    if (cachedConfigs) {
-      return JSON.parse(cachedConfigs);
-    }
-    const request: GetTenantConfigsByTenantIdRequest = {
-      tenantId,
-    };
-    const configs = await firstValueFrom(
-      this.coreosAgentServiceClient
-        .getTenantConfigsByTenantId(request, ctx.rpcMetadata)
-        .pipe(
-          map((response) => {
-            return response.configs;
-          }),
-          catchError((err) => {
-            const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
-            this.logger.error(message, err);
-            throw new InternalServerErrorException(message);
-          }),
-        ),
-    ).catch((error) => {
-      return [];
-    });
-
-    if (configs && configs.length) {
-      await this.redisService.set(
+    try {
+      const cachedConfigs = await this.redisService.get(
         RedisConstants.getConfigKey(tenantId),
-        JSON.stringify(configs),
       );
-    }
+      if (cachedConfigs && typeof cachedConfigs == 'string') {
+        return JSON.parse(cachedConfigs);
+      }
+      const request: GetTenantConfigsByTenantIdRequest = {
+        tenantId,
+      };
+      const configs = await firstValueFrom(
+        this.coreosAgentServiceClient
+          .getTenantConfigsByTenantId(request, ctx.rpcMetadata)
+          .pipe(
+            map((response) => {
+              return response.configs;
+            }),
+            catchError((err) => {
+              const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
+              this.logger.error(message, err);
+              throw new InternalServerErrorException(message);
+            }),
+          ),
+      ).catch((error) => {
+        return [];
+      });
 
-    return configs;
+      if (configs && configs.length) {
+        await this.redisService.set(
+          RedisConstants.getConfigKey(tenantId),
+          JSON.stringify(configs),
+        );
+      }
+
+      return configs;
+    } catch (error) {
+      // should catch any error and return empty array.
+      this.logger.error(
+        `Error fetching tenant configs from coreos-agent for ${tenantId}: ${error.message}`,
+      );
+      return [];
+    }
   }
 
   private async invalidateCaches(
@@ -937,7 +956,7 @@ export class SubscriptionService {
     return '';
   }
 
-  private updateAppDisplayNameBasedOnConfig(
+  private updateAppAndSubMenuDisplayNameBasedOnConfig(
     application: Application,
     tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
   ) {
