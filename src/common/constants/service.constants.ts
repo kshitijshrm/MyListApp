@@ -14,7 +14,7 @@ export const ServiceConstants = {
   global_filter_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
-    '/app/console-api/subscription/.*',
+    '/app/console-api/subscription/[^/]+$',
   ],
 
   health_check_timeout_default: 2000,
