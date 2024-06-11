@@ -1074,9 +1074,9 @@
     uuid "^8.3.2"
 
 "@foxtrotplatform/developer-platform-proto-schemas@^0.22.0":
-  version "0.22.14"
-  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.14/32345dd5e43015545d483705b9d19469b4e30ce3#32345dd5e43015545d483705b9d19469b4e30ce3"
-  integrity sha512-DOBmyMJc4VHxT5TLMn2aJo5w3pY6Cvkc1WAb1QmLgXSoMo5tCk0VovsfR+Vpmyh5rRQHOwv9Md82l/vPQ2P4qw==
+  version "0.22.16"
+  resolved "https://npm.pkg.github.com/download/@FoxtrotPlatform/developer-platform-proto-schemas/0.22.16/f4a57ed57a2617e67c028e2bd503d72e439274cf#f4a57ed57a2617e67c028e2bd503d72e439274cf"
+  integrity sha512-gH8BmaLBt/G6ytk7QmWtBzV9znhEHRcrB+IEYElCLF6etzBxISWm7SDV5G8A0MsAaKFOf7dewY5uRBYVbDRPww==
   dependencies:
     "@grpc/grpc-js" "^1.6.8"
     "@nestjs/axios" "^0.1.0"
@@ -1496,6 +1496,13 @@
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@js-sdsl/ordered-map/-/ordered-map-4.4.2.tgz#9299f82874bab9e4c7f9c48d865becbfe8d6907c"
   integrity sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==
+
+"@liaoliaots/nestjs-redis-health@^9.0.4":
+  version "9.0.4"
+  resolved "https://registry.yarnpkg.com/@liaoliaots/nestjs-redis-health/-/nestjs-redis-health-9.0.4.tgz#f62ec53288d8bdba2225607c4fe968ea5ad7b057"
+  integrity sha512-bVHQl4ZmkdJ6SpGi9vxBjl9RjaCA7enhOV9nFRviyfkMXV6Za0NaCGPwLmNeJJhXW2/ZYbSZFM/i/B3D8vX+wA==
+  dependencies:
+    tslib "2.4.1"
 
 "@lukeed/csprng@^1.0.0":
   version "1.1.0"
@@ -2971,6 +2978,11 @@
     pg-protocol "*"
     pg-types "^2.2.0"
 
+"@types/pluralize@^0.0.33":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@types/pluralize/-/pluralize-0.0.33.tgz#8ad9018368c584d268667dd9acd5b3b806e8c82a"
+  integrity sha512-JOqsl+ZoCpP4e8TDke9W79FDcSgPAR0l6pixx2JHkhnRjvShyYiAYw2LVsnA7K08Y6DeOnaU6ujmENO4os/cYg==
+
 "@types/prettier@^2.1.5":
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.7.3.tgz#3e51a17e291d01d17d3fc61422015a933af7a08f"
@@ -3753,6 +3765,11 @@ bytes@3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
   integrity sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==
+
+cache-control-parser@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/cache-control-parser/-/cache-control-parser-2.0.6.tgz#c33acd5f278c375b803f7b237f1c6334442aed2c"
+  integrity sha512-N4rxCk7V8NLfUVONXG0d7S4IyTQh3KEDW5k2I4CAcEUcMQCmVkfAMn37JSWfUQudiR883vDBy5XM5+TS2Xo7uQ==
 
 call-bind@^1.0.2, call-bind@^1.0.5, call-bind@^1.0.6, call-bind@^1.0.7:
   version "1.0.7"
@@ -5505,7 +5522,7 @@ interpret@^1.0.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
 
-ioredis@^5.3.2:
+ioredis@^5.3.2, ioredis@^5.4.1:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-5.4.1.tgz#1c56b70b759f01465913887375ed809134296f40"
   integrity sha512-2YZsvl7jopIa1gaePkeMtd9rAcSjOOjPtpcLlOeusyO+XH2SK5ZcT+UCrElPP+WVIInh2TzeI4XW9ENaSLVVHA==
@@ -7169,7 +7186,7 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pluralize@8.0.0:
+pluralize@8.0.0, pluralize@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-8.0.0.tgz#1a6fa16a38d12a1901e0320fa017051c539ce3b1"
   integrity sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
@@ -8275,10 +8292,18 @@ ts-poet@^6.7.0:
   dependencies:
     dprint-node "^1.0.8"
 
-ts-proto-descriptors@1.15.0, ts-proto-descriptors@^1.15.0:
+ts-proto-descriptors@1.15.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.15.0.tgz#e859e3a2887da2d954c552524719b80bdb6ee355"
   integrity sha512-TYyJ7+H+7Jsqawdv+mfsEpZPTIj9siDHS6EMCzG/z3b/PZiphsX+mWtqFfFVe5/N0Th6V3elK9lQqjnrgTOfrg==
+  dependencies:
+    long "^5.2.3"
+    protobufjs "^7.2.4"
+
+ts-proto-descriptors@1.16.0, ts-proto-descriptors@^1.15.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.16.0.tgz#e9f15d5d23774088f8573fa5a2d75130c64a565a"
+  integrity sha512-3yKuzMLpltdpcyQji1PJZRfoo4OJjNieKTYkQY8pF7xGKsYz/RHe3aEe4KiRxcinoBmnEhmuI+yJTxLb922ULA==
   dependencies:
     long "^5.2.3"
     protobufjs "^7.2.4"
@@ -8294,14 +8319,14 @@ ts-proto@^1.120.0:
     ts-proto-descriptors "1.15.0"
 
 ts-proto@^1.169.0:
-  version "1.175.0"
-  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.175.0.tgz#b8076b0a6713afbb4bd9b0749a916a50418f0aa3"
-  integrity sha512-JH60AFESM7KzzhmX/7rOabi5BlE94RGU/mq0Q73GTQqKW5Mck6CCEay/Ts/Ld/kuayCZpdSTfM+opOUD/A2oFw==
+  version "1.176.1"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.176.1.tgz#43188226b3eac5dd395de0e5e48ee2fe16b5a343"
+  integrity sha512-oZtvXcAe/4ILiHSvNhrQAqZ3MHpwHXZ+J0gN1rBLvTQ7NBAmM8Ccl2kTiUqybDBs/48FFEalAqtErcjvO6ePPQ==
   dependencies:
     case-anything "^2.1.13"
     protobufjs "^7.2.4"
     ts-poet "^6.7.0"
-    ts-proto-descriptors "1.15.0"
+    ts-proto-descriptors "1.16.0"
 
 ts-protoc-gen@^0.15.0:
   version "0.15.0"
@@ -8336,6 +8361,11 @@ tsconfig-paths@4.2.0, tsconfig-paths@^4.1.2:
     json5 "^2.2.2"
     minimist "^1.2.6"
     strip-bom "^3.0.0"
+
+tslib@2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
+  integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
 
 tslib@2.5.3:
   version "2.5.3"
