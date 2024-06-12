@@ -575,14 +575,15 @@ export class SubscriptionService {
       const cachedSubscriptonResponse = await this.redisService.get(
         RedisConstants.getConsoleSubscriptionsKey(tenantId),
       );
-      this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-        shouldInvalidateCache,
-        fetchSettingsCompatible,
-      );
-      return JSON.parse(cachedSubscriptonResponse);
+      if (cachedSubscriptonResponse) {
+        this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
+          ctx,
+          userId,
+          tenantId,
+          fetchSettingsCompatible,
+        );
+        return JSON.parse(cachedSubscriptonResponse);
+      }
     } catch (error) {
       this.logger.error(
         `Error fetching cached subscriptions: ${error.message}`,
@@ -593,7 +594,6 @@ export class SubscriptionService {
       ctx,
       userId,
       tenantId,
-      shouldInvalidateCache,
       fetchSettingsCompatible,
     );
   }
@@ -602,7 +602,6 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-    shouldInvalidateCache: boolean,
     fetchSettingsCompatible = false,
   ) {
     const tenantConfigs = await this.getTenantConfigsByTenantId(ctx, tenantId);
@@ -755,8 +754,10 @@ export class SubscriptionService {
       const cachedSettingsResponse = await this.redisService.get(
         RedisConstants.getConsoleSettingsKey(tenantId),
       );
-      this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
-      return JSON.parse(cachedSettingsResponse);
+      if (cachedSettingsResponse) {
+        this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
+        return JSON.parse(cachedSettingsResponse);
+      }
     } catch (error) {
       this.logger.error(
         `Error fetching cached console settings: ${error.message}`,
@@ -1028,9 +1029,6 @@ export class SubscriptionService {
     if (appRelPath) {
       return appRelPath.url;
     }
-    this.logger.error(
-      `No landing page configured for ${tenantId} - ${solutionDto.solutionVersionId}`,
-    );
     return '';
   }
 
