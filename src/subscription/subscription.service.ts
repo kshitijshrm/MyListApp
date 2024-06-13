@@ -1044,12 +1044,18 @@ export class SubscriptionService {
           config.typeName === appDisplayNameSingular.trim().toLocaleLowerCase(),
       );
       if (appTenantConfig) {
-        if (pluralize.isSingular(appDisplayName.trim())) {
+        if (
+          pluralize.isSingular(appDisplayName.trim()) &&
+          appTenantConfig.alias.singular.length
+        ) {
           application.versions[0].displayName = _.capitalize(
             appTenantConfig.alias.singular,
           );
         }
-        if (pluralize.isPlural(appDisplayName.trim())) {
+        if (
+          pluralize.isPlural(appDisplayName.trim()) &&
+          appTenantConfig.alias.plural.length
+        ) {
           application.versions[0].displayName = _.capitalize(
             appTenantConfig.alias.plural,
           );
