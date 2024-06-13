@@ -558,9 +558,10 @@ describe('SubscriptionService', () => {
         .mockClear();
       jest
         .spyOn(redisService, 'get')
-        .mockImplementation(async () =>
+        .mockImplementationOnce(async () =>
           JSON.stringify(sampleSubscriptionResponse),
-        );
+        )
+        .mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
       const result = await service.getAllSubscriptionsWithAddonApps(
         ctx,
