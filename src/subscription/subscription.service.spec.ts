@@ -1,4 +1,7 @@
-import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
+import {
+  SubscriptionDTO,
+  SubscriptionsResponseDTO,
+} from 'src/common/dto/subscription/subscription.dto';
 import { TestHelpers } from 'src/common/test/test.helpers';
 import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
@@ -17,6 +20,7 @@ import {
 } from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
 import { faker } from '@faker-js/faker';
 import { RedisConstants } from 'src/common/constants/redis.constants';
+import { AppType } from 'src/common/dto/application/application.dto';
 
 describe('SubscriptionService', () => {
   // setting timeout to be 100 seconds to allow aaa testing aaa permissions timed upload retries
@@ -395,6 +399,101 @@ describe('SubscriptionService', () => {
         skuUsage: {},
       },
     ];
+    const sampleSubscriptionResponse: SubscriptionsResponseDTO = {
+      subscriptions: [
+        {
+          subscriptionId: 'subscription:3e134368-ca90-4941-b210-ba2d803439ca',
+          applications: [],
+          solutions: [
+            {
+              solutionId: 'solution:dce2047a-32c2-5475-98de-e2b2857bcd4c',
+              solutionVersionId:
+                'solutionversion:bf442532-fa83-5ded-b6b8-4c5b6979b741',
+              displayName: 'SampleSolution',
+              shortDescription: 'short',
+              longDescription: 'long',
+              icon: {
+                fileId: 'file:123',
+                fileDescription: 'xyz',
+                fileName: 'file',
+              },
+              version: '1.0.0',
+              images: [
+                {
+                  fileId: 'f8777b66-3b33-4c87-8c31-8900e7345e50',
+                  fileName: 'DispatchOne_logo_1000x500 (1).png',
+                  fileDescription: '',
+                  fileUrl:
+                    'https://d1ravn1ruyfjdn.cloudfront.net/f8777b66-3b33-4c87-8c31-8900e7345e50-DispatchOne_logo_1000x500-(1).png',
+                },
+              ],
+              applications: [
+                {
+                  appId: 'app:5187e0bf-8f3c-536e-82ed-61296a01b691',
+                  appVersionId:
+                    'appversion:904498c9-71ec-5b59-ba14-28ea13746963',
+                  listingName: 'Route Optimizer',
+                  description: 'random',
+                  applicationMenu: [],
+                  version: '2.0.4',
+                  urlPath: '/optimizer',
+                  appType: AppType.mobile,
+                  isPrivate: true,
+                  consoleCompatible: false,
+                  appUrls: [
+                    {
+                      name: 'relativePath',
+                      url: '/myTestRelPath',
+                    },
+                    {
+                      name: 'docs',
+                      url: 'my-docs',
+                    },
+                  ],
+                  urlOverrides: [
+                    {
+                      name: 'override1',
+                      url: 'override54534.com',
+                    },
+                  ],
+                  icon: {
+                    fileId: 'c3de156d-1440-4602-b570-a8db1b9f3e19',
+                    fileName: 'rute_optimizer.svg',
+                    fileDescription: 'image/svg+xml',
+                    fileUrl: 'randomUrl',
+                  },
+                  images: [
+                    {
+                      fileId: '5610d337-3ec8-44f3-818a-f8e8d275789b',
+                      fileName: '01.png',
+                      fileDescription: '',
+                      fileUrl: 'imageUrl',
+                    },
+                  ],
+                  shortDescription: 'Reduce costs',
+                  longDescription: 'Reduce costs and delivery times',
+                },
+              ],
+              isMarketplaceCompatible: true,
+              isConsoleCompatible: true,
+              solutionAppSetting: [],
+              landingPage: '/control-tower',
+            },
+          ],
+          status: {
+            status: 'Active',
+            activatedAt: '2024-03-26T09:49:58.867Z',
+            requestedAt: '2024-03-26T09:49:53.463Z',
+          },
+          tier: {
+            planType: 'UNRECOGNIZED',
+            displayName: 'Starter',
+            periodInDays: 30,
+          },
+        },
+      ],
+      isSettingsAvailable: false,
+    };
 
     beforeEach(() => {
       applicationServiceClient.getSolutionByVersionId = jest
@@ -450,6 +549,30 @@ describe('SubscriptionService', () => {
       ).toHaveBeenCalledTimes(2);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
+      expect(result.subscriptions).toHaveLength(1);
+    });
+    it('should return subscription response from cache', async () => {
+      jest
+        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
+        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockClear();
+      jest
+        .spyOn(redisService, 'get')
+        .mockImplementationOnce(async () =>
+          JSON.stringify(sampleSubscriptionResponse),
+        )
+        .mockImplementation(async () => undefined);
+      const ctx = TestHelpersBase.CreatePlatformContext();
+      const result = await service.getAllSubscriptionsWithAddonApps(
+        ctx,
+        'user-id',
+        'tenant-id',
+        false,
+      );
+      expect(
+        subscriptionServiceClient.getSubscriptionsByTenantId,
+      ).toHaveBeenCalledTimes(0);
+      expect(result).toBeDefined();
       expect(result.subscriptions).toHaveLength(1);
     });
     it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {

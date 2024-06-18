@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { ServiceConstants } from '../constants/service.constants';
 
 @Injectable()
@@ -16,6 +16,7 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> {
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
 
     // skip response transformation for health check and ping
     if (
@@ -27,6 +28,10 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
+      tap((data) => {
+        if (request.method == 'GET')
+          response.set('Cache-Control', 'private, max-age=10800');
+      }),
       map((data) => {
         return {
           data: instanceToPlain(data),

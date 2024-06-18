@@ -6,13 +6,18 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 @Injectable()
 export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
     return next.handle().pipe(
+      tap((data) => {
+        if (request.method == 'GET')
+          response.set('Cache-Control', 'private, max-age=10800');
+      }),
       map((data) => {
         return {
           data: instanceToPlain(data.subscriptions),
@@ -29,19 +34,5 @@ export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
         };
       }),
     );
-  }
-
-  checkIfVersionIdIsAppVersion(params: Record<string, any>): boolean {
-    const { versionId, versionId1, versionId2 } = params;
-    if (
-      (versionId && versionId.includes('appversion')) ||
-      (versionId1 &&
-        versionId2 &&
-        versionId1.includes('appversion') &&
-        versionId2.includes('appversion'))
-    )
-      return true;
-
-    return false;
   }
 }

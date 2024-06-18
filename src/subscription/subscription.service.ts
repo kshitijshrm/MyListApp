@@ -337,9 +337,10 @@ export class SubscriptionService {
     const stackId = tenant.stackId;
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     let isSettingsAvailable = false;
+
     for (const subscription of subscriptions || []) {
       this.logger.log(
-        'processing subscriptions: ' + subscription.id.subscriptionId,
+        'processing subscription: ' + subscription.id.subscriptionId,
       );
 
       const subscriptionDTO: SubscriptionDTO = {
@@ -570,6 +571,39 @@ export class SubscriptionService {
     if (shouldInvalidateCache) {
       await this.invalidateCaches(ctx, tenantId);
     }
+    try {
+      const cachedSubscriptonResponse = await this.redisService.get(
+        RedisConstants.getConsoleSubscriptionsKey(tenantId),
+      );
+      if (cachedSubscriptonResponse) {
+        this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
+          ctx,
+          userId,
+          tenantId,
+          fetchSettingsCompatible,
+        );
+        return JSON.parse(cachedSubscriptonResponse);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error fetching cached subscriptions: ${error.message}`,
+      );
+    }
+
+    return this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
+      ctx,
+      userId,
+      tenantId,
+      fetchSettingsCompatible,
+    );
+  }
+
+  async getAllSubscriptionsWithAddonAppsAndSaveToRedis(
+    ctx: PlatformRequestContext,
+    userId: string,
+    tenantId: string,
+    fetchSettingsCompatible = false,
+  ) {
     const tenantConfigs = await this.getTenantConfigsByTenantId(ctx, tenantId);
 
     const subscriptionsResponse = await this.getAllSubscriptions(
@@ -689,6 +723,12 @@ export class SubscriptionService {
       }
     }
 
+    await this.redisService.setEx(
+      RedisConstants.getConsoleSubscriptionsKey(tenantId),
+      JSON.stringify(subscriptionsResponse),
+      RedisConstants.one_day_in_seconds,
+    );
+
     return subscriptionsResponse;
   }
 
@@ -705,6 +745,32 @@ export class SubscriptionService {
       shouldInvalidateCache,
       true,
     );
+    if (shouldInvalidateCache) {
+      await this.redisService.del(
+        RedisConstants.getConsoleSettingsKey(tenantId),
+      );
+    }
+    try {
+      const cachedSettingsResponse = await this.redisService.get(
+        RedisConstants.getConsoleSettingsKey(tenantId),
+      );
+      if (cachedSettingsResponse) {
+        this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
+        return JSON.parse(cachedSettingsResponse);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error fetching cached console settings: ${error.message}`,
+      );
+    }
+
+    return this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
+  }
+
+  async getAllSolutionSettingAndSaveToRedis(
+    tenantId: string,
+    allSubscriptions: SubscriptionsResponseDTO,
+  ) {
     let solutionsSettings: SolutionSettingsDTO[] = [];
     let foundationalAppsSetting: FoundationalAppsSettingsDTO[] = [];
     let foundationAppIdSet = new Set<string>();
@@ -725,10 +791,16 @@ export class SubscriptionService {
         solutionsSettings?.push(setting);
       }
     }
-    return {
+    const response = {
       foundation: foundationalAppsSetting,
       solutions: solutionsSettings,
     };
+    await this.redisService.setEx(
+      RedisConstants.getConsoleSettingsKey(tenantId),
+      JSON.stringify(response),
+      RedisConstants.one_day_in_seconds,
+    );
+    return response;
   }
 
   findSolutionBySolutionId(
@@ -908,6 +980,13 @@ export class SubscriptionService {
           `Tenant Config cache has been successfully reset for: ${tenantId}`,
         );
       });
+    await this.redisService
+      .del(RedisConstants.getConsoleSubscriptionsKey(tenantId))
+      .then((response) => {
+        this.logger.log(
+          `Console subscriptions cache has been successfully reset for: ${tenantId}`,
+        );
+      });
   }
 
   private filterUrlOverridesByStackId(
@@ -950,9 +1029,6 @@ export class SubscriptionService {
     if (appRelPath) {
       return appRelPath.url;
     }
-    this.logger.error(
-      `No landing page configured for ${tenantId} - ${solutionDto.solutionVersionId}`,
-    );
     return '';
   }
 
@@ -968,12 +1044,18 @@ export class SubscriptionService {
           config.typeName === appDisplayNameSingular.trim().toLocaleLowerCase(),
       );
       if (appTenantConfig) {
-        if (pluralize.isSingular(appDisplayName.trim())) {
+        if (
+          pluralize.isSingular(appDisplayName.trim()) &&
+          appTenantConfig.alias.singular.length
+        ) {
           application.versions[0].displayName = _.capitalize(
             appTenantConfig.alias.singular,
           );
         }
-        if (pluralize.isPlural(appDisplayName.trim())) {
+        if (
+          pluralize.isPlural(appDisplayName.trim()) &&
+          appTenantConfig.alias.plural.length
+        ) {
           application.versions[0].displayName = _.capitalize(
             appTenantConfig.alias.plural,
           );

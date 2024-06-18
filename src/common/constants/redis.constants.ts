@@ -4,6 +4,12 @@ export const RedisConstants = {
   getSubscriptionsKey: (tenant: string) => {
     return `subscriptions-for-tenant:${tenant}`;
   },
+  getConsoleSubscriptionsKey: (tenant: string) => {
+    return `console-subscriptions-for-tenant:${tenant}`;
+  },
+  getConsoleSettingsKey: (tenant: string) => {
+    return `console-settings-for-tenant:${tenant}`;
+  },
   getConfigKey: (tenantId: string) => {
     return `console::configs-for-tenant:${tenantId}`;
   },
