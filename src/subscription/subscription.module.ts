@@ -7,6 +7,13 @@ import { FILE_SERVICE_NAME } from 'src/shared/schemas/os1/core/service/file.pb';
 import { SubscriptionController } from './subscription.controller';
 import { SubscriptionService } from './subscription.service';
 import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
+import { redisStore } from 'cache-manager-ioredis-yet';
+import { redisClusterOptions } from 'src/common/config/redis';
+import { RedisConstants } from 'src/common/constants/redis.constants';
+import { CacheModule } from '@nestjs/cache-manager';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GlobalCustomCacheInterceptor } from 'src/common/interceptor/global.cache.interceptor';
+
 
 @Module({
   imports: [
@@ -78,8 +85,20 @@ import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
         },
       },
     ]),
+    CacheModule.register({
+      store: redisStore,
+      ...redisClusterOptions,
+      ttl: RedisConstants.one_day_in_milli_seconds,
+    }),
   ],
   controllers: [SubscriptionController],
-  providers: [SubscriptionService, RedisService],
+  providers: [
+    SubscriptionService,
+    RedisService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GlobalCustomCacheInterceptor,
+    },
+  ],
 })
 export class SubscriptionModule {}

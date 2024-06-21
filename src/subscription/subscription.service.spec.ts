@@ -79,6 +79,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(false);
     });
@@ -91,6 +92,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(true);
     });
@@ -105,6 +107,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(false);
     });
@@ -118,7 +121,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
-        true,
+        false,
       );
       expect(result).toEqual(true);
     });
@@ -542,37 +545,12 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(2);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
-    });
-    it('should return subscription response from cache', async () => {
-      jest
-        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
-        .mockClear();
-      jest
-        .spyOn(redisService, 'get')
-        .mockImplementationOnce(async () =>
-          JSON.stringify(sampleSubscriptionResponse),
-        )
-        .mockImplementation(async () => undefined);
-      const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getAllSubscriptionsWithAddonApps(
-        ctx,
-        'user-id',
-        'tenant-id',
-        false,
-      );
-      expect(
-        subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(0);
-      expect(result).toBeDefined();
       expect(result.subscriptions).toHaveLength(1);
     });
     it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {
@@ -601,7 +579,6 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
@@ -633,7 +610,6 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
@@ -663,7 +639,6 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
@@ -770,7 +745,6 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
@@ -779,46 +753,10 @@ describe('SubscriptionService', () => {
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
       expect(redisSetSpy).toHaveBeenCalledWith(
-        RedisConstants.getConfigKey('tenant-id'),
+        RedisConstants.getTenantConfigKey('tenant-id'),
         JSON.stringify(
           TestHelpers.CreateGetTenantConfigsByTenantIdResponse().configs,
         ),
-      );
-    });
-
-    it('should evit tenant config cache when getting subscriptions with "no-cache" cache directive', async () => {
-      jest
-        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
-        .mockClear();
-      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
-      jest.spyOn(redisService, 'set').mockImplementation(async (key) => {
-        return new Promise<void>((r) => {
-          r();
-        });
-      });
-      const redisDelSpy = jest
-        .spyOn(redisService, 'del')
-        .mockImplementation(async (key) => {
-          return new Promise<void>((r) => {
-            r();
-          });
-        });
-      const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getAllSubscriptionsWithAddonApps(
-        ctx,
-        'user-id',
-        'tenant-id',
-        true, // flag for cache invalidation
-      );
-      expect(
-        subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
-      expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
-      expect(redisDelSpy).toHaveBeenCalledWith(
-        RedisConstants.getConfigKey('tenant-id'),
       );
     });
   });

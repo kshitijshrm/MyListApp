@@ -16,7 +16,8 @@ export const ServiceConstants = {
     '/app/console-api/health',
     '/app/console-api/subscription/[^/]+$',
   ],
-
+  access_token_header: 'x-coreos-access',
+  cache_control_header: 'cache-control',
   health_check_timeout_default: 2000,
   proto_schemas_root:
     './node_modules/@foxtrotplatform/developer-platform-proto-schemas',

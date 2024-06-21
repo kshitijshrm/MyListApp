@@ -302,7 +302,7 @@ export class SubscriptionService {
     userId: string,
     tenantId: string,
     tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
-    fetchSettingsCompatible: boolean,
+    applyFilterForConsoleCompatibleWebApps: boolean,
   ): Promise<SubscriptionsResponseDTO> {
     const subscriptions = await this.getActiveSubscriptions(
       ctx,
@@ -407,7 +407,7 @@ export class SubscriptionService {
           // sort applications by display order descending
           appsReferencedInSolution = this.sortSolutionApplications(
             appsReferencedInSolution,
-            fetchSettingsCompatible,
+            applyFilterForConsoleCompatibleWebApps,
           );
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
@@ -425,7 +425,7 @@ export class SubscriptionService {
                   application,
                   tenant,
                   corsAppsAssignedToUser,
-                  fetchSettingsCompatible,
+                  applyFilterForConsoleCompatibleWebApps,
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -462,7 +462,7 @@ export class SubscriptionService {
                   application,
                   tenant,
                   corsAppsAssignedToUser,
-                  fetchSettingsCompatible,
+                  applyFilterForConsoleCompatibleWebApps,
                 )
               ) {
                 this.sortApplicationMenuItems(
@@ -519,7 +519,7 @@ export class SubscriptionService {
               JSON.parse(appFromRedis),
               tenant,
               corsAppsAssignedToUser,
-              fetchSettingsCompatible,
+              applyFilterForConsoleCompatibleWebApps,
             )
           ) {
             this.updateAppAndSubMenuDisplayNameBasedOnConfig(
@@ -543,7 +543,7 @@ export class SubscriptionService {
               app,
               tenant,
               corsAppsAssignedToUser,
-              fetchSettingsCompatible,
+              applyFilterForConsoleCompatibleWebApps,
             )
           ) {
             this.updateAppAndSubMenuDisplayNameBasedOnConfig(
@@ -565,44 +565,7 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-    shouldInvalidateCache: boolean,
-    fetchSettingsCompatible = false,
-  ): Promise<SubscriptionsResponseDTO> {
-    if (shouldInvalidateCache) {
-      await this.invalidateCaches(ctx, tenantId);
-    }
-    try {
-      const cachedSubscriptonResponse = await this.redisService.get(
-        RedisConstants.getConsoleSubscriptionsKey(tenantId),
-      );
-      if (cachedSubscriptonResponse) {
-        this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
-          ctx,
-          userId,
-          tenantId,
-          fetchSettingsCompatible,
-        );
-        return JSON.parse(cachedSubscriptonResponse);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error fetching cached subscriptions: ${error.message}`,
-      );
-    }
-
-    return this.getAllSubscriptionsWithAddonAppsAndSaveToRedis(
-      ctx,
-      userId,
-      tenantId,
-      fetchSettingsCompatible,
-    );
-  }
-
-  async getAllSubscriptionsWithAddonAppsAndSaveToRedis(
-    ctx: PlatformRequestContext,
-    userId: string,
-    tenantId: string,
-    fetchSettingsCompatible = false,
+    applyFilterForConsoleCompatibleWebApps = true, // should be true if console-compatible web apps need to be returned
   ) {
     const tenantConfigs = await this.getTenantConfigsByTenantId(ctx, tenantId);
 
@@ -611,7 +574,7 @@ export class SubscriptionService {
       userId,
       tenantId,
       tenantConfigs,
-      fetchSettingsCompatible,
+      applyFilterForConsoleCompatibleWebApps,
     );
     const solutions = subscriptionsResponse.subscriptions
       .map((subscription) => subscription.solutions)
@@ -723,12 +686,6 @@ export class SubscriptionService {
       }
     }
 
-    await this.redisService.setEx(
-      RedisConstants.getConsoleSubscriptionsKey(tenantId),
-      JSON.stringify(subscriptionsResponse),
-      RedisConstants.one_day_in_seconds,
-    );
-
     return subscriptionsResponse;
   }
 
@@ -736,41 +693,13 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     userId: string,
     tenantId: string,
-    shouldInvalidateCache: boolean,
-  ): Promise<SubscriptionSettings> {
+  ) {
     const allSubscriptions = await this.getAllSubscriptionsWithAddonApps(
       ctx,
       userId,
       tenantId,
-      shouldInvalidateCache,
-      true,
+      false,
     );
-    if (shouldInvalidateCache) {
-      await this.redisService.del(
-        RedisConstants.getConsoleSettingsKey(tenantId),
-      );
-    }
-    try {
-      const cachedSettingsResponse = await this.redisService.get(
-        RedisConstants.getConsoleSettingsKey(tenantId),
-      );
-      if (cachedSettingsResponse) {
-        this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
-        return JSON.parse(cachedSettingsResponse);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error fetching cached console settings: ${error.message}`,
-      );
-    }
-
-    return this.getAllSolutionSettingAndSaveToRedis(tenantId, allSubscriptions);
-  }
-
-  async getAllSolutionSettingAndSaveToRedis(
-    tenantId: string,
-    allSubscriptions: SubscriptionsResponseDTO,
-  ) {
     let solutionsSettings: SolutionSettingsDTO[] = [];
     let foundationalAppsSetting: FoundationalAppsSettingsDTO[] = [];
     let foundationAppIdSet = new Set<string>();
@@ -795,11 +724,6 @@ export class SubscriptionService {
       foundation: foundationalAppsSetting,
       solutions: solutionsSettings,
     };
-    await this.redisService.setEx(
-      RedisConstants.getConsoleSettingsKey(tenantId),
-      JSON.stringify(response),
-      RedisConstants.one_day_in_seconds,
-    );
     return response;
   }
 
@@ -831,19 +755,19 @@ export class SubscriptionService {
 
   private sortSolutionApplications(
     appsReferencedInSolution: SolutionVersion_Application[],
-    fetchSettingsCompatible: boolean,
+    applyFilterForConsoleCompatibleWebApps: boolean,
   ): SolutionVersion_Application[] {
-    return fetchSettingsCompatible
-      ? appsReferencedInSolution.sort((a, b) => {
-          // default undefined display order to 0 so it always moved at bottom of the list
-          return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-        })
-      : appsReferencedInSolution
+    return applyFilterForConsoleCompatibleWebApps
+      ? appsReferencedInSolution
           .sort((a, b) => {
             // default undefined display order to 0 so it always moved at bottom of the list
             return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
           })
-          .filter((a) => a.displayOrder > 0);
+          // filter apps which have display order greater than zero (true for web apps)
+          .filter((a) => a.displayOrder > 0)
+      : appsReferencedInSolution.sort((a, b) => {
+          return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+        });
   }
 
   private sortApplicationMenuItems(
@@ -859,14 +783,14 @@ export class SubscriptionService {
     app: Application,
     tenant: Tenant,
     coreosAppsAssignedToUser: string[],
-    fetchSettingsCompatible: boolean,
+    applyFilterForConsoleCompatibleWebApps: boolean,
   ): boolean {
     // filter out which are not console compatable apps not assigned to user
-    return fetchSettingsCompatible
-      ? tenant.isDeveloperTenant || coreosAppsAssignedToUser?.includes(app.urn)
-      : app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
+    return applyFilterForConsoleCompatibleWebApps
+      ? app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
           (tenant.isDeveloperTenant ||
-            coreosAppsAssignedToUser?.includes(app.urn));
+            coreosAppsAssignedToUser?.includes(app.urn))
+      : tenant.isDeveloperTenant || coreosAppsAssignedToUser?.includes(app.urn);
   }
 
   private getSubscriptionsByTenantId(
@@ -927,7 +851,7 @@ export class SubscriptionService {
   ): Promise<GetTenantConfigsByTenantIdResponse_Config[]> {
     try {
       const cachedConfigs = await this.redisService.get(
-        RedisConstants.getConfigKey(tenantId),
+        RedisConstants.getTenantConfigKey(tenantId),
       );
       if (cachedConfigs && typeof cachedConfigs == 'string') {
         return JSON.parse(cachedConfigs);
@@ -954,7 +878,7 @@ export class SubscriptionService {
 
       if (configs && configs.length) {
         await this.redisService.set(
-          RedisConstants.getConfigKey(tenantId),
+          RedisConstants.getTenantConfigKey(tenantId),
           JSON.stringify(configs),
         );
       }
@@ -967,26 +891,6 @@ export class SubscriptionService {
       );
       return [];
     }
-  }
-
-  private async invalidateCaches(
-    ctx: PlatformRequestContext,
-    tenantId: string,
-  ) {
-    await this.redisService
-      .del(RedisConstants.getConfigKey(tenantId))
-      .then((response) => {
-        this.logger.log(
-          `Tenant Config cache has been successfully reset for: ${tenantId}`,
-        );
-      });
-    await this.redisService
-      .del(RedisConstants.getConsoleSubscriptionsKey(tenantId))
-      .then((response) => {
-        this.logger.log(
-          `Console subscriptions cache has been successfully reset for: ${tenantId}`,
-        );
-      });
   }
 
   private filterUrlOverridesByStackId(
