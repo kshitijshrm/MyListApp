@@ -11,10 +11,14 @@ import {
 } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 
 export const ServiceConstants = {
-  global_filter_skip_routes: [
+  response_interceptor_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
-    '/app/console-api/subscription/[^/]+$',
+    '/app/console-api/subscription/[a-zA-Z0-9]+$',
+  ],
+  cache_interceptor_skip_routes: [
+    '/app/console-api/ping',
+    '/app/console-api/health',
   ],
   access_token_header: 'x-coreos-access',
   cache_control_header: 'cache-control',

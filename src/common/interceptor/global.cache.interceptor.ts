@@ -43,6 +43,15 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
+    if (
+      ServiceConstants.response_interceptor_skip_routes.findIndex((routeRe) =>
+        new RegExp(routeRe).test(request.originalUrl),
+      ) !== -1 ||
+      request.method !== 'GET'
+    ) {
+      return next.handle();
+    }
+
     let serveCachedResponse = true;
     const cacheControlHeader = request.headers[
       ServiceConstants.cache_control_header
