@@ -363,9 +363,13 @@ describe('SubscriptionService', () => {
 
   describe('getTenantSubscriptionsWithAddOns', () => {
     subscriptionServiceClient = mock<SubscriptionServiceClient>();
-    const sampleSubscriptions: Subscription[] = [
+    const [randomSolnId, randomSolnVersionId] = [
+      TestHelpers.CreateRandomSolutionId(),
+      TestHelpers.CreateRandomSolutionVersionId(),
+    ];
+    const sampleSubscriptionsWithAddOns: Subscription[] = [
       {
-        id: { subscriptionId: 'sample-subscription-id' },
+        id: { subscriptionId: 'solution-subscription-id' },
         organization: undefined,
         status: {
           activatedAt: '2024-02-07T00:49:47.917Z',
@@ -386,8 +390,8 @@ describe('SubscriptionService', () => {
         item: {
           solution: {
             id: {
-              solutionId: TestHelpers.CreateRandomSolutionId(),
-              solutionVersionId: TestHelpers.CreateRandomSolutionVersionId(),
+              solutionId: randomSolnId,
+              solutionVersionId: randomSolnVersionId,
             },
           },
         },
@@ -401,113 +405,77 @@ describe('SubscriptionService', () => {
         metadata: undefined,
         skuUsage: {},
       },
-    ];
-    const sampleSubscriptionResponse: SubscriptionsResponseDTO = {
-      subscriptions: [
-        {
-          subscriptionId: 'subscription:3e134368-ca90-4941-b210-ba2d803439ca',
-          applications: [],
-          solutions: [
-            {
-              solutionId: 'solution:dce2047a-32c2-5475-98de-e2b2857bcd4c',
-              solutionVersionId:
-                'solutionversion:bf442532-fa83-5ded-b6b8-4c5b6979b741',
-              displayName: 'SampleSolution',
-              shortDescription: 'short',
-              longDescription: 'long',
-              icon: {
-                fileId: 'file:123',
-                fileDescription: 'xyz',
-                fileName: 'file',
-              },
-              version: '1.0.0',
-              images: [
-                {
-                  fileId: 'f8777b66-3b33-4c87-8c31-8900e7345e50',
-                  fileName: 'DispatchOne_logo_1000x500 (1).png',
-                  fileDescription: '',
-                  fileUrl:
-                    'https://d1ravn1ruyfjdn.cloudfront.net/f8777b66-3b33-4c87-8c31-8900e7345e50-DispatchOne_logo_1000x500-(1).png',
-                },
-              ],
-              applications: [
-                {
-                  appId: 'app:5187e0bf-8f3c-536e-82ed-61296a01b691',
-                  appVersionId:
-                    'appversion:904498c9-71ec-5b59-ba14-28ea13746963',
-                  listingName: 'Route Optimizer',
-                  description: 'random',
-                  applicationMenu: [],
-                  version: '2.0.4',
-                  urlPath: '/optimizer',
-                  appType: AppType.mobile,
-                  isPrivate: true,
-                  consoleCompatible: false,
-                  appUrls: [
-                    {
-                      name: 'relativePath',
-                      url: '/myTestRelPath',
-                    },
-                    {
-                      name: 'docs',
-                      url: 'my-docs',
-                    },
-                  ],
-                  urlOverrides: [
-                    {
-                      name: 'override1',
-                      url: 'override54534.com',
-                    },
-                  ],
-                  icon: {
-                    fileId: 'c3de156d-1440-4602-b570-a8db1b9f3e19',
-                    fileName: 'rute_optimizer.svg',
-                    fileDescription: 'image/svg+xml',
-                    fileUrl: 'randomUrl',
-                  },
-                  images: [
-                    {
-                      fileId: '5610d337-3ec8-44f3-818a-f8e8d275789b',
-                      fileName: '01.png',
-                      fileDescription: '',
-                      fileUrl: 'imageUrl',
-                    },
-                  ],
-                  shortDescription: 'Reduce costs',
-                  longDescription: 'Reduce costs and delivery times',
-                },
-              ],
-              isMarketplaceCompatible: true,
-              isConsoleCompatible: true,
-              solutionAppSetting: [],
-              landingPage: '/control-tower',
+      {
+        id: {
+          subscriptionId: 'addon-app-subscription-id',
+        },
+        organization: undefined,
+        item: {
+          application: {
+            id: {
+              appId: 'app:b2e6d204-e199-5bcc-bec8-5129f20819f0',
+              appVersionId: 'appversion:aa06c195-486b-5f02-838b-74082b2929e4',
             },
-          ],
-          status: {
-            status: 'Active',
-            activatedAt: '2024-03-26T09:49:58.867Z',
-            requestedAt: '2024-03-26T09:49:53.463Z',
-          },
-          tier: {
-            planType: 'UNRECOGNIZED',
-            displayName: 'Starter',
-            periodInDays: 30,
           },
         },
-      ],
-      isSettingsAvailable: false,
-    };
+        tier: {
+          displayName: 'Sample',
+          periodInDays: 365,
+          planType: SubscriptionTier_PlanType.DEVELOPER,
+          productTierId: {
+            id: `tier:${faker.datatype.uuid()}`,
+          },
+        },
+        status: {
+          status: 'Active',
+          requestedAt: '2024-02-07T00:49:46.167Z',
+          activatedAt: '2024-02-07T00:49:47.917Z',
+          log: [],
+          reason: '',
+          expiresAt: '2025-02-06T00:49:47.818Z',
+        },
+        recordStatus: {
+          isActive: true,
+          isDeleted: false,
+        },
+        skuUsage: {
+          orders: {
+            usage: [
+              {
+                from: 1707266987917,
+                to: 1709251199999,
+                usage: 0,
+              },
+            ],
+          },
+        },
+        recordAudit: undefined,
+        pendingAction: undefined,
+        documents: undefined,
+        metadata: undefined,
+      },
+    ];
 
     beforeEach(() => {
       applicationServiceClient.getSolutionByVersionId = jest
         .fn()
         .mockImplementation(() =>
-          of(TestHelpers.CreateGetSolutionByVersionIdResponse()),
+          of(
+            TestHelpers.CreateGetSolutionByVersionIdResponse(
+              randomSolnId,
+              randomSolnVersionId,
+            ),
+          ),
         );
       applicationServiceClient.getApplicationByVersionId = jest
         .fn()
         .mockImplementation(() =>
-          of(TestHelpers.CreateGetApplicationByVersionIdResponse()),
+          of(
+            TestHelpers.CreateGetApplicationByVersionIdResponse(
+              undefined,
+              true,
+            ),
+          ),
         );
       coreosAgentServiceClient.getAppsForCoreosUser = jest
         .fn()
@@ -535,9 +503,24 @@ describe('SubscriptionService', () => {
     });
 
     it('should return subscription response', async () => {
+      applicationServiceClient.getApplicationByVersionId = jest
+        .fn()
+        .mockImplementation(() =>
+          of(
+            TestHelpers.CreateGetApplicationByVersionIdResponse(
+              {
+                solnId: randomSolnId,
+                solnVersionId: randomSolnVersionId,
+              },
+              true,
+            ),
+          ),
+        );
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -548,15 +531,18 @@ describe('SubscriptionService', () => {
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptions[0].solutions[0].applications).toHaveLength(5);
     });
     it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       applicationServiceClient.getSolutionByVersionId = jest
         .fn()
@@ -582,7 +568,7 @@ describe('SubscriptionService', () => {
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(true);
       expect(result.subscriptions).toHaveLength(1);
@@ -602,7 +588,9 @@ describe('SubscriptionService', () => {
         });
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -613,7 +601,7 @@ describe('SubscriptionService', () => {
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(true);
       expect(result.subscriptions).toHaveLength(1);
@@ -631,7 +619,9 @@ describe('SubscriptionService', () => {
         });
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -642,7 +632,7 @@ describe('SubscriptionService', () => {
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
@@ -748,7 +738,7 @@ describe('SubscriptionService', () => {
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);

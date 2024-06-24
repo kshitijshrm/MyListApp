@@ -129,4 +129,11 @@ export class SolutionDTO {
     example: '/launch/control-tower',
   })
   landingPage: string;
+  @ApiProperty({
+    name: 'allowed redirect URIs',
+    description:
+      'list of relative paths allowed to be accessed on this solution',
+    example: ['/orders', '/application/settings'],
+  })
+  allowedRedirectUrls: string[];
 }
