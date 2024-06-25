@@ -400,7 +400,9 @@ export class SubscriptionService {
                 (url) => url.name === 'relativePath',
               );
               if (appRelativePathUrl) {
-                solutionDto.allowedRedirectUrls.push(appRelativePathUrl.url);
+                solutionDto.allowedRedirectUrls.push(
+                  appRelativePathUrl.url.toLowerCase(),
+                );
               }
               if (
                 applyFilterForConsoleCompatibleWebApps &&
@@ -449,7 +451,9 @@ export class SubscriptionService {
                   (url) => url.name === 'relativePath',
                 );
                 if (appRelativePathUrl) {
-                  solutionDto.allowedRedirectUrls.push(appRelativePathUrl.url);
+                  solutionDto.allowedRedirectUrls.push(
+                    appRelativePathUrl.url.toLowerCase(),
+                  );
                 }
                 if (
                   applyFilterForConsoleCompatibleWebApps &&
