@@ -16,7 +16,6 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
 
     // skip response transformation for health check and ping
     if (
