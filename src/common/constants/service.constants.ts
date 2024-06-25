@@ -20,6 +20,12 @@ export const ServiceConstants = {
     '/app/console-api/ping',
     '/app/console-api/health',
   ],
+  get_tenant_subscriptions_route_regex: new RegExp(
+    '/app/console-api/subscription/[a-z0-9A-Z]+$',
+  ),
+  get_tenant_settings_route_regex: new RegExp(
+    '/app/console-api/subscription/[a-z0-9A-Z]+/settings$',
+  ),
   access_token_header: 'x-coreos-access',
   cache_control_header: 'cache-control',
   health_check_timeout_default: 2000,

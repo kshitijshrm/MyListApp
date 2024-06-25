@@ -12,32 +12,29 @@ import { Observable, of, tap } from 'rxjs';
 import { ServiceConstants } from '../constants/service.constants';
 import jwtDecode from 'jwt-decode';
 import { parse } from 'cache-control-parser';
-import { Request } from 'express';
 import { RedisConstants } from '../constants/redis.constants';
+import { getTenantIdFromRequest } from '../utils/util';
+import { getFeatureFlags } from 'src/configuration/feature.flag';
 
 @Injectable()
 export class GlobalCustomCacheInterceptor extends CacheInterceptor {
+  featureFlags: any;
+
   constructor(
     readonly reflector: Reflector,
     @Inject(CACHE_MANAGER) cacheManager: Cache,
   ) {
     super(cacheManager, reflector);
+    this.featureFlags = getFeatureFlags();
   }
 
   trackBy(context: ExecutionContext): string | undefined {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const request = context.switchToHttp().getRequest();
     const path = httpAdapter.getRequestUrl(request);
-    const authHeader = request.headers[
-      ServiceConstants.access_token_header
-    ] as string;
-    if (authHeader) {
-      const decodedToken: Record<string, any> = jwtDecode(authHeader);
-      request.userId = decodedToken.userId;
-      // Using sid (session Id) from the token ensures that a new response is cached every time user re-login.
-      // If permissions/access has changed between logins, the updated response from the APIs is expected
-      return `${path}::${decodedToken.sid}`;
-    } else throw new BadRequestException('X-COREOS-ACCESS header is missing');
+    // Using sid (session Id) from the token ensures that a new response is cached every time user re-login.
+    // If permissions/access has changed between logins, the updated response from the APIs is expected
+    return `${path}::${request.sid}`;
   }
 
   async intercept(
@@ -46,6 +43,23 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
   ): Promise<Observable<any>> {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const request = context.switchToHttp().getRequest();
+
+    const authHeader = request.headers[
+      ServiceConstants.access_token_header
+    ] as string;
+    if (authHeader) {
+      const decodedToken: Record<string, any> = jwtDecode(authHeader);
+      request.userId = decodedToken.userId;
+      request.sid = decodedToken.sid;
+    } else throw new BadRequestException('X-COREOS-ACCESS header is missing');
+
+    const tenantId = getTenantIdFromRequest(request);
+    if (tenantId) {
+      if (!this.featureFlags.abTestTenants.includes(tenantId)) {
+        if (!this.featureFlags.autoCachingEnabled) return next.handle();
+      }
+    }
+
     const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
 
     if (
