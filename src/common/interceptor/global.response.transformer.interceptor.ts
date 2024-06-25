@@ -28,10 +28,6 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      tap((data) => {
-        if (request.method == 'GET')
-          response.set('Cache-Control', 'private, max-age=10800');
-      }),
       map((data) => {
         return {
           data: instanceToPlain(data),

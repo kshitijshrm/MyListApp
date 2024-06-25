@@ -12,7 +12,6 @@ import { Observable, of, tap } from 'rxjs';
 import { ServiceConstants } from '../constants/service.constants';
 import jwtDecode from 'jwt-decode';
 import { parse } from 'cache-control-parser';
-import { Request } from 'express';
 import { RedisConstants } from '../constants/redis.constants';
 
 @Injectable()
