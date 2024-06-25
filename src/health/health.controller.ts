@@ -9,10 +9,6 @@ import {
 } from '@nestjs/terminus';
 import { Cluster, ClusterOptions } from 'ioredis';
 import { join } from 'path';
-import {
-  redisClusterHosts,
-  redisClusterOptions,
-} from 'src/common/config/redis';
 import { ServiceConstants } from 'src/common/constants/service.constants';
 
 @ApiTags('Health')
