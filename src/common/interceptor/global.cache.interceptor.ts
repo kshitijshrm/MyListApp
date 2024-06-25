@@ -34,7 +34,9 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     if (authHeader) {
       const decodedToken: Record<string, any> = jwtDecode(authHeader);
       request.userId = decodedToken.userId;
-      return `${path}::${decodedToken.userId}`;
+      // Using sid (session Id) from the token ensures that a new response is cached every time user re-login.
+      // If permissions/access has changed between logins, the updated response from the APIs is expected
+      return `${path}::${decodedToken.sid}`;
     } else throw new BadRequestException('X-COREOS-ACCESS header is missing');
   }
 
@@ -43,6 +45,14 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
+    if (
+      ServiceConstants.cache_interceptor_skip_routes.findIndex((routeRe) =>
+        new RegExp(routeRe).test(request.originalUrl),
+      ) !== -1 ||
+      request.method !== 'GET'
+    ) {
+      return next.handle();
+    }
     let serveCachedResponse = true;
     const cacheControlHeader = request.headers[
       ServiceConstants.cache_control_header
@@ -61,10 +71,8 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     }
 
     const key = this.trackBy(context);
-    if (!key) {
-      return next.handle();
-    }
-    if (serveCachedResponse) {
+    
+    if (serveCachedResponse && key) {
       const cachedResponse = await this.cacheManager.get(key);
       if (cachedResponse) {
         // Deserialize cached response

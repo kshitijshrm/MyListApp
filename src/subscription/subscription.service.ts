@@ -249,7 +249,7 @@ export class SubscriptionService {
       ),
     ).catch((error) => {
       if (error.code === 5) {
-        // app not found. no action required
+        // solution not found. no action required
       } else {
         const message = `Error occured while getting solution for solutionVersionIdentifier ${solutionVersionIdentifier}`;
         this.logger.error(message, error.stack);
@@ -299,46 +299,18 @@ export class SubscriptionService {
   // returns only one subscription for now. Should return all subscriptions for a tenant in the future
   async getAllSubscriptions(
     ctx: PlatformRequestContext,
-    userId: string,
-    tenantId: string,
+    activeSubscriptions: Subscription[],
+    tenant: Tenant,
+    appsAssignedToUser: string[],
+    userGroups: string[],
     tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
     applyFilterForConsoleCompatibleWebApps: boolean,
   ): Promise<SubscriptionsResponseDTO> {
-    const subscriptions = await this.getActiveSubscriptions(
-      ctx,
-      userId,
-      tenantId,
-    );
-    const corsAppsAssignedToUser = await this.getCoreosAppsAssignedToUser(
-      ctx,
-      userId,
-      tenantId,
-    );
-
-    const userGroups = await firstValueFrom(
-      this.coreosAgentServiceClient
-        .getCoreosUserById(
-          {
-            tenantId,
-            coreosUserId: userId,
-          },
-          ctx.rpcMetadata,
-        )
-        .pipe(
-          map((response) => {
-            return response.groups;
-          }),
-        ),
-    );
-
-    const tenant = await firstValueFrom(
-      this.getTenantByTenantId(ctx, tenantId),
-    );
     const stackId = tenant.stackId;
     const subscriptionResponseDTOs: Array<SubscriptionDTO> = [];
     let isSettingsAvailable = false;
 
-    for (const subscription of subscriptions || []) {
+    for (const subscription of activeSubscriptions || []) {
       this.logger.log(
         'processing subscription: ' + subscription.id.subscriptionId,
       );
@@ -424,7 +396,7 @@ export class SubscriptionService {
                 this.isAppToBeAddedToSolution(
                   application,
                   tenant,
-                  corsAppsAssignedToUser,
+                  appsAssignedToUser,
                   applyFilterForConsoleCompatibleWebApps,
                 )
               ) {
@@ -461,7 +433,7 @@ export class SubscriptionService {
                 this.isAppToBeAddedToSolution(
                   application,
                   tenant,
-                  corsAppsAssignedToUser,
+                  appsAssignedToUser,
                   applyFilterForConsoleCompatibleWebApps,
                 )
               ) {
@@ -495,68 +467,14 @@ export class SubscriptionService {
 
           //add solution landing page to the DTO
           solutionDto.landingPage = this.getSolutionLandingPage(
-            tenantId,
+            tenant.tenantId,
             solutionDto,
             solution,
             userGroups,
           );
+          subscriptionResponseDTOs.push(subscriptionDTO);
         }
       }
-      if (subscription.item.application) {
-        const appFromRedis = await this.redisService.get(
-          RedisConstants.getApplicationByVersionIdKey(
-            subscription.item.application.id.appVersionId,
-          ),
-        );
-
-        if (appFromRedis) {
-          this.getApplicationByVersionIdAndSaveToRedis(
-            ctx,
-            subscription.item.application.id,
-          ).catch();
-          if (
-            this.isAppToBeAddedToSolution(
-              JSON.parse(appFromRedis),
-              tenant,
-              corsAppsAssignedToUser,
-              applyFilterForConsoleCompatibleWebApps,
-            )
-          ) {
-            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
-              JSON.parse(appFromRedis),
-              tenantConfigs,
-            );
-            subscriptionDTO.applications.push(
-              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
-                JSON.parse(appFromRedis),
-              ),
-            );
-          }
-        } else {
-          const app = await this.getApplicationByVersionIdAndSaveToRedis(
-            ctx,
-            subscription.item.application.id,
-          );
-          if (
-            app &&
-            this.isAppToBeAddedToSolution(
-              app,
-              tenant,
-              corsAppsAssignedToUser,
-              applyFilterForConsoleCompatibleWebApps,
-            )
-          ) {
-            this.updateAppAndSubMenuDisplayNameBasedOnConfig(
-              app,
-              tenantConfigs,
-            );
-            subscriptionDTO.applications.push(
-              ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-            );
-          }
-        }
-      }
-      subscriptionResponseDTOs.push(subscriptionDTO);
     }
     return { isSettingsAvailable, subscriptions: subscriptionResponseDTOs };
   }
@@ -567,24 +485,48 @@ export class SubscriptionService {
     tenantId: string,
     applyFilterForConsoleCompatibleWebApps = true, // should be true if console-compatible web apps need to be returned
   ) {
-    const tenantConfigs = await this.getTenantConfigsByTenantId(ctx, tenantId);
+    const [
+      activeTenantSubscriptions,
+      tenantEntity,
+      tenantConfigs,
+      appsAssignedToUser,
+      userGroups,
+    ] = await Promise.all([
+      this.getActiveSubscriptions(ctx, userId, tenantId),
+      firstValueFrom(this.getTenantByTenantId(ctx, tenantId)),
+      this.getTenantConfigsByTenantId(ctx, tenantId),
+      this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
+      firstValueFrom(
+        this.coreosAgentServiceClient
+          .getCoreosUserById(
+            {
+              tenantId,
+              coreosUserId: userId,
+            },
+            ctx.rpcMetadata,
+          )
+          .pipe(
+            map((response) => {
+              return response.groups;
+            }),
+          ),
+      ),
+    ]);
 
     const subscriptionsResponse = await this.getAllSubscriptions(
       ctx,
-      userId,
-      tenantId,
+      activeTenantSubscriptions,
+      tenantEntity,
+      appsAssignedToUser,
+      userGroups,
       tenantConfigs,
       applyFilterForConsoleCompatibleWebApps,
     );
     const solutions = subscriptionsResponse.subscriptions
       .map((subscription) => subscription.solutions)
       .flat();
-    const subscriptions = await this.getActiveSubscriptions(
-      ctx,
-      userId,
-      tenantId,
-    );
-    for (const subscription of subscriptions || []) {
+
+    for (const subscription of activeTenantSubscriptions || []) {
       if (subscription.item.application) {
         const appFromRedis = await this.redisService.get(
           RedisConstants.getApplicationByVersionIdKey(
@@ -623,16 +565,39 @@ export class SubscriptionService {
                 );
                 continue;
               }
-              this.logger.log(
-                'adding application to solution: ' + compatibleSolutionId,
-              );
-              this.updateAppAndSubMenuDisplayNameBasedOnConfig(
-                app,
-                tenantConfigs,
-              );
-              solution.applications.push(
-                ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-              );
+              if (
+                this.isAppToBeAddedToSolution(
+                  app,
+                  tenantEntity,
+                  appsAssignedToUser,
+                  applyFilterForConsoleCompatibleWebApps,
+                )
+              ) {
+                this.logger.log(
+                  'adding application to solution: ' + compatibleSolutionId,
+                );
+                this.sortApplicationMenuItems(
+                  app.versions[0]?.appNavigation?.menuItems || [],
+                );
+                app.versions[0].appUrlOverrides =
+                  this.filterUrlOverridesByStackId(
+                    app.versions[0]?.appUrlOverrides || [],
+                    tenantEntity.stackId,
+                  );
+                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                  app,
+                  tenantConfigs,
+                );
+                solution.applications.push(
+                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+                );
+                if (
+                  app.versions[0].appUrls?.find((url) => url.name === 'setting')
+                    ?.url?.length > 0
+                ) {
+                  subscriptionsResponse.isSettingsAvailable ||= true;
+                }
+              }
             }
           }
         } else {
@@ -669,16 +634,42 @@ export class SubscriptionService {
                   );
                   continue;
                 }
-                this.logger.log(
-                  'adding application to solution: ' + compatibleSolutionId,
-                );
-                this.updateAppAndSubMenuDisplayNameBasedOnConfig(
-                  app,
-                  tenantConfigs,
-                );
-                solution.applications.push(
-                  ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
-                );
+                if (
+                  this.isAppToBeAddedToSolution(
+                    app,
+                    tenantEntity,
+                    appsAssignedToUser,
+                    applyFilterForConsoleCompatibleWebApps,
+                  )
+                ) {
+                  this.logger.log(
+                    'adding application to solution: ' + compatibleSolutionId,
+                  );
+                  this.sortApplicationMenuItems(
+                    app.versions[0]?.appNavigation?.menuItems || [],
+                  );
+                  app.versions[0].appUrlOverrides =
+                    this.filterUrlOverridesByStackId(
+                      app.versions[0]?.appUrlOverrides || [],
+                      tenantEntity.stackId,
+                    );
+                  this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+                    app,
+                    tenantConfigs,
+                  );
+                  solution.applications.push(
+                    ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+                      app,
+                    ),
+                  );
+                  if (
+                    app.versions[0].appUrls?.find(
+                      (url) => url.name === 'setting',
+                    )?.url?.length > 0
+                  ) {
+                    subscriptionsResponse.isSettingsAvailable ||= true;
+                  }
+                }
               }
             }
           }
