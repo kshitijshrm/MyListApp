@@ -38,6 +38,7 @@ export class SolutionResponseSchemaToDtoMapper {
         solution.version[0].compatibility?.isConsoleCompatible,
       solutionAppSetting: solution.version[0].systemAppSettings ?? [],
       landingPage: '',
+      allowedRedirectUrls: [],
     };
     return response;
   }

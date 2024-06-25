@@ -14,7 +14,7 @@ export const ServiceConstants = {
   response_interceptor_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
-    '/app/console-api/subscription/[a-z0-9A-Z]+$',
+    '/app/console-api/subscription/[a-zA-Z0-9]+$',
   ],
   cache_interceptor_skip_routes: [
     '/app/console-api/ping',

@@ -616,6 +616,7 @@ export class TestHelpers extends TestHelpersBase {
         },
       ],
       landingPage: faker.system.directoryPath(),
+      allowedRedirectUrls: ['/' + faker.internet.url().split('//').pop()],
     };
 
     return solutionDTO;
