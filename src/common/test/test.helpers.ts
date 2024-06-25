@@ -127,13 +127,20 @@ export class TestHelpers extends TestHelpersBase {
     });
   }
 
-  static CreateGetApplicationByVersionIdResponse(): GetApplicationByVersionIdResponse {
+  static CreateGetApplicationByVersionIdResponse(
+    isAddOn?: {
+      solnId: string;
+      solnVersionId: string;
+    },
+    consoleCompatible = false,
+  ): GetApplicationByVersionIdResponse {
     // Leaving it as json for this PR.
     // All testing utils needs to be moved to a shared testing library.
+    const appId = this.CreateRandomAppId();
     return GetApplicationByApplicationIdResponse.fromJSON({
       application: {
         id: {
-          appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
+          appId,
         },
         name: faker.random.word(),
         urlPath: faker.random.word(),
@@ -159,15 +166,23 @@ export class TestHelpers extends TestHelpersBase {
         versions: [
           {
             id: {
-              appId: 'app:1a209038-ab3d-5066-b64c-42bfeef091db',
-              appVersionId: 'appversion:8710fa5d-f11c-525d-a702-ed5aae7ce86a',
+              appId: appId,
+              appVersionId: this.CreateRandomAppVersionId(),
             },
             displayName: 'Schultz Group',
             version: '1.0.0',
             description: '',
             applicationCompitablity: {
               isMarketplaceCompatible: false,
-              isConsoleCompatible: false,
+              isConsoleCompatible: consoleCompatible,
+              compitableSolutions: isAddOn
+                ? [
+                    {
+                      solutionId: isAddOn.solnId,
+                      solutionVersionId: isAddOn.solnVersionId,
+                    },
+                  ]
+                : undefined,
             },
             privacy: {
               type: 'PRIVATE',

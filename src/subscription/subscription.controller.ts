@@ -8,6 +8,7 @@ import {
   Inject,
   Logger,
   Param,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -24,14 +25,14 @@ import {
 import { SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionService } from './subscription.service';
 import { GetAllSubscriptionsResponseInterceptor } from 'src/common/interceptor/custom.response.interceptor';
-import { parse } from 'cache-control-parser';
-
-const X_COREOS_ACCESS = 'x-coreos-access';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { ServiceConstants } from 'src/common/constants/service.constants';
 
 @ApiTags('Subscription')
 @ApiHeaders([
   {
-    name: X_COREOS_ACCESS,
+    name: ServiceConstants.access_token_header,
     description: 'coreos access token',
     required: true,
   },
@@ -42,6 +43,9 @@ export class SubscriptionController {
 
   @Inject(SubscriptionService)
   private readonly subscriptionService: SubscriptionService;
+
+  @Inject(CACHE_MANAGER)
+  private readonly cacheManager: Cache;
 
   @Get('/:tenantId')
   @ApiOperation({
@@ -61,18 +65,16 @@ When the tenant being queried is a developer tenant, there wont be any access re
   })
   @UseInterceptors(GetAllSubscriptionsResponseInterceptor)
   private getAllSubscriptions(
+    @Req() request,
     @Param('tenantId') tenantId: string,
     @Headers() headers,
   ): Promise<SubscriptionsResponseDTO> {
-    const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
-    const shouldInvalidateCache = this.shouldInvalidateCaches(headers);
     return this.subscriptionService.getAllSubscriptionsWithAddonApps(
       ctx,
-      userId,
+      request.userId,
       tenantId,
-      shouldInvalidateCache,
     );
   }
 
@@ -93,38 +95,16 @@ When the tenant being queried is a developer tenant, there wont be any access re
     status: 200,
   })
   private getAllSolutionSettings(
+    @Req() request,
     @Param('tenantId') tenantId: string,
     @Headers() headers,
   ): Promise<SubscriptionSettings> {
-    const userId = this.getUserIdFromCoreosToken(headers);
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
-    const shouldInvalidateCache = this.shouldInvalidateCaches(headers);
     return this.subscriptionService.getAllSolutionSetting(
       ctx,
-      userId,
+      request.userId,
       tenantId,
-      shouldInvalidateCache,
     );
-  }
-  private getUserIdFromCoreosToken(headers: any): string {
-    if (!headers[X_COREOS_ACCESS]) {
-      throw new BadRequestException('x-coreos-access header is missing');
-    }
-    const decodedToken: Record<string, any> = jwtDecode(
-      headers[X_COREOS_ACCESS],
-    );
-    return decodedToken.userId;
-  }
-
-  private shouldInvalidateCaches(headers: any): boolean {
-    const cacheControlHeader = headers['cache-control'];
-    if (cacheControlHeader) {
-      const cacheControlDirectives = parse(cacheControlHeader);
-      if (cacheControlDirectives['no-cache']) {
-        return true;
-      }
-    }
-    return false;
   }
 }
