@@ -1103,20 +1103,20 @@
     logform "2.5.1"
     winston "^3.8.2"
 
-"@foxtrotplatform/tracer@0.3.10":
-  version "0.3.10"
-  resolved "https://npm.pkg.github.com/download/@foxtrotplatform/tracer/0.3.10/ecefc241252bf63c46e3dc8c56b62edbf96e1801#ecefc241252bf63c46e3dc8c56b62edbf96e1801"
-  integrity sha512-q+MXqILY/PDSHJY0jgCQpdt5bEfuT8FOnTpPnp8v2qQPF+Qkd/BnEDTDev+d+mNkpj+iBKh/N7ZG/bXcFs6sXg==
+"@foxtrotplatform/tracer@0.3.8":
+  version "0.3.8"
+  resolved "https://npm.pkg.github.com/download/@foxtrotplatform/tracer/0.3.8/407d2130d8cd891c711f6b237ea513d31ed8b846#407d2130d8cd891c711f6b237ea513d31ed8b846"
+  integrity sha512-JKupU/k1OKdqUjQmmfFHV3EpcCdEpihOgYjkgGS4ID1NAV27jsP/AemI7MajNT8TSddzGMDyBPFlo2PWDGP4hQ==
   dependencies:
     "@opentelemetry/api" "^1.4.0"
     "@opentelemetry/auto-instrumentations-node" "^0.36.3"
     "@opentelemetry/exporter-collector" "^0.25.0"
     "@opentelemetry/exporter-jaeger" "^1.9.1"
     "@opentelemetry/exporter-trace-otlp-http" "^0.35.1"
-    "@opentelemetry/instrumentation" "^0.41.2"
+    "@opentelemetry/instrumentation" "^0.35.1"
     "@opentelemetry/instrumentation-cassandra-driver" "^0.32.1"
     "@opentelemetry/node" "^0.24.0"
-    "@opentelemetry/sdk-node" "0.35.1"
+    "@opentelemetry/sdk-node" "^0.35.1"
     "@opentelemetry/sdk-trace-node" "^1.11.0"
     "@opentelemetry/tracing" "^0.24.0"
     kafkajs "^1.15.0"
@@ -2191,7 +2191,7 @@
   dependencies:
     "@opentelemetry/instrumentation" "^0.40.0"
 
-"@opentelemetry/instrumentation@0.35.1", "@opentelemetry/instrumentation@0.38.0", "@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.38.0", "@opentelemetry/instrumentation@^0.39.1", "@opentelemetry/instrumentation@^0.40.0", "@opentelemetry/instrumentation@^0.41.0", "@opentelemetry/instrumentation@^0.41.2":
+"@opentelemetry/instrumentation@0.35.1", "@opentelemetry/instrumentation@0.38.0", "@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.35.1", "@opentelemetry/instrumentation@^0.38.0", "@opentelemetry/instrumentation@^0.39.1", "@opentelemetry/instrumentation@^0.40.0", "@opentelemetry/instrumentation@^0.41.0":
   version "0.41.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.41.2.tgz#cae11fa64485dcf03dae331f35b315b64bc6189f"
   integrity sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==
@@ -2360,7 +2360,7 @@
     "@opentelemetry/resources" "1.9.1"
     lodash.merge "4.6.2"
 
-"@opentelemetry/sdk-node@0.35.1":
+"@opentelemetry/sdk-node@^0.35.1":
   version "0.35.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-node/-/sdk-node-0.35.1.tgz#af01c09caa7da1efa0b7c9c849c50875a94b8ea0"
   integrity sha512-3If8ryB74hNmZiT3/tNNWre7CbjZFmzApwThJG4olLe/PnUIq/ezo8MJYZwzPcc3QW8IKso77oJQjKm73dEtqQ==
