@@ -1,6 +1,5 @@
 import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core-lib';
 import {
-  BadRequestException,
   Controller,
   Get,
   Headers,
@@ -17,7 +16,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import jwtDecode from 'jwt-decode';
 import {
   SubscriptionDTO,
   SubscriptionsResponseDTO,
@@ -25,7 +23,7 @@ import {
 import { SubscriptionSettings } from 'src/common/dto/solutionSettings/solutionSettings.dto';
 import { SubscriptionService } from './subscription.service';
 import { GetAllSubscriptionsResponseInterceptor } from 'src/common/interceptor/custom.response.interceptor';
-import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ServiceConstants } from 'src/common/constants/service.constants';
 
@@ -43,9 +41,6 @@ export class SubscriptionController {
 
   @Inject(SubscriptionService)
   private readonly subscriptionService: SubscriptionService;
-
-  @Inject(CACHE_MANAGER)
-  private readonly cacheManager: Cache;
 
   @Get('/:tenantId')
   @ApiOperation({

@@ -41,6 +41,8 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
+    const now = Date.now();
+    console.log(`Request Received: ${now}`)
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const request = context.switchToHttp().getRequest();
 
@@ -95,11 +97,17 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
       const cachedResponse = await this.cacheManager.get(key);
       if (cachedResponse) {
         // Deserialize cached response
+        console.log(
+          `Returned Cached response: ${now}. Elapsed: ${Date.now() - now}`,
+        );
         return of(JSON.parse(cachedResponse));
       }
     }
 
     return next.handle().pipe(
+      tap(() => {
+        console.log(`Returned response: ${now}. Elapsed: ${Date.now() - now}`);
+      }),
       tap(async (response) => {
         // Serialize response before caching
         await this.cacheManager.set(key, JSON.stringify(response));
