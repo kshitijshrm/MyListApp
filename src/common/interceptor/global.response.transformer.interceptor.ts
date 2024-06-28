@@ -28,6 +28,7 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data) => {
+        console.log(`Final response: ${Date.now()}`);
         return {
           data: instanceToPlain(data),
           request: {

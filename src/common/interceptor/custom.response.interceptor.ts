@@ -19,6 +19,7 @@ export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
           response.set('Cache-Control', 'private, max-age=10800');
       }),
       map((data) => {
+        console.log(`Final response: ${Date.now()}`);
         return {
           data: instanceToPlain(data.subscriptions),
           additionalInfo: {
