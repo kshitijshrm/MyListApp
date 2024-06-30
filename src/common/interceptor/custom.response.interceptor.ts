@@ -12,14 +12,8 @@ import { map, tap } from 'rxjs/operators';
 export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
     return next.handle().pipe(
-      tap((data) => {
-        if (request.method == 'GET')
-          response.set('Cache-Control', 'private, max-age=10800');
-      }),
       map((data) => {
-        console.log(`Final response: ${Date.now()}`);
         return {
           data: instanceToPlain(data.subscriptions),
           additionalInfo: {
