@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {

@@ -41,7 +41,6 @@ export class GlobalCustomCacheInterceptor extends CacheInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const now = Date.now();
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const request = context.switchToHttp().getRequest();
 
