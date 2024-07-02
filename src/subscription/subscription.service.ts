@@ -45,6 +45,7 @@ import {
 import {
   Application,
   ApplicationNavigation_MenuItem,
+  ApplicationUrl,
   ApplicationUrlOverride,
 } from 'src/shared/schemas/os1/developerportal/application/application.pb';
 import { ApplicationVersionIdentifier } from 'src/shared/schemas/os1/developerportal/application/identifiers.pb';
@@ -299,8 +300,8 @@ export class SubscriptionService {
   // returns only one subscription for now. Should return all subscriptions for a tenant in the future
   async getAllSubscriptions(
     ctx: PlatformRequestContext,
-    activeSubscriptions: Subscription[],
     tenant: Tenant,
+    activeSubscriptions: Subscription[],
     appsAssignedToUser: string[],
     userGroups: string[],
     tenantConfigs: GetTenantConfigsByTenantIdResponse_Config[],
@@ -311,6 +312,9 @@ export class SubscriptionService {
     let isSettingsAvailable = false;
 
     for (const subscription of activeSubscriptions || []) {
+      if (!subscription.item.application && !subscription.item.solution) {
+        continue;
+      }
       this.logger.log(
         'processing subscription: ' + subscription.id.subscriptionId,
       );
@@ -379,8 +383,8 @@ export class SubscriptionService {
           // sort applications by display order descending
           appsReferencedInSolution = this.sortSolutionApplications(
             appsReferencedInSolution,
-            applyFilterForConsoleCompatibleWebApps,
           );
+
           // get app details and build a map of app id to app for all apps referenced in solution
           for (const app of appsReferencedInSolution) {
             // collect all applciations referenced in solution
@@ -388,10 +392,24 @@ export class SubscriptionService {
             const appFromRedis = await this.redisService.get(
               RedisConstants.getApplicationByVersionIdKey(app.id.appVersionId),
             );
-
+            let appRelativePathUrl: ApplicationUrl;
             if (appFromRedis) {
               this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id).catch();
               const application: Application = JSON.parse(appFromRedis);
+              appRelativePathUrl = application.versions[0]?.appUrls?.find(
+                (url) => url.name === 'relativePath',
+              );
+              if (appRelativePathUrl) {
+                solutionDto.allowedRedirectUrls.push(
+                  appRelativePathUrl.url.toLowerCase(),
+                );
+              }
+              if (
+                applyFilterForConsoleCompatibleWebApps &&
+                app.displayOrder <= 0
+              ) {
+                continue;
+              }
               if (
                 this.isAppToBeAddedToSolution(
                   application,
@@ -428,6 +446,22 @@ export class SubscriptionService {
             } else {
               const application =
                 await this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id);
+              if (application) {
+                appRelativePathUrl = application.versions[0]?.appUrls?.find(
+                  (url) => url.name === 'relativePath',
+                );
+                if (appRelativePathUrl) {
+                  solutionDto.allowedRedirectUrls.push(
+                    appRelativePathUrl.url.toLowerCase(),
+                  );
+                }
+                if (
+                  applyFilterForConsoleCompatibleWebApps &&
+                  app.displayOrder <= 0
+                ) {
+                  continue;
+                }
+              }
               if (
                 application &&
                 this.isAppToBeAddedToSolution(
@@ -472,8 +506,17 @@ export class SubscriptionService {
             solution,
             userGroups,
           );
-          subscriptionResponseDTOs.push(subscriptionDTO);
+
+          solutionDto.allowedRedirectUrls = Array.from(
+            new Set(solutionDto.allowedRedirectUrls),
+          ).filter((path) => path.length > 0);
         }
+      }
+      if (
+        subscriptionDTO.solutions.length ||
+        subscriptionDTO.applications.length
+      ) {
+        subscriptionResponseDTOs.push(subscriptionDTO);
       }
     }
     return { isSettingsAvailable, subscriptions: subscriptionResponseDTOs };
@@ -486,15 +529,13 @@ export class SubscriptionService {
     applyFilterForConsoleCompatibleWebApps = true, // should be true if console-compatible web apps need to be returned
   ) {
     const [
-      activeTenantSubscriptions,
-      tenantEntity,
-      tenantConfigs,
+      subscriptions,
       appsAssignedToUser,
       userGroups,
+      tenantEntity,
+      tenantConfig,
     ] = await Promise.all([
       this.getActiveSubscriptions(ctx, userId, tenantId),
-      firstValueFrom(this.getTenantByTenantId(ctx, tenantId)),
-      this.getTenantConfigsByTenantId(ctx, tenantId),
       this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
       firstValueFrom(
         this.coreosAgentServiceClient
@@ -511,22 +552,24 @@ export class SubscriptionService {
             }),
           ),
       ),
+      firstValueFrom(this.getTenantByTenantId(ctx, tenantId)),
+      this.getTenantConfigsByTenantId(ctx, tenantId),
     ]);
 
     const subscriptionsResponse = await this.getAllSubscriptions(
       ctx,
-      activeTenantSubscriptions,
       tenantEntity,
+      subscriptions,
       appsAssignedToUser,
       userGroups,
-      tenantConfigs,
+      tenantConfig,
       applyFilterForConsoleCompatibleWebApps,
     );
     const solutions = subscriptionsResponse.subscriptions
       .map((subscription) => subscription.solutions)
       .flat();
 
-    for (const subscription of activeTenantSubscriptions || []) {
+    for (const subscription of subscriptions || []) {
       if (subscription.item.application) {
         const appFromRedis = await this.redisService.get(
           RedisConstants.getApplicationByVersionIdKey(
@@ -573,9 +616,6 @@ export class SubscriptionService {
                   applyFilterForConsoleCompatibleWebApps,
                 )
               ) {
-                this.logger.log(
-                  'adding application to solution: ' + compatibleSolutionId,
-                );
                 this.sortApplicationMenuItems(
                   app.versions[0]?.appNavigation?.menuItems || [],
                 );
@@ -584,9 +624,12 @@ export class SubscriptionService {
                     app.versions[0]?.appUrlOverrides || [],
                     tenantEntity.stackId,
                   );
+                this.logger.log(
+                  'adding application to solution: ' + compatibleSolutionId,
+                );
                 this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   app,
-                  tenantConfigs,
+                  tenantConfig,
                 );
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
@@ -642,9 +685,6 @@ export class SubscriptionService {
                     applyFilterForConsoleCompatibleWebApps,
                   )
                 ) {
-                  this.logger.log(
-                    'adding application to solution: ' + compatibleSolutionId,
-                  );
                   this.sortApplicationMenuItems(
                     app.versions[0]?.appNavigation?.menuItems || [],
                   );
@@ -653,9 +693,12 @@ export class SubscriptionService {
                       app.versions[0]?.appUrlOverrides || [],
                       tenantEntity.stackId,
                     );
+                  this.logger.log(
+                    'adding application to solution: ' + compatibleSolutionId,
+                  );
                   this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                     app,
-                    tenantConfigs,
+                    tenantConfig,
                   );
                   solution.applications.push(
                     ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
@@ -678,6 +721,15 @@ export class SubscriptionService {
     }
 
     return subscriptionsResponse;
+  }
+
+  private sortSolutionApplications(
+    appsReferencedInSolution: SolutionVersion_Application[],
+  ): SolutionVersion_Application[] {
+    return appsReferencedInSolution.sort((a, b) => {
+      // default undefined display order to 0 so it always moved at bottom of the list
+      return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
+    });
   }
 
   async getAllSolutionSetting(
@@ -742,23 +794,6 @@ export class SubscriptionService {
         });
       }
     });
-  }
-
-  private sortSolutionApplications(
-    appsReferencedInSolution: SolutionVersion_Application[],
-    applyFilterForConsoleCompatibleWebApps: boolean,
-  ): SolutionVersion_Application[] {
-    return applyFilterForConsoleCompatibleWebApps
-      ? appsReferencedInSolution
-          .sort((a, b) => {
-            // default undefined display order to 0 so it always moved at bottom of the list
-            return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-          })
-          // filter apps which have display order greater than zero (true for web apps)
-          .filter((a) => a.displayOrder > 0)
-      : appsReferencedInSolution.sort((a, b) => {
-          return (b.displayOrder ?? 0) - (a.displayOrder ?? 0);
-        });
   }
 
   private sortApplicationMenuItems(
