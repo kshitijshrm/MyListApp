@@ -6,18 +6,13 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
     return next.handle().pipe(
-      tap((data) => {
-        if (request.method == 'GET')
-          response.set('Cache-Control', 'private, max-age=10800');
-      }),
       map((data) => {
         return {
           data: instanceToPlain(data.subscriptions),
