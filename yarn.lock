@@ -1103,20 +1103,20 @@
     logform "2.5.1"
     winston "^3.8.2"
 
-"@foxtrotplatform/tracer@0.3.10":
-  version "0.3.10"
-  resolved "https://npm.pkg.github.com/download/@foxtrotplatform/tracer/0.3.10/ecefc241252bf63c46e3dc8c56b62edbf96e1801#ecefc241252bf63c46e3dc8c56b62edbf96e1801"
-  integrity sha512-q+MXqILY/PDSHJY0jgCQpdt5bEfuT8FOnTpPnp8v2qQPF+Qkd/BnEDTDev+d+mNkpj+iBKh/N7ZG/bXcFs6sXg==
+"@foxtrotplatform/tracer@0.3.8":
+  version "0.3.8"
+  resolved "https://npm.pkg.github.com/download/@foxtrotplatform/tracer/0.3.8/407d2130d8cd891c711f6b237ea513d31ed8b846#407d2130d8cd891c711f6b237ea513d31ed8b846"
+  integrity sha512-JKupU/k1OKdqUjQmmfFHV3EpcCdEpihOgYjkgGS4ID1NAV27jsP/AemI7MajNT8TSddzGMDyBPFlo2PWDGP4hQ==
   dependencies:
     "@opentelemetry/api" "^1.4.0"
     "@opentelemetry/auto-instrumentations-node" "^0.36.3"
     "@opentelemetry/exporter-collector" "^0.25.0"
     "@opentelemetry/exporter-jaeger" "^1.9.1"
     "@opentelemetry/exporter-trace-otlp-http" "^0.35.1"
-    "@opentelemetry/instrumentation" "^0.41.2"
+    "@opentelemetry/instrumentation" "^0.35.1"
     "@opentelemetry/instrumentation-cassandra-driver" "^0.32.1"
     "@opentelemetry/node" "^0.24.0"
-    "@opentelemetry/sdk-node" "0.35.1"
+    "@opentelemetry/sdk-node" "^0.35.1"
     "@opentelemetry/sdk-trace-node" "^1.11.0"
     "@opentelemetry/tracing" "^0.24.0"
     kafkajs "^1.15.0"
@@ -1515,6 +1515,11 @@
   integrity sha512-KFW37K5ujSce3lukNp9Uym5T6/oKCDw8EQRYhAKdNiBveMtotkokJwKIHVKCc21qfXMyes4291eR2No1Sf/fow==
   dependencies:
     axios "1.2.1"
+
+"@nestjs/cache-manager@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/cache-manager/-/cache-manager-2.2.2.tgz#4b0e7c4112c7b8c2a869d64f998aaf8a1bf0040d"
+  integrity sha512-+n7rpU1QABeW2WV17Dl1vZCG3vWjJU1MaamWgZvbGxYE9EeCM0lVLfw3z7acgDTNwOy+K68xuQPoIMxD0bhjlA==
 
 "@nestjs/cli@^9.0.0":
   version "9.5.0"
@@ -2186,7 +2191,7 @@
   dependencies:
     "@opentelemetry/instrumentation" "^0.40.0"
 
-"@opentelemetry/instrumentation@0.35.1", "@opentelemetry/instrumentation@0.38.0", "@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.38.0", "@opentelemetry/instrumentation@^0.39.1", "@opentelemetry/instrumentation@^0.40.0", "@opentelemetry/instrumentation@^0.41.0", "@opentelemetry/instrumentation@^0.41.2":
+"@opentelemetry/instrumentation@0.35.1", "@opentelemetry/instrumentation@0.38.0", "@opentelemetry/instrumentation@0.41.2", "@opentelemetry/instrumentation@^0.35.1", "@opentelemetry/instrumentation@^0.38.0", "@opentelemetry/instrumentation@^0.39.1", "@opentelemetry/instrumentation@^0.40.0", "@opentelemetry/instrumentation@^0.41.0":
   version "0.41.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.41.2.tgz#cae11fa64485dcf03dae331f35b315b64bc6189f"
   integrity sha512-rxU72E0pKNH6ae2w5+xgVYZLzc5mlxAbGzF4shxMVK8YC2QQsfN38B2GPbj0jvrKWWNUElfclQ+YTykkNg/grw==
@@ -2355,7 +2360,7 @@
     "@opentelemetry/resources" "1.9.1"
     lodash.merge "4.6.2"
 
-"@opentelemetry/sdk-node@0.35.1":
+"@opentelemetry/sdk-node@^0.35.1":
   version "0.35.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-node/-/sdk-node-0.35.1.tgz#af01c09caa7da1efa0b7c9c849c50875a94b8ea0"
   integrity sha512-3If8ryB74hNmZiT3/tNNWre7CbjZFmzApwThJG4olLe/PnUIq/ezo8MJYZwzPcc3QW8IKso77oJQjKm73dEtqQ==
@@ -3770,6 +3775,25 @@ cache-control-parser@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/cache-control-parser/-/cache-control-parser-2.0.6.tgz#c33acd5f278c375b803f7b237f1c6334442aed2c"
   integrity sha512-N4rxCk7V8NLfUVONXG0d7S4IyTQh3KEDW5k2I4CAcEUcMQCmVkfAMn37JSWfUQudiR883vDBy5XM5+TS2Xo7uQ==
+
+cache-manager-ioredis-yet@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/cache-manager-ioredis-yet/-/cache-manager-ioredis-yet-2.1.1.tgz#7079dc877915a254a6b449e45960d861f5620944"
+  integrity sha512-i4taQCesUa66Op2v3DQiF2oXHIeGyGAbOrwyVklN1TECyvKFgxd3JDP1MwkxvdpeKkPZh8dH4USFL9/wbmQp/Q==
+  dependencies:
+    cache-manager "*"
+    ioredis "^5.4.1"
+    telejson "^7.2.0"
+
+cache-manager@*, cache-manager@^5.6.1:
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/cache-manager/-/cache-manager-5.6.1.tgz#8ec19a833e2011044806221bade9cb2099a65f78"
+  integrity sha512-9uTQmLPaTKpvO38RXOm54jfPyrcXR+51NzNdba+Jaydnz8v5l/YEA6l/MsSSeAvF6s43+K4wojIGJC9i6cLfJg==
+  dependencies:
+    eventemitter3 "^5.0.1"
+    lodash.clonedeep "^4.5.0"
+    lru-cache "^10.2.2"
+    promise-coalesce "^1.1.2"
 
 call-bind@^1.0.2, call-bind@^1.0.5, call-bind@^1.0.6, call-bind@^1.0.7:
   version "1.0.7"
@@ -6434,6 +6458,11 @@ lodash.camelcase@^4.3.0:
   resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
   integrity sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==
 
+lodash.clonedeep@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
+  integrity sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==
+
 lodash.defaults@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/lodash.defaults/-/lodash.defaults-4.2.0.tgz#d09178716ffea4dde9e5fb7b37f6f0802274580c"
@@ -6524,7 +6553,7 @@ lower-case@^1.1.0, lower-case@^1.1.1, lower-case@^1.1.2:
   resolved "https://registry.yarnpkg.com/lower-case/-/lower-case-1.1.4.tgz#9a2cabd1b9e8e0ae993a4bf7d5875c39c42e8eac"
   integrity sha512-2Fgx1Ycm599x+WGpIYwJOvsjmXFzTSc34IwDWALRA/8AopUKAVPwfJ+h5+f85BCp0PWmmJcWzEpxOpoXycMpdA==
 
-lru-cache@^10.2.0:
+lru-cache@^10.2.0, lru-cache@^10.2.2:
   version "10.2.2"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.2.2.tgz#48206bc114c1252940c41b25b41af5b545aca878"
   integrity sha512-9hp3Vp2/hFQUiIwKo8XCeFVnrg8Pk3TYNPIR7tJADKi5YfcF7vEaK7avFHTlSy3kOKYaJQaalfEo6YuXdceBOQ==
@@ -6584,6 +6613,11 @@ map-obj@^4.1.0:
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-4.3.0.tgz#9304f906e93faae70880da102a9f1df0ea8bb05a"
   integrity sha512-hdN1wVrZbb29eBGiGjJbeP8JbKjq1urkHJ/LIP/NY48MZ1QVXUsQBV1G1zvYFHn1XE06cwjBsOI2K3Ulnj1YXQ==
 
+map-or-similar@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/map-or-similar/-/map-or-similar-1.5.0.tgz#6de2653174adfb5d9edc33c69d3e92a1b76faf08"
+  integrity sha512-0aF7ZmVon1igznGI4VS30yugpduQW3y3GkcgGJOp7d8x8QrizhigUxjI/m2UojsXXto+jLAH3KSz+xOJTiORjg==
+
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
@@ -6595,6 +6629,13 @@ memfs@^3.4.1:
   integrity sha512-EGowvkkgbMcIChjMTMkESFDbZeSh8xZ7kNSF0hAiAN4Jh6jgHCRS0Ga/+C8y6Au+oqpezRHCfPsmJ2+DwAgiwQ==
   dependencies:
     fs-monkey "^1.0.4"
+
+memoizerific@^1.11.3:
+  version "1.11.3"
+  resolved "https://registry.yarnpkg.com/memoizerific/-/memoizerific-1.11.3.tgz#7c87a4646444c32d75438570905f2dbd1b1a805a"
+  integrity sha512-/EuHYwAPdLtXwAwSZkh/Gutery6pD2KYd44oQLhAvQp/50mpyduZh8Q7PYHXTCJ+wuXxt7oij2LXyIJOOYFPog==
+  dependencies:
+    map-or-similar "^1.5.0"
 
 memorystream@^0.3.1:
   version "0.3.1"
@@ -7281,6 +7322,11 @@ process@^0.10.0:
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/process/-/process-0.10.1.tgz#842457cc51cfed72dc775afeeafb8c6034372725"
   integrity sha512-dyIett8dgGIZ/TXKUzeYExt7WA6ldDzys9vTDU/cCA9L17Ypme+KzS+NjQCjpn9xsvi/shbMC+yP/BcFMBz0NA==
+
+promise-coalesce@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/promise-coalesce/-/promise-coalesce-1.1.2.tgz#5d3bc4d0b2cf2e41e9df7cbeb6519b2a09459e3d"
+  integrity sha512-zLaJ9b8hnC564fnJH6NFSOGZYYdzrAJn2JUUIwzoQb32fG2QAakpDNM+CZo1km6keXkRXRM+hml1BFAPVnPkxg==
 
 prompts@^2.0.1:
   version "2.4.2"
@@ -8121,6 +8167,13 @@ tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
   integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==
+
+telejson@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/telejson/-/telejson-7.2.0.tgz#3994f6c9a8f8d7f2dba9be2c7c5bbb447e876f32"
+  integrity sha512-1QTEcJkJEhc8OnStBx/ILRu5J2p0GjvWsBx56bmZRqnrkdBMUe+nX92jxV+p3dB4CP6PZCdJMQJwCggkNBMzkQ==
+  dependencies:
+    memoizerific "^1.11.3"
 
 terminal-link@^2.0.0:
   version "2.1.1"

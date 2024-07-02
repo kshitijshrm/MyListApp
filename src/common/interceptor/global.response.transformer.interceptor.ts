@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { ServiceConstants } from '../constants/service.constants';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
 
     // skip response transformation for health check and ping
     if (
-      ServiceConstants.global_filter_skip_routes.findIndex((routeRe) =>
+      ServiceConstants.response_interceptor_skip_routes.findIndex((routeRe) =>
         new RegExp(routeRe).test(request.originalUrl),
       ) !== -1
     ) {

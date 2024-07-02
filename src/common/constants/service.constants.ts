@@ -11,12 +11,23 @@ import {
 } from 'src/shared/schemas/os1/marketplace/service/subscription.pb';
 
 export const ServiceConstants = {
-  global_filter_skip_routes: [
+  response_interceptor_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
-    '/app/console-api/subscription/[^/]+$',
+    '/app/console-api/subscription/[a-zA-Z0-9]+$',
   ],
-
+  cache_interceptor_skip_routes: [
+    '/app/console-api/ping',
+    '/app/console-api/health',
+  ],
+  get_tenant_subscriptions_route_regex: new RegExp(
+    '/app/console-api/subscription/[a-z0-9A-Z]+$',
+  ),
+  get_tenant_settings_route_regex: new RegExp(
+    '/app/console-api/subscription/[a-z0-9A-Z]+/settings$',
+  ),
+  access_token_header: 'x-coreos-access',
+  cache_control_header: 'cache-control',
   health_check_timeout_default: 2000,
   proto_schemas_root:
     './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
