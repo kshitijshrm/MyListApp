@@ -6,7 +6,6 @@ import {
   GRPCHealthIndicator,
   HealthCheck,
   HealthCheckService,
-  MicroserviceHealthIndicator,
 } from '@nestjs/terminus';
 import { Cluster, ClusterOptions } from 'ioredis';
 import { join } from 'path';
@@ -30,11 +29,12 @@ export class HealthController {
       parseInt(process.env['REDIS_RETRIES'] as string, 10) || 3;
     const namespace = process.env['f_redis_namespace'];
 
-    const hosts = hostsString.split(',').map((host) => ({
+    const redisClusterHosts = hostsString.split(',').map((host) => ({
       host: host.trim(),
       port: port,
     }));
-    const options: ClusterOptions = {
+
+    const redisClusterOptions: ClusterOptions = {
       redisOptions: {
         password: password,
         maxRetriesPerRequest: retryCount,
@@ -50,18 +50,15 @@ export class HealthController {
       slotsRefreshTimeout: 10000,
       slotsRefreshInterval: 50000,
     };
-    if (namespace) {
-      options.keyPrefix = namespace;
-    }
 
-    this.redis = new Cluster(hosts, options);
+    if (namespace) {
+      redisClusterOptions.keyPrefix = namespace;
+    }
+    this.redis = new Cluster(redisClusterHosts, redisClusterOptions);
   }
 
   @Inject(GRPCHealthIndicator)
   private grpc: GRPCHealthIndicator;
-
-  @Inject(MicroserviceHealthIndicator)
-  private microservice: MicroserviceHealthIndicator;
 
   @Get()
   @HealthCheck()

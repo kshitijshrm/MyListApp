@@ -30,18 +30,4 @@ export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
       }),
     );
   }
-
-  checkIfVersionIdIsAppVersion(params: Record<string, any>): boolean {
-    const { versionId, versionId1, versionId2 } = params;
-    if (
-      (versionId && versionId.includes('appversion')) ||
-      (versionId1 &&
-        versionId2 &&
-        versionId1.includes('appversion') &&
-        versionId2.includes('appversion'))
-    )
-      return true;
-
-    return false;
-  }
 }

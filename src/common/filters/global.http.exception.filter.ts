@@ -21,7 +21,9 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
 
     // skip response transformation for health check and ping
     if (
-      ServiceConstants.global_filter_skip_routes.includes(request.originalUrl)
+      ServiceConstants.response_interceptor_skip_routes.includes(
+        request.originalUrl,
+      )
     ) {
       response.status(status).send(exception);
     } else {

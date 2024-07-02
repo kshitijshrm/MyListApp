@@ -4,7 +4,7 @@ export const RedisConstants = {
   getSubscriptionsKey: (tenant: string) => {
     return `subscriptions-for-tenant:${tenant}`;
   },
-  getConfigKey: (tenantId: string) => {
+  getTenantConfigKey: (tenantId: string) => {
     return `console::configs-for-tenant:${tenantId}`;
   },
   getAppsForCoreosUserKey: (user: string) => {
@@ -19,5 +19,6 @@ export const RedisConstants = {
   dpaaa_app_listing_id_key: (appUrn: string) =>
     `dpaaa::listingIdFromUrn::${appUrn}`,
   one_day_in_seconds: 86400,
+  one_day_in_milli_seconds: 86400000,
   ten_seconds: 10,
 };

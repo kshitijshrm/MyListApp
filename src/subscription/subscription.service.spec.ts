@@ -1,4 +1,7 @@
-import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
+import {
+  SubscriptionDTO,
+  SubscriptionsResponseDTO,
+} from 'src/common/dto/subscription/subscription.dto';
 import { TestHelpers } from 'src/common/test/test.helpers';
 import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
@@ -17,6 +20,7 @@ import {
 } from 'src/shared/schemas/os1/marketplace/subscription/subscription.pb';
 import { faker } from '@faker-js/faker';
 import { RedisConstants } from 'src/common/constants/redis.constants';
+import { AppType } from 'src/common/dto/application/application.dto';
 
 describe('SubscriptionService', () => {
   // setting timeout to be 100 seconds to allow aaa testing aaa permissions timed upload retries
@@ -75,6 +79,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(false);
     });
@@ -87,6 +92,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(true);
     });
@@ -101,6 +107,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
+        true,
       );
       expect(result).toEqual(false);
     });
@@ -114,7 +121,7 @@ describe('SubscriptionService', () => {
         app,
         tenant,
         corsAppsAssignedToUser,
-        true,
+        false,
       );
       expect(result).toEqual(true);
     });
@@ -356,9 +363,13 @@ describe('SubscriptionService', () => {
 
   describe('getTenantSubscriptionsWithAddOns', () => {
     subscriptionServiceClient = mock<SubscriptionServiceClient>();
-    const sampleSubscriptions: Subscription[] = [
+    const [randomSolnId, randomSolnVersionId] = [
+      TestHelpers.CreateRandomSolutionId(),
+      TestHelpers.CreateRandomSolutionVersionId(),
+    ];
+    const sampleSubscriptionsWithAddOns: Subscription[] = [
       {
-        id: { subscriptionId: 'sample-subscription-id' },
+        id: { subscriptionId: 'solution-subscription-id' },
         organization: undefined,
         status: {
           activatedAt: '2024-02-07T00:49:47.917Z',
@@ -379,8 +390,8 @@ describe('SubscriptionService', () => {
         item: {
           solution: {
             id: {
-              solutionId: TestHelpers.CreateRandomSolutionId(),
-              solutionVersionId: TestHelpers.CreateRandomSolutionVersionId(),
+              solutionId: randomSolnId,
+              solutionVersionId: randomSolnVersionId,
             },
           },
         },
@@ -394,18 +405,77 @@ describe('SubscriptionService', () => {
         metadata: undefined,
         skuUsage: {},
       },
+      {
+        id: {
+          subscriptionId: 'addon-app-subscription-id',
+        },
+        organization: undefined,
+        item: {
+          application: {
+            id: {
+              appId: 'app:b2e6d204-e199-5bcc-bec8-5129f20819f0',
+              appVersionId: 'appversion:aa06c195-486b-5f02-838b-74082b2929e4',
+            },
+          },
+        },
+        tier: {
+          displayName: 'Sample',
+          periodInDays: 365,
+          planType: SubscriptionTier_PlanType.DEVELOPER,
+          productTierId: {
+            id: `tier:${faker.datatype.uuid()}`,
+          },
+        },
+        status: {
+          status: 'Active',
+          requestedAt: '2024-02-07T00:49:46.167Z',
+          activatedAt: '2024-02-07T00:49:47.917Z',
+          log: [],
+          reason: '',
+          expiresAt: '2025-02-06T00:49:47.818Z',
+        },
+        recordStatus: {
+          isActive: true,
+          isDeleted: false,
+        },
+        skuUsage: {
+          orders: {
+            usage: [
+              {
+                from: 1707266987917,
+                to: 1709251199999,
+                usage: 0,
+              },
+            ],
+          },
+        },
+        recordAudit: undefined,
+        pendingAction: undefined,
+        documents: undefined,
+        metadata: undefined,
+      },
     ];
 
     beforeEach(() => {
       applicationServiceClient.getSolutionByVersionId = jest
         .fn()
         .mockImplementation(() =>
-          of(TestHelpers.CreateGetSolutionByVersionIdResponse()),
+          of(
+            TestHelpers.CreateGetSolutionByVersionIdResponse(
+              randomSolnId,
+              randomSolnVersionId,
+            ),
+          ),
         );
       applicationServiceClient.getApplicationByVersionId = jest
         .fn()
         .mockImplementation(() =>
-          of(TestHelpers.CreateGetApplicationByVersionIdResponse()),
+          of(
+            TestHelpers.CreateGetApplicationByVersionIdResponse(
+              undefined,
+              true,
+            ),
+          ),
         );
       coreosAgentServiceClient.getAppsForCoreosUser = jest
         .fn()
@@ -433,9 +503,24 @@ describe('SubscriptionService', () => {
     });
 
     it('should return subscription response', async () => {
+      applicationServiceClient.getApplicationByVersionId = jest
+        .fn()
+        .mockImplementation(() =>
+          of(
+            TestHelpers.CreateGetApplicationByVersionIdResponse(
+              {
+                solnId: randomSolnId,
+                solnVersionId: randomSolnVersionId,
+              },
+              true,
+            ),
+          ),
+        );
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -443,19 +528,21 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptions[0].solutions[0].applications).toHaveLength(5);
     });
     it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       applicationServiceClient.getSolutionByVersionId = jest
         .fn()
@@ -478,11 +565,10 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(true);
       expect(result.subscriptions).toHaveLength(1);
@@ -502,7 +588,9 @@ describe('SubscriptionService', () => {
         });
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -510,11 +598,10 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(true);
       expect(result.subscriptions).toHaveLength(1);
@@ -532,7 +619,9 @@ describe('SubscriptionService', () => {
         });
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
+        .mockImplementation(() =>
+          of({ subscriptions: sampleSubscriptionsWithAddOns }),
+        )
         .mockClear();
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
@@ -540,11 +629,10 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
@@ -647,55 +735,18 @@ describe('SubscriptionService', () => {
         ctx,
         'user-id',
         'tenant-id',
-        false,
       );
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
+      ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
       expect(result.isSettingsAvailable).toBe(false);
       expect(result.subscriptions).toHaveLength(1);
       expect(redisSetSpy).toHaveBeenCalledWith(
-        RedisConstants.getConfigKey('tenant-id'),
+        RedisConstants.getTenantConfigKey('tenant-id'),
         JSON.stringify(
           TestHelpers.CreateGetTenantConfigsByTenantIdResponse().configs,
         ),
-      );
-    });
-
-    it('should evit tenant config cache when getting subscriptions with "no-cache" cache directive', async () => {
-      jest
-        .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
-        .mockImplementation(() => of({ subscriptions: sampleSubscriptions }))
-        .mockClear();
-      jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
-      jest.spyOn(redisService, 'set').mockImplementation(async (key) => {
-        return new Promise<void>((r) => {
-          r();
-        });
-      });
-      const redisDelSpy = jest
-        .spyOn(redisService, 'del')
-        .mockImplementation(async (key) => {
-          return new Promise<void>((r) => {
-            r();
-          });
-        });
-      const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getAllSubscriptionsWithAddonApps(
-        ctx,
-        'user-id',
-        'tenant-id',
-        true, // flag for cache invalidation
-      );
-      expect(
-        subscriptionServiceClient.getSubscriptionsByTenantId,
-      ).toHaveBeenCalledTimes(2);
-      expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
-      expect(redisDelSpy).toHaveBeenCalledWith(
-        RedisConstants.getConfigKey('tenant-id'),
       );
     });
   });
