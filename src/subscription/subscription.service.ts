@@ -720,7 +720,7 @@ export class SubscriptionService {
       }
     }
 
-    return { subscriptionsResponse, appsAssignedToUser };
+    return { subscriptionsResponse, meta: { appsAssignedToUser } };
   }
 
   private sortSolutionApplications(
@@ -753,7 +753,7 @@ export class SubscriptionService {
       for (const solution of solutions || []) {
         const setting = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(
           solution,
-          allSubscriptions.appsAssignedToUser,
+          allSubscriptions.meta.appsAssignedToUser,
         );
 
         if (solution.coreAppSettings) {
@@ -761,7 +761,7 @@ export class SubscriptionService {
             solution.coreAppSettings,
             coreAppsSetting,
             coreAppIdSet,
-            allSubscriptions.appsAssignedToUser,
+            allSubscriptions.meta.appsAssignedToUser,
           );
         }
         solutionsSettings?.push(setting);

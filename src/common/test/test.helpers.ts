@@ -589,7 +589,7 @@ export class TestHelpers extends TestHelpersBase {
     };
     return subscriptionDTO;
   }
-  static createSolutionDTO(): SolutionDTO {
+  static createSolutionDTO(appUrn?: string): SolutionDTO {
     const solutionDTO: SolutionDTO = {
       solutionId: faker.datatype.uuid(),
       solutionVersionId: faker.datatype.uuid(),
@@ -604,7 +604,9 @@ export class TestHelpers extends TestHelpersBase {
         fileUrl: faker.internet.url(),
         fileDescription: '',
       },
-      applications: [this.createApplicationDTO(false)],
+      applications: [
+        this.createApplicationDTO(false, undefined, undefined, appUrn),
+      ],
       isMarketplaceCompatible: faker.datatype.boolean(),
       isConsoleCompatible: faker.datatype.boolean(),
       coreAppSettings: [
@@ -626,6 +628,7 @@ export class TestHelpers extends TestHelpersBase {
     hasSettings: boolean,
     hasIcon = true,
     hasDescription = true,
+    appUrn?: string,
   ): ApplicationDTO {
     const applicationDTO: ApplicationDTO = {
       appId: faker.datatype.uuid(),
@@ -636,6 +639,7 @@ export class TestHelpers extends TestHelpersBase {
       appType: faker.random.word() as AppType,
       isPrivate: faker.datatype.boolean(),
       consoleCompatible: faker.datatype.boolean(),
+      coreosUrn: appUrn ?? faker.datatype.uuid(),
       appUrls: [
         hasSettings
           ? ({
