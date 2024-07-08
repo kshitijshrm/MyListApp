@@ -607,7 +607,7 @@ export class TestHelpers extends TestHelpersBase {
       applications: [this.createApplicationDTO(false)],
       isMarketplaceCompatible: faker.datatype.boolean(),
       isConsoleCompatible: faker.datatype.boolean(),
-      solutionAppSetting: [
+      coreAppSettings: [
         {
           appName: faker.random.word(),
           appUrn: faker.random.word(),
