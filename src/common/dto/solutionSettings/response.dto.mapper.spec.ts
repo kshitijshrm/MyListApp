@@ -6,10 +6,12 @@ import { SettingsMetaDTO } from '../common/common.dto';
 
 describe('response dto mapper tests', () => {
     test('mapSolutionSettingsDTO should map SolutionDTO to SolutionSettingsDTO', () => {
-        const solutionDTO = TestHelpers.createSolutionDTO('appUrn');
+        const solutionDTO = TestHelpers.createSolutionDTO(
+          'Role:appA:setting-role',
+        );
         const result = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(
           solutionDTO,
-          ['appUrn'],
+          ['Role:appA:setting-role'],
         );
 
         expect(result).toEqual({
@@ -20,7 +22,7 @@ describe('response dto mapper tests', () => {
           settings: solutionDTO.applications
             ? SolutionSettingsResponseSchema.mapSettingsDTO(
                 solutionDTO.applications,
-                ['appUrn'],
+                ['Role:appA:setting-role'],
               )
             : [],
           icon: solutionDTO.icon.fileUrl,

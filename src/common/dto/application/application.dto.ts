@@ -184,4 +184,10 @@ For exmaple, When the console is being accessed from the tenant mytenant.os1.del
     type: FileMetadataDTO,
   })
   settingsIcon?: FileMetadataDTO;
+  @ApiProperty({
+    description:
+      'Roles required for user to access the settings page if it is a web app',
+    type: Array<string>,
+  })
+  settingPageRolesRequired: Array<string>;
 }

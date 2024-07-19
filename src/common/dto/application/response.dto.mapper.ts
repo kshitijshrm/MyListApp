@@ -65,6 +65,8 @@ export class ApplicationResponseSchemaToDtoMapper {
             application.versions[0].appSettingsIcon,
           )
         : undefined,
+      settingPageRolesRequired:
+        application.versions[0].settingPageRolesRequired ?? [],
     };
     return response;
   }

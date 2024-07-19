@@ -9,7 +9,7 @@ import { SettingsMetaDTO } from "../common/common.dto";
 export class SolutionSettingsResponseSchema {
   static mapSolutionSettingsDTO(
     solution: SolutionDTO,
-    appsAssignedToUser: string[],
+    userRoles: string[],
   ): SolutionSettingsDTO {
     const response: SolutionSettingsDTO = {
       solutionId: solution.solutionId,
@@ -17,7 +17,7 @@ export class SolutionSettingsResponseSchema {
       displayName: solution.displayName,
       version: solution.version,
       settings: solution.applications
-        ? this.mapSettingsDTO(solution.applications, appsAssignedToUser)
+        ? this.mapSettingsDTO(solution.applications, userRoles)
         : [],
       icon: solution?.icon?.fileUrl,
     };
@@ -39,7 +39,7 @@ export class SolutionSettingsResponseSchema {
   }
   static mapSettingsDTO(
     applications: ApplicationDTO[],
-    appsAssignedToUser: string[],
+    userRoles: string[],
   ): SettingsMetaDTO[] {
     const applicationSettings = applications
       .map((application) => {
@@ -51,11 +51,11 @@ export class SolutionSettingsResponseSchema {
         if (settingsUrl?.url && settingsUrl?.url !== '') {
           // app has a associated settings page
           if (
-            appsAssignedToUser.includes(
-              application.coreosUrn.split('-').slice(0, 1).join(''),
+            application.settingPageRolesRequired?.every((role) =>
+              userRoles.includes(role),
             )
           ) {
-            // check if the user has access to the settings backend app
+            // check if the user has access to the settings page
             return {
               displayName: application.listingName,
               settingsUrl: settingsUrl.url,

@@ -534,6 +534,7 @@ export class SubscriptionService {
       userGroups,
       tenantEntity,
       tenantConfig,
+      userRoles,
     ] = await Promise.all([
       this.getActiveSubscriptions(ctx, userId, tenantId),
       this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
@@ -554,6 +555,21 @@ export class SubscriptionService {
       ),
       firstValueFrom(this.getTenantByTenantId(ctx, tenantId)),
       this.getTenantConfigsByTenantId(ctx, tenantId),
+      firstValueFrom(
+        this.coreosAgentServiceClient
+          .getUserRolesResults(
+            {
+              tenantId,
+              userId: userId,
+            },
+            ctx.rpcMetadata,
+          )
+          .pipe(
+            map((response) => {
+              return response.userRoles;
+            }),
+          ),
+      ),
     ]);
 
     const subscriptionsResponse = await this.getAllSubscriptions(
@@ -720,7 +736,7 @@ export class SubscriptionService {
       }
     }
 
-    return { subscriptionsResponse, meta: { appsAssignedToUser } };
+    return { subscriptionsResponse, meta: { appsAssignedToUser, userRoles } };
   }
 
   private sortSolutionApplications(
@@ -746,6 +762,7 @@ export class SubscriptionService {
     let solutionsSettings: SolutionSettingsDTO[] = [];
     let coreAppsSetting: CoreAppsSettingsDTO[] = [];
     let coreAppIdSet = new Set<string>();
+    const { userRoles } = allSubscriptions.meta;
 
     for (const subscription of allSubscriptions.subscriptionsResponse
       .subscriptions || []) {
@@ -753,7 +770,7 @@ export class SubscriptionService {
       for (const solution of solutions || []) {
         const setting = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(
           solution,
-          allSubscriptions.meta.appsAssignedToUser,
+          userRoles,
         );
 
         if (solution.coreAppSettings) {
@@ -761,7 +778,6 @@ export class SubscriptionService {
             solution.coreAppSettings,
             coreAppsSetting,
             coreAppIdSet,
-            allSubscriptions.meta.appsAssignedToUser,
           );
         }
         solutionsSettings?.push(setting);
@@ -785,25 +801,17 @@ export class SubscriptionService {
     coreAppSettings: Array<systemAppSettingItem>,
     coreAppsSettingsDTO: CoreAppsSettingsDTO[],
     coreAppIdSet: Set<string>,
-    appsAssignedToUser: string[],
   ) {
     coreAppSettings?.map((setting) => {
       if (!coreAppIdSet.has(setting.appUrn)) {
         coreAppIdSet.add(setting.appUrn);
-        if (
-          appsAssignedToUser.includes(
-            setting.appUrn.split('-').slice(0, 1).join(),
-          )
-        ) {
-          // include core app iff user has access to the backend app
-          coreAppsSettingsDTO.push({
-            coreAppId: setting.appUrn,
-            displayName: setting.displayName,
-            settingsUrl: setting.settingsUrl,
-            description: setting.description,
-            icon: setting.iconUrl,
-          });
-        }
+        coreAppsSettingsDTO.push({
+          coreAppId: setting.appUrn,
+          displayName: setting.displayName,
+          settingsUrl: setting.settingsUrl,
+          description: setting.description,
+          icon: setting.iconUrl,
+        });
       }
     });
   }

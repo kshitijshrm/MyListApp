@@ -679,6 +679,7 @@ export class TestHelpers extends TestHelpersBase {
               'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
           } as FileMetadataDTO)
         : undefined,
+      settingPageRolesRequired: [],
     };
 
     return applicationDTO;

@@ -284,6 +284,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
     const sampleSubscriptions2: Subscription[] = [
@@ -302,6 +303,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
 
@@ -404,6 +406,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
       {
         id: {
@@ -453,6 +456,7 @@ describe('SubscriptionService', () => {
         pendingAction: undefined,
         documents: undefined,
         metadata: undefined,
+        publisherPaymentType: '',
       },
     ];
 
@@ -680,6 +684,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
 
