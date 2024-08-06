@@ -32,6 +32,7 @@ import { FileMetadataDTO } from '../dto/common/common.dto';
 import {
   GetTenantByIdResponse,
   GetTenantConfigsByTenantIdResponse,
+  UserRolesListResponse,
 } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
@@ -221,6 +222,14 @@ export class TestHelpers extends TestHelpersBase {
         isDeveloperTenant,
       },
     });
+  }
+
+  static CreateGetUserRolesResult(): UserRolesListResponse {
+    // Leaving it as json for this PR.
+    // All testing utils needs to be moved to a shared testing library.
+    return {
+      userRoles: ['role1', 'role2'],
+    };
   }
 
   static CreateGetTenantConfigsByTenantIdResponse(): GetTenantConfigsByTenantIdResponse {

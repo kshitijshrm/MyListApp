@@ -520,6 +520,9 @@ describe('SubscriptionService', () => {
             ),
           ),
         );
+      coreosAgentServiceClient.getUserRolesResults = jest
+        .fn()
+        .mockImplementation(() => of(TestHelpers.CreateGetUserRolesResult()));
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
         .mockImplementation(() =>
