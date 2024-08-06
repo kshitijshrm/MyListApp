@@ -30,9 +30,9 @@
     "setup:local": "mkdir -p ./src/shared/schemas && run-p _proto:gen"
   },
   "dependencies": {
+    "@delhivery/developer-platform-proto-schemas": "^0.24.3",
     "@faker-js/faker": "^7.4.0",
     "@foxtrotplatform/developer-platform-core-lib": "0.5.4",
-    "@delhivery/developer-platform-proto-schemas": "^0.22.20",
     "@foxtrotplatform/tracer": "0.3.8",
     "@grpc/grpc-js": "^1.6.8",
     "@liaoliaots/nestjs-redis-health": "^9.0.4",
