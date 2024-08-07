@@ -315,6 +315,10 @@ components:
           type: string
           description: The description of the application to show in the UI
           example: My App is a sample application
+        coreosUrn:
+          type: string
+          description: coreos appId
+          example: platform:app:258a0fcc-d0c6-5964-bace-c15109ed21b5
         isPrivate:
           type: boolean
           description: Is the application to be displayed in the marketplace
@@ -376,6 +380,12 @@ components:
           description: The icon associated with the application
           allOf:
             - $ref: "#/components/schemas/FileMetadataDTO"
+        settingPageRolesRequired:
+          description: Roles required for user to access the settings page if it is a web
+            app
+          type: array
+          items:
+            type: string
       required:
         - appId
         - appVersionId
@@ -384,6 +394,7 @@ components:
         - urlPath
         - appType
         - description
+        - coreosUrn
         - isPrivate
         - consoleCompatible
         - appUrls
@@ -394,6 +405,7 @@ components:
         - longDescription
         - applicationMenu
         - settingsIcon
+        - settingPageRolesRequired
     SolutionDTO:
       type: object
       properties:
@@ -611,7 +623,7 @@ components:
       type: object
       properties:
         foundation:
-          description: Foundational apps identifier in the OS1 platform
+          description: Core apps identifier in the OS1 platform
           example:
             - coreAppId: platform:app:payments
               displayName: Payments
