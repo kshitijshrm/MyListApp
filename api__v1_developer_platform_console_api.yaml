@@ -452,7 +452,7 @@ components:
           type: boolean
           description: Is the solution compatible with the console
           example: true
-        solutionAppSetting:
+        coreAppSettings:
           description: Displays list of system apps settings for solution
           example:
             - appUrn: platform:app:mts
@@ -485,7 +485,7 @@ components:
         - applications
         - isMarketplaceCompatible
         - isConsoleCompatible
-        - solutionAppSetting
+        - coreAppSettings
         - Landing Page
         - allowed redirect URIs
     SubscriptionStatusDTO:

@@ -284,6 +284,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
     const sampleSubscriptions2: Subscription[] = [
@@ -302,6 +303,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
 
@@ -404,6 +406,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
       {
         id: {
@@ -453,6 +456,7 @@ describe('SubscriptionService', () => {
         pendingAction: undefined,
         documents: undefined,
         metadata: undefined,
+        publisherPaymentType: '',
       },
     ];
 
@@ -516,6 +520,9 @@ describe('SubscriptionService', () => {
             ),
           ),
         );
+      coreosAgentServiceClient.getUserRolesResults = jest
+        .fn()
+        .mockImplementation(() => of(TestHelpers.CreateGetUserRolesResult()));
       jest
         .spyOn(subscriptionServiceClient, 'getSubscriptionsByTenantId')
         .mockImplementation(() =>
@@ -533,9 +540,11 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
-      expect(result.subscriptions[0].solutions[0].applications).toHaveLength(5);
+      expect(result.subscriptionsResponse.isSettingsAvailable).toBe(false);
+      expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
+      expect(
+        result.subscriptionsResponse.subscriptions[0].solutions[0].applications,
+      ).toHaveLength(5);
     });
     it('should return subscription response with isSettingsAvailable flag as true when solution system settings is defined', async () => {
       jest
@@ -570,8 +579,8 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(true);
-      expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptionsResponse.isSettingsAvailable).toBe(true);
+      expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
     });
     it('should return subscription response with isSettingsAvailable flag as true when system settings is defined for a solution app', async () => {
       applicationServiceClient.getApplicationByVersionId = jest
@@ -603,8 +612,8 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(true);
-      expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptionsResponse.isSettingsAvailable).toBe(true);
+      expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
     });
     it('should return subscription response with isSettingsAvailable flag as false when setting url do not exist for a solution app', async () => {
       applicationServiceClient.getApplicationByVersionId = jest
@@ -634,8 +643,8 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptionsResponse.isSettingsAvailable).toBe(false);
+      expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
     });
   });
 
@@ -678,6 +687,7 @@ describe('SubscriptionService', () => {
         documents: undefined,
         metadata: undefined,
         skuUsage: {},
+        publisherPaymentType: '',
       },
     ];
 
@@ -740,8 +750,8 @@ describe('SubscriptionService', () => {
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
       expect(result).toBeDefined();
-      expect(result.isSettingsAvailable).toBe(false);
-      expect(result.subscriptions).toHaveLength(1);
+      expect(result.subscriptionsResponse.isSettingsAvailable).toBe(false);
+      expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
       expect(redisSetSpy).toHaveBeenCalledWith(
         RedisConstants.getTenantConfigKey('tenant-id'),
         JSON.stringify(

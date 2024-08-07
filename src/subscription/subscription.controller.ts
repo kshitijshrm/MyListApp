@@ -66,11 +66,9 @@ When the tenant being queried is a developer tenant, there wont be any access re
   ): Promise<SubscriptionsResponseDTO> {
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
-    return this.subscriptionService.getAllSubscriptionsWithAddonApps(
-      ctx,
-      request.userId,
-      tenantId,
-    );
+    return this.subscriptionService
+      .getAllSubscriptionsWithAddonApps(ctx, request.userId, tenantId)
+      .then((response) => response.subscriptionsResponse);
   }
 
   @Get('/:tenantId/Settings')
