@@ -30,7 +30,7 @@ export const ServiceConstants = {
   cache_control_header: 'cache-control',
   health_check_timeout_default: 2000,
   proto_schemas_root:
-    './node_modules/@foxtrotplatform/developer-platform-proto-schemas',
+    './node_modules/@delhivery/developer-platform-proto-schemas',
   application_service_v2: {
     name: APPLICATION_SERVICE_V2_SERVICE_NAME,
     package: OS1_DEVELOPERPORTAL_SERVICE_PACKAGE_NAME,
