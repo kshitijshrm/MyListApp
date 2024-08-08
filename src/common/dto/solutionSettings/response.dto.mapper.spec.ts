@@ -6,16 +6,26 @@ import { SettingsMetaDTO } from '../common/common.dto';
 
 describe('response dto mapper tests', () => {
     test('mapSolutionSettingsDTO should map SolutionDTO to SolutionSettingsDTO', () => {
-        const solutionDTO = TestHelpers.createSolutionDTO()
-        const result = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(solutionDTO);
+        const solutionDTO = TestHelpers.createSolutionDTO(
+          'Role:appA:setting-role',
+        );
+        const result = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(
+          solutionDTO,
+          ['Role:appA:setting-role'],
+        );
 
         expect(result).toEqual({
-            solutionId: solutionDTO.solutionId,
-            solutionVersionId: solutionDTO.solutionVersionId,
-            displayName: solutionDTO.displayName,
-            version: solutionDTO.version,
-            settings: solutionDTO.applications ? SolutionSettingsResponseSchema.mapSettingsDTO(solutionDTO.applications) : [],
-            icon: solutionDTO.icon.fileUrl
+          solutionId: solutionDTO.solutionId,
+          solutionVersionId: solutionDTO.solutionVersionId,
+          displayName: solutionDTO.displayName,
+          version: solutionDTO.version,
+          settings: solutionDTO.applications
+            ? SolutionSettingsResponseSchema.mapSettingsDTO(
+                solutionDTO.applications,
+                ['Role:appA:setting-role'],
+              )
+            : [],
+          icon: solutionDTO.icon.fileUrl,
         });
     });
 
@@ -75,9 +85,18 @@ describe('response dto mapper tests', () => {
     });
     describe('mapSettingsDTO', () => {
         test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL', () => {
-            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, true);
+            const applicationWithSetting: ApplicationDTO =
+              TestHelpers.createApplicationDTO(
+                true,
+                true,
+                undefined,
+                'randomAppUrn',
+              );
 
-            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO(
+              [applicationWithSetting],
+              ['randomAppUrn'],
+            );
 
             expect(result).toEqual([
                 {
@@ -90,9 +109,18 @@ describe('response dto mapper tests', () => {
         });
 
         test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL and description is not present', () => {
-            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, true, false);
+            const applicationWithSetting: ApplicationDTO =
+              TestHelpers.createApplicationDTO(
+                true,
+                true,
+                false,
+                'randomAppUrn',
+              );
 
-            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO(
+              [applicationWithSetting],
+              ['randomAppUrn'],
+            );
 
             expect(result).toEqual([
                 {
@@ -105,9 +133,18 @@ describe('response dto mapper tests', () => {
         });
 
         test('should map ApplicationDTO array to SettingsMetaDTO array with a setting URL', () => {
-            const applicationWithSetting: ApplicationDTO = TestHelpers.createApplicationDTO(true, false);
+            const applicationWithSetting: ApplicationDTO =
+              TestHelpers.createApplicationDTO(
+                true,
+                false,
+                undefined,
+                'randomAppUrn',
+              );
 
-            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithSetting]);
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO(
+              [applicationWithSetting],
+              ['randomAppUrn'],
+            );
 
             expect(result).toEqual([
                 {
@@ -120,15 +157,27 @@ describe('response dto mapper tests', () => {
         });
 
         test('should map ApplicationDTO array to empty SettingsMetaDTO array without a setting URL', () => {
-            const applicationWithoutSetting: ApplicationDTO = TestHelpers.createApplicationDTO(false);
+            const applicationWithoutSetting: ApplicationDTO =
+              TestHelpers.createApplicationDTO(
+                false,
+                undefined,
+                undefined,
+                'randomAppUrn',
+              );
 
-            const result = SolutionSettingsResponseSchema.mapSettingsDTO([applicationWithoutSetting]);
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO(
+              [applicationWithoutSetting],
+              ['randomAppUrn'],
+            );
 
             expect(result).toEqual([]);
         });
 
         test('should map empty ApplicationDTO array to empty SettingsMetaDTO array', () => {
-            const result = SolutionSettingsResponseSchema.mapSettingsDTO([]);
+            const result = SolutionSettingsResponseSchema.mapSettingsDTO(
+              [],
+              [],
+            );
 
             expect(result).toEqual([]);
         });

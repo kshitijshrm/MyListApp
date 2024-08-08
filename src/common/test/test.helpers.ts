@@ -32,6 +32,7 @@ import { FileMetadataDTO } from '../dto/common/common.dto';
 import {
   GetTenantByIdResponse,
   GetTenantConfigsByTenantIdResponse,
+  UserRolesListResponse,
 } from 'src/shared/schemas/os1/core/coreosagent/response.pb';
 export class TestHelpers extends TestHelpersBase {
   static ClientGrpcMock(name: string) {
@@ -221,6 +222,14 @@ export class TestHelpers extends TestHelpersBase {
         isDeveloperTenant,
       },
     });
+  }
+
+  static CreateGetUserRolesResult(): UserRolesListResponse {
+    // Leaving it as json for this PR.
+    // All testing utils needs to be moved to a shared testing library.
+    return {
+      userRoles: ['role1', 'role2'],
+    };
   }
 
   static CreateGetTenantConfigsByTenantIdResponse(): GetTenantConfigsByTenantIdResponse {
@@ -589,7 +598,7 @@ export class TestHelpers extends TestHelpersBase {
     };
     return subscriptionDTO;
   }
-  static createSolutionDTO(): SolutionDTO {
+  static createSolutionDTO(appUrn?: string): SolutionDTO {
     const solutionDTO: SolutionDTO = {
       solutionId: faker.datatype.uuid(),
       solutionVersionId: faker.datatype.uuid(),
@@ -604,10 +613,12 @@ export class TestHelpers extends TestHelpersBase {
         fileUrl: faker.internet.url(),
         fileDescription: '',
       },
-      applications: [this.createApplicationDTO(false)],
+      applications: [
+        this.createApplicationDTO(false, undefined, undefined, appUrn),
+      ],
       isMarketplaceCompatible: faker.datatype.boolean(),
       isConsoleCompatible: faker.datatype.boolean(),
-      solutionAppSetting: [
+      coreAppSettings: [
         {
           appName: faker.random.word(),
           appUrn: faker.random.word(),
@@ -626,6 +637,7 @@ export class TestHelpers extends TestHelpersBase {
     hasSettings: boolean,
     hasIcon = true,
     hasDescription = true,
+    appUrn?: string,
   ): ApplicationDTO {
     const applicationDTO: ApplicationDTO = {
       appId: faker.datatype.uuid(),
@@ -636,6 +648,7 @@ export class TestHelpers extends TestHelpersBase {
       appType: faker.random.word() as AppType,
       isPrivate: faker.datatype.boolean(),
       consoleCompatible: faker.datatype.boolean(),
+      coreosUrn: appUrn ?? faker.datatype.uuid(),
       appUrls: [
         hasSettings
           ? ({
@@ -675,6 +688,7 @@ export class TestHelpers extends TestHelpersBase {
               'https://cdn.getos1.com/7adcf59e-c5df-418f-8645-e82f2a5231b6-default_icon.png',
           } as FileMetadataDTO)
         : undefined,
+      settingPageRolesRequired: [],
     };
 
     return applicationDTO;

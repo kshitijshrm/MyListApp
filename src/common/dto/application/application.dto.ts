@@ -120,6 +120,11 @@ The relative url path of the application. This field is deprecated. Use **appUrl
   })
   description: string;
   @ApiProperty({
+    description: 'coreos appId',
+    example: 'platform:app:258a0fcc-d0c6-5964-bace-c15109ed21b5',
+  })
+  coreosUrn: string;
+  @ApiProperty({
     description: 'Is the application to be displayed in the marketplace',
   })
   isPrivate: boolean;
@@ -179,4 +184,10 @@ For exmaple, When the console is being accessed from the tenant mytenant.os1.del
     type: FileMetadataDTO,
   })
   settingsIcon?: FileMetadataDTO;
+  @ApiProperty({
+    description:
+      'Roles required for user to access the settings page if it is a web app',
+    type: Array<string>,
+  })
+  settingPageRolesRequired: Array<string>;
 }
