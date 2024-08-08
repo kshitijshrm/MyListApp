@@ -19,7 +19,7 @@ import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/respo
 import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
 import { SolutionSettingsResponseSchema } from 'src/common/dto/solutionSettings/response.dto.mapper';
 import {
-  FoundationalAppsSettingsDTO,
+  CoreAppsSettingsDTO,
   SolutionSettingsDTO,
   SubscriptionSettings,
 } from 'src/common/dto/solutionSettings/solutionSettings.dto';
@@ -534,6 +534,7 @@ export class SubscriptionService {
       userGroups,
       tenantEntity,
       tenantConfig,
+      userRoles,
     ] = await Promise.all([
       this.getActiveSubscriptions(ctx, userId, tenantId),
       this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
@@ -554,6 +555,21 @@ export class SubscriptionService {
       ),
       firstValueFrom(this.getTenantByTenantId(ctx, tenantId)),
       this.getTenantConfigsByTenantId(ctx, tenantId),
+      firstValueFrom(
+        this.coreosAgentServiceClient
+          .getUserRolesResults(
+            {
+              tenantId,
+              userId: userId,
+            },
+            ctx.rpcMetadata,
+          )
+          .pipe(
+            map((response) => {
+              return response.userRoles;
+            }),
+          ),
+      ),
     ]);
 
     const subscriptionsResponse = await this.getAllSubscriptions(
@@ -738,7 +754,7 @@ export class SubscriptionService {
       }
     }
 
-    return subscriptionsResponse;
+    return { subscriptionsResponse, meta: { appsAssignedToUser, userRoles } };
   }
 
   private sortSolutionApplications(
@@ -762,27 +778,31 @@ export class SubscriptionService {
       false,
     );
     let solutionsSettings: SolutionSettingsDTO[] = [];
-    let foundationalAppsSetting: FoundationalAppsSettingsDTO[] = [];
-    let foundationAppIdSet = new Set<string>();
+    let coreAppsSetting: CoreAppsSettingsDTO[] = [];
+    let coreAppIdSet = new Set<string>();
+    const { userRoles } = allSubscriptions.meta;
 
-    for (const subscription of allSubscriptions.subscriptions || []) {
+    for (const subscription of allSubscriptions.subscriptionsResponse
+      .subscriptions || []) {
       const solutions = subscription.solutions;
       for (const solution of solutions || []) {
-        const setting =
-          SolutionSettingsResponseSchema.mapSolutionSettingsDTO(solution);
+        const setting = SolutionSettingsResponseSchema.mapSolutionSettingsDTO(
+          solution,
+          userRoles,
+        );
 
-        if (solution.solutionAppSetting) {
-          this.aggregateFoundationalSettings(
-            solution.solutionAppSetting,
-            foundationalAppsSetting,
-            foundationAppIdSet,
+        if (solution.coreAppSettings) {
+          this.aggregateCoreAppSettings(
+            solution.coreAppSettings,
+            coreAppsSetting,
+            coreAppIdSet,
           );
         }
         solutionsSettings?.push(setting);
       }
     }
     const response = {
-      foundation: foundationalAppsSetting,
+      foundation: coreAppsSetting,
       solutions: solutionsSettings,
     };
     return response;
@@ -795,15 +815,15 @@ export class SubscriptionService {
     return solutions.find((solution) => solution.solutionId === solutionId);
   }
 
-  private aggregateFoundationalSettings(
-    solutionAppSetting: Array<systemAppSettingItem>,
-    foundationalAppsSettingsDTO: FoundationalAppsSettingsDTO[],
-    foundationAppIdSet: Set<string>,
+  private aggregateCoreAppSettings(
+    coreAppSettings: Array<systemAppSettingItem>,
+    coreAppsSettingsDTO: CoreAppsSettingsDTO[],
+    coreAppIdSet: Set<string>,
   ) {
-    solutionAppSetting?.map((setting) => {
-      if (!foundationAppIdSet.has(setting.appUrn)) {
-        foundationAppIdSet.add(setting.appUrn);
-        foundationalAppsSettingsDTO.push({
+    coreAppSettings?.map((setting) => {
+      if (!coreAppIdSet.has(setting.appUrn)) {
+        coreAppIdSet.add(setting.appUrn);
+        coreAppsSettingsDTO.push({
           coreAppId: setting.appUrn,
           displayName: setting.displayName,
           settingsUrl: setting.settingsUrl,

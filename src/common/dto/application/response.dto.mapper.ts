@@ -24,6 +24,7 @@ export class ApplicationResponseSchemaToDtoMapper {
       listingName: application.versions[0].displayName,
       version: application.versions[0].version,
       urlPath: application.urlPath,
+      coreosUrn: application.urn,
       appType:
         AppType[applicationTypeToJSON(application.appType).toLowerCase()],
       description: application.versions[0].description,
@@ -59,11 +60,13 @@ export class ApplicationResponseSchemaToDtoMapper {
       applicationMenu: application.versions[0].appNavigation?.menuItems?.map(
         ApplicationResponseSchemaToDtoMapper.mapToApplicationMenuDTO,
       ),
-      settingsIcon:  application.versions[0].appSettingsIcon 
+      settingsIcon: application.versions[0].appSettingsIcon
         ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
-            application.versions[0].appSettingsIcon
+            application.versions[0].appSettingsIcon,
           )
         : undefined,
+      settingPageRolesRequired:
+        application.versions[0].settingPageRolesRequired ?? [],
     };
     return response;
   }

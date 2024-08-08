@@ -9,7 +9,7 @@ on:
 jobs:
   pr-standard:
     name: PR Standards
-    uses: FoxtrotPlatform/developer-platform-github-workflow/.github/workflows/dev-pr-standards.yaml@main
+    uses: Delhivery/developer-platform-github-workflow/.github/workflows/dev-pr-standards.yaml@main
     secrets:
       f_github_token: ${{ secrets.F_GITHUB_TOKEN }}
       ado_user_name: ${{ secrets.ADO_USERNAME }}
@@ -35,7 +35,7 @@ jobs:
       - name: Install Dependencies
         run: |
           git config --global url."https://${{ secrets.CICD_KEY}}@github.com/".insteadOf ssh://git@github.com/
-          echo -e "@foxtrotplatform:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${{ secrets.F_GITHUB_TOKEN }}" > .npmrc
+          echo -e "@foxtrotplatform:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${{ secrets.F_GITHUB_TOKEN }}\n@delhivery:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${{ secrets.F_GITHUB_TOKEN }}" > .npmrc
           yarn install
       - name: Generate schemas
         run: |
@@ -60,6 +60,5 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          comment: coverage summary
           header: coverage summary
           path: code-coverage-results.md

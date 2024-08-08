@@ -122,7 +122,7 @@ export class SolutionDTO {
       },
     ],
   })
-  solutionAppSetting: Array<systemAppSettingItem>;
+  coreAppSettings: Array<systemAppSettingItem>;
   @ApiProperty({
     name: 'Landing Page',
     description: 'relative url path of the landing page (launch page)',
