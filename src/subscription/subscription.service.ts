@@ -510,6 +510,8 @@ export class SubscriptionService {
           solutionDto.allowedRedirectUrls = Array.from(
             new Set(solutionDto.allowedRedirectUrls),
           ).filter((path) => path.length > 0);
+
+          solutionDto.productGuideUrl = this.getSolutionProductGuideUrl(solution)
         }
       }
       if (
@@ -978,6 +980,16 @@ export class SubscriptionService {
     );
     if (appRelPath) {
       return appRelPath.url;
+    }
+    return '';
+  }
+
+  private getSolutionProductGuideUrl(solution: Solution): string {
+    const guideLink = solution.version[0].solutionUrls.find(
+      (url) => url.name === 'docs',
+    );
+    if (guideLink) {
+      return guideLink.url;
     }
     return '';
   }
