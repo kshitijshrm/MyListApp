@@ -985,7 +985,7 @@ export class SubscriptionService {
   }
 
   private getSolutionProductGuideUrl(solution: Solution): string {
-    const guideLink = solution.version[0].solutionUrls.find(
+    const guideLink = solution.version[0].solutionUrls?.find(
       (url) => url.name === 'docs',
     );
     if (guideLink) {

@@ -39,6 +39,9 @@ export class SolutionResponseSchemaToDtoMapper {
       coreAppSettings: solution.version[0].systemAppSettings ?? [],
       landingPage: '',
       allowedRedirectUrls: [],
+      productGuideUrl: solution.version[0].solutionUrls?.find(
+        (url) => url.name === 'docs',
+      )?.url,
     };
     return response;
   }
