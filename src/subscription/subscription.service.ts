@@ -914,11 +914,6 @@ export class SubscriptionService {
             map((response) => {
               return response.configs;
             }),
-            catchError((err) => {
-              const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
-              this.logger.error(message, err);
-              throw new InternalServerErrorException(message);
-            }),
           ),
       ).catch((error) => {
         return [];

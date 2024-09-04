@@ -752,6 +752,10 @@ describe('SubscriptionService', () => {
       expect(result).toBeDefined();
       expect(result.subscriptionsResponse.isSettingsAvailable).toBe(false);
       expect(result.subscriptionsResponse.subscriptions).toHaveLength(1);
+      expect(
+        result.subscriptionsResponse.subscriptions[0].solutions[0]
+          .productGuideUrl,
+      ).toBe('https://sample.com');
       expect(redisSetSpy).toHaveBeenCalledWith(
         RedisConstants.getTenantConfigKey('tenant-id'),
         JSON.stringify(

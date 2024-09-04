@@ -479,6 +479,12 @@ export class TestHelpers extends TestHelpersBase {
               logs: [],
             },
             associatedApplications: [],
+            solutionUrls: [
+              {
+                name: 'docs',
+                url: 'https://sample.com',
+              },
+            ],
           } as SolutionVersion,
         ],
         solutionType: 0,
