@@ -136,4 +136,10 @@ export class SolutionDTO {
     example: ['/orders', '/application/settings'],
   })
   allowedRedirectUrls: string[];
+  @ApiProperty({
+    name: 'Product guide link',
+    description: 'url of the product guide for the current selected solution',
+    example: ['www.dispatchoneguide.com'],
+  })
+  productGuideUrl: string;
 }

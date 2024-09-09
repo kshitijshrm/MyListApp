@@ -479,6 +479,12 @@ export class TestHelpers extends TestHelpersBase {
               logs: [],
             },
             associatedApplications: [],
+            solutionUrls: [
+              {
+                name: 'docs',
+                url: 'https://sample.com',
+              },
+            ],
           } as SolutionVersion,
         ],
         solutionType: 0,
@@ -628,6 +634,7 @@ export class TestHelpers extends TestHelpersBase {
       ],
       landingPage: faker.system.directoryPath(),
       allowedRedirectUrls: ['/' + faker.internet.url().split('//').pop()],
+      productGuideUrl: faker.internet.url(),
     };
 
     return solutionDTO;
