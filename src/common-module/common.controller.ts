@@ -43,7 +43,6 @@ export class CommonController {
   @HttpCode(200)
   @ApiResponse({
     type: BannersResponseDTO,
-    isArray: false,
     status: 200,
   })
   private getActiveBanners(

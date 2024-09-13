@@ -104,6 +104,7 @@ export class BannerMessageDTO {
   content: string;
   @ApiProperty({
     description: 'JSON data whose properties will be injected into the content',
+    type: BannerMessageDataDTO,
   })
   data: BannerMessageDataDTO;
 }
@@ -136,6 +137,7 @@ export class BannerDTO {
   activeUntilTime: string;
   @ApiProperty({
     description: 'The banner message',
+    type: BannerMessageDTO,
   })
   message: BannerMessageDTO;
 }
@@ -153,6 +155,7 @@ export class BannersResponseDTO {
   tenantTimeZone: string;
   @ApiProperty({
     description: 'list of active banners',
+    type: BannerDTO,
     isArray: true,
   })
   banners: Array<BannerDTO>;
