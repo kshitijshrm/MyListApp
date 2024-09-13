@@ -82,31 +82,26 @@ export class BannerMessageDataDTO {
   @ApiProperty({
     description: 'banner activity start time in ISO',
     example: '2024-08-29T23:00:00.000Z',
-    required: false,
   })
   activityStartTime?: string;
   @ApiProperty({
     description: 'banner activity end time in ISO',
     example: '2024-08-29T23:30:00.000Z',
-    required: false,
   })
   activityEndTIme?: string;
   @ApiProperty({
     description: 'banner activity date in ISO',
     example: '2024-08-29',
-    required: false,
   })
   activityDate?: string;
 }
 export class BannerMessageDTO {
   @ApiProperty({
     description: 'content to be displayed',
-    required: true,
   })
   content: string;
   @ApiProperty({
     description: 'JSON data whose properties will be injected into the content',
-    required: true,
   })
   data: BannerMessageDataDTO;
 }
@@ -114,37 +109,31 @@ export class BannerDTO {
   @ApiProperty({
     description: 'Unique ID of the banner',
     example: 'banner:e27f429d-42ce-499a-aa43-dfcb1a1ddf3b',
-    required: true,
   })
   id: string;
   @ApiProperty({
     description: 'short title of the banner',
     example: 'Scheduled Maintainance Alert!',
-    required: true,
   })
   title: string;
   @ApiProperty({
     description: "tenant's subscription Id this banner is applicable on",
     example: 'subscription:9d672510-c6a7-4f03-a4b2-01c19dbd63a4',
-    required: true,
   })
   subscriptionId: string;
   @ApiProperty({
     description: 'time in ISO from which this banner should be shown to users',
     example: '2024-09-04T17:00:00.000Z',
-    required: true,
   })
   activeFromTime: string;
   @ApiProperty({
     description:
       'time in ISO till which this banner should remain shown to users',
     example: '2024-09-04T22:00:00.000Z',
-    required: true,
   })
   activeUntilTime: string;
   @ApiProperty({
     description: 'The banner message',
-    required: true,
   })
   message: BannerMessageDTO;
 }
@@ -162,6 +151,7 @@ export class BannersResponseDTO {
   tenantTimeZone: string;
   @ApiProperty({
     description: 'list of active banners',
+    isArray: true,
   })
   banners: Array<BannerDTO>;
 }
