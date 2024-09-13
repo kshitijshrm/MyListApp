@@ -67,7 +67,6 @@ export class DocumentMetadataDTO {
   category: string;
   @ApiProperty({
     description: 'File metadata',
-    type: FileMetadataDTO,
   })
   document: FileMetadataDTO;
 }
@@ -84,34 +83,29 @@ export class BannerMessageDataDTO {
     description: 'banner activity start time in ISO',
     example: '2024-08-29T23:00:00.000Z',
     required: false,
-    type: string,
   })
   activityStartTime?: string;
   @ApiProperty({
     description: 'banner activity end time in ISO',
     example: '2024-08-29T23:30:00.000Z',
     required: false,
-    type: string,
   })
   activityEndTIme?: string;
   @ApiProperty({
     description: 'banner activity date in ISO',
     example: '2024-08-29',
     required: false,
-    type: string,
   })
   activityDate?: string;
 }
 export class BannerMessageDTO {
   @ApiProperty({
     description: 'content to be displayed',
-    type: string,
     required: true,
   })
   content: string;
   @ApiProperty({
     description: 'JSON data whose properties will be injected into the content',
-    type: BannerMessageDataDTO,
     required: true,
   })
   data: BannerMessageDataDTO;
@@ -121,28 +115,24 @@ export class BannerDTO {
     description: 'Unique ID of the banner',
     example: 'banner:e27f429d-42ce-499a-aa43-dfcb1a1ddf3b',
     required: true,
-    type: string,
   })
   id: string;
   @ApiProperty({
     description: 'short title of the banner',
     example: 'Scheduled Maintainance Alert!',
     required: true,
-    type: string,
   })
   title: string;
   @ApiProperty({
     description: "tenant's subscription Id this banner is applicable on",
     example: 'subscription:9d672510-c6a7-4f03-a4b2-01c19dbd63a4',
     required: true,
-    type: string,
   })
   subscriptionId: string;
   @ApiProperty({
     description: 'time in ISO from which this banner should be shown to users',
     example: '2024-09-04T17:00:00.000Z',
     required: true,
-    type: string,
   })
   activeFromTime: string;
   @ApiProperty({
@@ -150,13 +140,11 @@ export class BannerDTO {
       'time in ISO till which this banner should remain shown to users',
     example: '2024-09-04T22:00:00.000Z',
     required: true,
-    type: string,
   })
   activeUntilTime: string;
   @ApiProperty({
     description: 'The banner message',
     required: true,
-    type: BannerMessageDTO,
   })
   message: BannerMessageDTO;
 }
@@ -165,18 +153,15 @@ export class BannersResponseDTO {
   @ApiProperty({
     description: 'server time at the time of request',
     example: '2024-09-06T17:00:00.000Z',
-    type: string,
   })
   serverTime: string;
   @ApiProperty({
     description: 'tenant timezone',
     example: 'Asia/Kolkata',
-    type: string,
   })
   tenantTimeZone: string;
   @ApiProperty({
     description: 'list of active banners',
-    type: Array<BannerDTO>,
   })
   banners: Array<BannerDTO>;
 }
