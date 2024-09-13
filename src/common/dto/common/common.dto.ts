@@ -98,6 +98,8 @@ export class BannerMessageDataDTO {
 export class BannerMessageDTO {
   @ApiProperty({
     description: 'content to be displayed',
+    example:
+      'We have a planned for maintenance from ${activityStartTime} to ${activityEndTime} on ${activityDate}. During this time this application will be temporarily unavailable.',
   })
   content: string;
   @ApiProperty({
