@@ -120,11 +120,6 @@ export class BannerDTO {
   })
   title: string;
   @ApiProperty({
-    description: "tenant's subscription Id this banner is applicable on",
-    example: 'subscription:9d672510-c6a7-4f03-a4b2-01c19dbd63a4',
-  })
-  subscriptionId: string;
-  @ApiProperty({
     description: 'time in ISO from which this banner should be shown to users',
     example: '2024-09-04T17:00:00.000Z',
   })
@@ -142,7 +137,31 @@ export class BannerDTO {
   message: BannerMessageDTO;
 }
 
-export class BannersResponseDTO {
+export class SolutionBannerDTO extends BannerDTO {
+  @ApiProperty({
+    description: 'solution Id this banner is applicable on',
+    example: 'solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4',
+    required: true,
+  })
+  solutionId?: string;
+}
+
+export class BannerResponseDataDTO {
+  @ApiProperty({
+    description: 'list of active foundational banners',
+    type: BannerDTO,
+    isArray: true,
+  })
+  foundation: Array<BannerDTO>;
+  @ApiProperty({
+    description: 'list of active solution banners',
+    type: SolutionBannerDTO,
+    isArray: true,
+  })
+  solution: Array<SolutionBannerDTO>;
+}
+
+export class BannerResponseDTO {
   @ApiProperty({
     description: 'server time at the time of request',
     example: '2024-09-06T17:00:00.000Z',
@@ -155,8 +174,7 @@ export class BannersResponseDTO {
   tenantTimeZone: string;
   @ApiProperty({
     description: 'list of active banners',
-    type: BannerDTO,
-    isArray: true,
+    type: BannerResponseDataDTO,
   })
-  banners: Array<BannerDTO>;
+  banners: BannerResponseDTO;
 }

@@ -37,13 +37,11 @@ export class ApplicationUrlDTO {
   @ApiProperty({
     description: 'The name of the url',
     example: 'relativePath',
-    examples: ['relativePath', 'interface'],
   })
   name: string;
   @ApiProperty({
     description: 'The actual url item',
     example: '/app/my-app',
-    examples: ['/app/my-app', 'https://mytenant.os1.delhivery.com/app/my-app'],
   })
   url: string;
   @ApiProperty({

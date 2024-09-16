@@ -1,6 +1,6 @@
 import { ServiceConstants } from 'src/common/constants/service.constants';
 import { CommonService } from './common.service';
-import { BannersResponseDTO } from 'src/common/dto/common/common.dto';
+import { BannerResponseDTO } from 'src/common/dto/common/common.dto';
 import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core-lib';
 import {
   Controller,
@@ -42,13 +42,13 @@ export class CommonController {
   })
   @HttpCode(200)
   @ApiResponse({
-    type: BannersResponseDTO,
+    type: BannerResponseDTO,
     status: 200,
   })
   private getActiveBanners(
     @Req() request,
     @Headers() headers,
-  ): Promise<BannersResponseDTO> {
+  ): Promise<BannerResponseDTO> {
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
     return null;
