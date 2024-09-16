@@ -491,11 +491,11 @@ components:
           type: array
           items:
             type: string
-        Landing Page:
+        landingPage:
           type: string
           description: relative url path of the landing page (launch page)
           example: /launch/control-tower
-        allowed redirect URIs:
+        allowedRedirectUrls:
           description: list of relative paths allowed to be accessed on this solution
           example:
             - /orders
@@ -503,7 +503,7 @@ components:
           type: array
           items:
             type: string
-        Product guide link:
+        productGuideUrl:
           type: string
           description: url of the product guide for the current selected solution
           example:
@@ -521,9 +521,9 @@ components:
         - isMarketplaceCompatible
         - isConsoleCompatible
         - coreAppSettings
-        - Landing Page
-        - allowed redirect URIs
-        - Product guide link
+        - landingPage
+        - allowedRedirectUrls
+        - productGuideUrl
     SubscriptionStatusDTO:
       type: object
       properties:
@@ -735,6 +735,20 @@ components:
         - activeFromTime
         - activeUntilTime
         - message
+    TenantSubscriptionDTO:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          description: subscription Id of the tenant
+          example: subscription:3n672510-c6a7-4f03-a4b2-01c19dbd64q9
+        solutionId:
+          type: string
+          description: solution Id this banner is applicable on
+          example: solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4
+      required:
+        - subscriptionId
+        - solutionId
     SolutionBannerDTO:
       type: object
       properties:
@@ -758,16 +772,17 @@ components:
           description: The banner message
           allOf:
             - $ref: "#/components/schemas/BannerMessageDTO"
-        solutionId:
-          type: string
-          description: solution Id this banner is applicable on
-          example: solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4
+        subscription:
+          description: tenant subscription details
+          allOf:
+            - $ref: "#/components/schemas/TenantSubscriptionDTO"
       required:
         - id
         - title
         - activeFromTime
         - activeUntilTime
         - message
+        - subscription
     BannerResponseDataDTO:
       type: object
       properties:

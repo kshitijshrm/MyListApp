@@ -137,13 +137,27 @@ export class BannerDTO {
   message: BannerMessageDTO;
 }
 
-export class SolutionBannerDTO extends BannerDTO {
+export class TenantSubscriptionDTO {
+  @ApiProperty({
+    description: 'subscription Id of the tenant',
+    example: 'subscription:3n672510-c6a7-4f03-a4b2-01c19dbd64q9',
+    required: true,
+  })
+  subscriptionId: string;
   @ApiProperty({
     description: 'solution Id this banner is applicable on',
     example: 'solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4',
     required: true,
   })
-  solutionId?: string;
+  solutionId: string;
+}
+
+export class SolutionBannerDTO extends BannerDTO {
+  @ApiProperty({
+    description: 'tenant subscription details',
+    required: true,
+  })
+  subscription: TenantSubscriptionDTO;
 }
 
 export class BannerResponseDataDTO {
