@@ -1008,10 +1008,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@delhivery/developer-platform-proto-schemas@^0.24.3":
-  version "0.24.3"
-  resolved "https://npm.pkg.github.com/download/@delhivery/developer-platform-proto-schemas/0.24.3/322f412b2daa9b5db8f031130ab637cf409ef177#322f412b2daa9b5db8f031130ab637cf409ef177"
-  integrity sha512-9LCDbzQuUKMH6swjVkkuLGJyLOPn1DkLjqqu56LbF1ZM0DrUp2pQDyYuZjLPcmkRCDEnf/jt6VcbGkmBP2kJxQ==
+"@delhivery/developer-platform-proto-schemas@^0.25.0":
+  version "0.25.0"
+  resolved "https://npm.pkg.github.com/download/@delhivery/developer-platform-proto-schemas/0.25.0/b48c1fb27e3bc500a2afc31d6dd52ce2f0e3f309#b48c1fb27e3bc500a2afc31d6dd52ce2f0e3f309"
+  integrity sha512-BM24LcW2wO8jA5ti9+iC+DB20A4o5Riu1eBh0seG7jSSV9wN3QNGh+IDNBt0y6renpCTuvXPsEF6W1t8eJrj3g==
   dependencies:
     "@grpc/grpc-js" "^1.6.8"
     "@nestjs/axios" "^0.1.0"
@@ -7382,25 +7382,7 @@ protobufjs@^7.1.2:
     "@types/node" ">=13.7.0"
     long "^5.0.0"
 
-protobufjs@^7.2.4:
-  version "7.3.2"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.3.2.tgz#60f3b7624968868f6f739430cfbc8c9370e26df4"
-  integrity sha512-RXyHaACeqXeqAKGLDl68rQKbmObRsTIn4TYVUUug1KfS47YWCo5MacGITEryugIgZqORCvJWEk4l449POg5Txg==
-  dependencies:
-    "@protobufjs/aspromise" "^1.1.2"
-    "@protobufjs/base64" "^1.1.2"
-    "@protobufjs/codegen" "^2.0.4"
-    "@protobufjs/eventemitter" "^1.1.0"
-    "@protobufjs/fetch" "^1.1.0"
-    "@protobufjs/float" "^1.0.2"
-    "@protobufjs/inquire" "^1.1.0"
-    "@protobufjs/path" "^1.1.2"
-    "@protobufjs/pool" "^1.1.0"
-    "@protobufjs/utf8" "^1.1.0"
-    "@types/node" ">=13.7.0"
-    long "^5.0.0"
-
-protobufjs@^7.2.5:
+protobufjs@^7.2.4, protobufjs@^7.2.5:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.4.0.tgz#7efe324ce9b3b61c82aae5de810d287bc08a248a"
   integrity sha512-mRUWCc3KUU4w1jU8sGxICXH/gNS94DvI1gxqDvBzhj1JpcsimQkYiOJfwsPUykUI5ZaspFbSgmBLER8IrQ3tqw==
@@ -8418,9 +8400,9 @@ ts-proto@^1.120.0:
     ts-proto-descriptors "1.15.0"
 
 ts-proto@^1.169.0:
-  version "1.181.1"
-  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.181.1.tgz#d96707087840870cae4d293f9cd6d52ed66bdede"
-  integrity sha512-lNmd/KEgqWtwDG9mIM3EpcxBx+URRVHkDP/EEJBgQJaQwmZFTk6VjHg56HNQswd114yXGfF+8pKQvJ2iH9KfWw==
+  version "1.181.2"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.181.2.tgz#62696b4d84666bd6e237afc7090ba19e865ebfd0"
+  integrity sha512-knJ8dtjn2Pd0c5ZGZG8z9DMiD4PUY8iGI9T9tb8DvGdWRMkLpf0WcPO7G+7cmbZyxvNTAG6ci3fybEaFgMZIvg==
   dependencies:
     case-anything "^2.1.13"
     protobufjs "^7.2.4"
@@ -8578,9 +8560,9 @@ typescript@4.9.5, typescript@^4.3.5:
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 typescript@latest:
-  version "5.5.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.5.4.tgz#d9852d6c82bad2d2eda4fd74a5762a8f5909e9ba"
-  integrity sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.2.tgz#d1de67b6bef77c41823f822df8f0b3bcff60a5a0"
+  integrity sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==
 
 uid@2.0.2:
   version "2.0.2"

@@ -1,13 +1,13 @@
-import {
-  COREOS_AGENT_SERVICE_NAME,
-  CoreosAgentServiceClient,
-} from '@delhivery/developer-platform-proto-schemas/src/index.os1.core.service';
 import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core-lib';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { BannerResponseDTO } from 'src/common/dto/common/common.dto';
 import { TenantBannersResponseSchemaToDtoMapper } from 'src/common/dto/common/response.dto.mapper';
+import {
+  COREOS_AGENT_SERVICE_NAME,
+  CoreosAgentServiceClient,
+} from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
