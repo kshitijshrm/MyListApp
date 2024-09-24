@@ -19,6 +19,7 @@ export const ServiceConstants = {
   cache_interceptor_skip_routes: [
     '/app/console-api/ping',
     '/app/console-api/health',
+    '/app/console-api/common/banners',
   ],
   get_tenant_subscriptions_route_regex: new RegExp(
     '/app/console-api/subscription/[a-z0-9A-Z]+$',
