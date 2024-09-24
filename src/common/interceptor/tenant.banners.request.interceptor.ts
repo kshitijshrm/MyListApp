@@ -30,7 +30,7 @@ export class GetTenantBannersRequestInterceptor implements NestInterceptor {
     ] as string;
     if (authHeader) {
       const decodedToken: Record<string, any> = jwtDecode(authHeader);
-      if (decodedToken.exp > DateTime.now().toUnixInteger()) {
+      if (decodedToken.exp < DateTime.now().toUnixInteger()) {
         throw new UnauthorizedException();
       }
       if (!decodedToken.tenantId) {
