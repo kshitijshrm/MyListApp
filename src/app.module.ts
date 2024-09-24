@@ -8,6 +8,7 @@ import { RedisConstants } from './common/constants/redis.constants';
 import { redisStore } from 'cache-manager-ioredis-yet';
 import { GlobalCustomCacheInterceptor } from './common/interceptor/global.cache.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CommonModule } from './common-module/common.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       }),
       inject: [ConfigService],
     }),
+    CommonModule,
   ],
   providers: [
     {

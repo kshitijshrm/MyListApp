@@ -81,5 +81,6 @@ import { RedisService } from '@foxtrotplatform/developer-platform-core-lib';
   ],
   controllers: [SubscriptionController],
   providers: [SubscriptionService, RedisService],
+  exports: [SubscriptionService],
 })
 export class SubscriptionModule {}
