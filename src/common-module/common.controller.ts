@@ -10,6 +10,7 @@ import {
   HttpCode,
   Req,
   Headers,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { GetTenantBannersRequestInterceptor } from 'src/common/interceptor/tenant.banners.request.interceptor';
 
 @ApiTags('Common')
 @ApiHeaders([
@@ -34,6 +36,7 @@ export class CommonController {
   private readonly commonService: CommonService;
 
   @Get('/banners')
+  @UseInterceptors(GetTenantBannersRequestInterceptor)
   @ApiOperation({
     summary: 'Get all active banners applicable on a tenant',
     description: `
@@ -45,12 +48,12 @@ export class CommonController {
     type: BannerResponseDTO,
     status: 200,
   })
-  private getActiveBanners(
+  private async getActiveBanners(
     @Req() request,
     @Headers() headers,
   ): Promise<BannerResponseDTO> {
     const ctx: PlatformRequestContext =
       PlatformRequestContext.createFromHttpHeaders(headers);
-    return null;
+    return await this.commonService.getApplicableBanners(ctx, request.tenantId);
   }
 }

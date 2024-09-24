@@ -178,7 +178,6 @@ export class SubscriptionService {
 
   async getActiveSubscriptionsAndSaveToRedis(
     ctx: PlatformRequestContext,
-    userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
     // get subscriptions for tenant
@@ -217,7 +216,6 @@ export class SubscriptionService {
 
   async getActiveSubscriptions(
     ctx: PlatformRequestContext,
-    userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
     const subs = await this.redisService.get(
@@ -225,18 +223,14 @@ export class SubscriptionService {
     );
 
     if (subs) {
-      this.getActiveSubscriptionsAndSaveToRedis(ctx, userId, tenantId).catch(
+      this.getActiveSubscriptionsAndSaveToRedis(ctx, tenantId).catch(
         (error) => {
           this.logger.error(error.message);
         },
       );
       return JSON.parse(subs);
     } else
-      return await this.getActiveSubscriptionsAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-      );
+      return await this.getActiveSubscriptionsAndSaveToRedis(ctx, tenantId);
   }
 
   async getSolutionByVersionIdAndSaveToRedis(
@@ -511,7 +505,8 @@ export class SubscriptionService {
             new Set(solutionDto.allowedRedirectUrls),
           ).filter((path) => path.length > 0);
 
-          solutionDto.productGuideUrl = this.getSolutionProductGuideUrl(solution)
+          solutionDto.productGuideUrl =
+            this.getSolutionProductGuideUrl(solution);
         }
       }
       if (
@@ -538,7 +533,7 @@ export class SubscriptionService {
       tenantConfig,
       userRoles,
     ] = await Promise.all([
-      this.getActiveSubscriptions(ctx, userId, tenantId),
+      this.getActiveSubscriptions(ctx, tenantId),
       this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
       firstValueFrom(
         this.coreosAgentServiceClient

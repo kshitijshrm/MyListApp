@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { string } from 'joi';
 
 export class RecordStatus {
   @ApiProperty({
@@ -95,13 +94,13 @@ export class BannerMessageDataDTO {
   })
   activityDate?: string;
 }
-export class BannerMessageDTO {
+export class BannerContentDTO {
   @ApiProperty({
-    description: 'content to be displayed',
+    description: 'message to be displayed',
     example:
-      'We have a planned for maintenance from ${activityStartTime} to ${activityEndTime} on ${activityDate}. During this time this application will be temporarily unavailable.',
+      'We have a planned for maintenance from {{activityStartTime}} to {{activityEndTime}} on {{activityDate}}. During this time this application will be temporarily unavailable.',
   })
-  content: string;
+  message: string;
   @ApiProperty({
     description: 'JSON data whose properties will be injected into the content',
     type: BannerMessageDataDTO,
@@ -132,9 +131,9 @@ export class BannerDTO {
   activeUntilTime: string;
   @ApiProperty({
     description: 'The banner message',
-    type: BannerMessageDTO,
+    type: BannerContentDTO,
   })
-  message: BannerMessageDTO;
+  content: BannerContentDTO;
 }
 
 export class TenantSubscriptionDTO {
@@ -190,5 +189,10 @@ export class BannerResponseDTO {
     description: 'list of active banners',
     type: BannerResponseDataDTO,
   })
-  banners: BannerResponseDTO;
+  banners: BannerResponseDataDTO;
 }
+
+export type TenantSubscriptionMap = Array<{
+  solutionId: string;
+  subscriptionId: string;
+}>;

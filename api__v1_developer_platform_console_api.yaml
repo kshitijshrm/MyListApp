@@ -690,21 +690,21 @@ components:
         - activityStartTime
         - activityEndTIme
         - activityDate
-    BannerMessageDTO:
+    BannerContentDTO:
       type: object
       properties:
-        content:
+        message:
           type: string
-          description: content to be displayed
-          example: We have a planned for maintenance from ${activityStartTime} to
-            ${activityEndTime} on ${activityDate}. During this time this
+          description: message to be displayed
+          example: We have a planned for maintenance from {{activityStartTime}} to
+            {{activityEndTime}} on {{activityDate}}. During this time this
             application will be temporarily unavailable.
         data:
           description: JSON data whose properties will be injected into the content
           allOf:
             - $ref: "#/components/schemas/BannerMessageDataDTO"
       required:
-        - content
+        - message
         - data
     BannerDTO:
       type: object
@@ -725,16 +725,16 @@ components:
           type: string
           description: time in ISO till which this banner should remain shown to users
           example: 2024-09-04T22:00:00.000Z
-        message:
+        content:
           description: The banner message
           allOf:
-            - $ref: "#/components/schemas/BannerMessageDTO"
+            - $ref: "#/components/schemas/BannerContentDTO"
       required:
         - id
         - title
         - activeFromTime
         - activeUntilTime
-        - message
+        - content
     TenantSubscriptionDTO:
       type: object
       properties:
@@ -768,10 +768,10 @@ components:
           type: string
           description: time in ISO till which this banner should remain shown to users
           example: 2024-09-04T22:00:00.000Z
-        message:
+        content:
           description: The banner message
           allOf:
-            - $ref: "#/components/schemas/BannerMessageDTO"
+            - $ref: "#/components/schemas/BannerContentDTO"
         subscription:
           description: tenant subscription details
           allOf:
@@ -781,7 +781,7 @@ components:
         - title
         - activeFromTime
         - activeUntilTime
-        - message
+        - content
         - subscription
     BannerResponseDataDTO:
       type: object

@@ -5,9 +5,12 @@ import { CommonService } from './common.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ServiceConstants } from 'src/common/constants/service.constants';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
   imports: [
+    SubscriptionModule,
     ClientsModule.register([
       {
         name: ServiceConstants.coreosagent_service.name,
