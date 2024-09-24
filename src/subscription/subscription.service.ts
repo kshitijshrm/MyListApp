@@ -647,6 +647,15 @@ export class SubscriptionService {
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
+                const appRelativePathUrl: ApplicationUrl =
+                  app.versions[0]?.appUrls?.find(
+                    (url) => url.name === 'relativePath',
+                  );
+                if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
+                  solution.allowedRedirectUrls.push(
+                    appRelativePathUrl.url.toLowerCase(),
+                  );
+                }
                 if (
                   app.versions[0].appUrls?.find((url) => url.name === 'setting')
                     ?.url?.length > 0
@@ -718,6 +727,15 @@ export class SubscriptionService {
                       app,
                     ),
                   );
+                  const appRelativePathUrl: ApplicationUrl =
+                    app.versions[0]?.appUrls?.find(
+                      (url) => url.name === 'relativePath',
+                    );
+                  if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
+                    solution.allowedRedirectUrls.push(
+                      appRelativePathUrl.url.toLowerCase(),
+                    );
+                  }
                   if (
                     app.versions[0].appUrls?.find(
                       (url) => url.name === 'setting',
