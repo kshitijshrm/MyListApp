@@ -1,7 +1,4 @@
-import {
-  SubscriptionDTO,
-  SubscriptionsResponseDTO,
-} from 'src/common/dto/subscription/subscription.dto';
+import { SubscriptionDTO } from 'src/common/dto/subscription/subscription.dto';
 import { TestHelpers } from 'src/common/test/test.helpers';
 import { CoreosAgentServiceClient } from 'src/shared/schemas/os1/core/service/coreosagent.pb';
 import { FileServiceClient } from 'src/shared/schemas/os1/core/service/file.pb';
@@ -313,11 +310,7 @@ describe('SubscriptionService', () => {
         .mockImplementation(() => of({ subscriptions: sampleSubscriptions }));
       jest.spyOn(redisService, 'get').mockImplementation(async () => undefined);
       const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getActiveSubscriptions(
-        ctx,
-        'user-id',
-        'tenant-id',
-      );
+      const result = await service.getActiveSubscriptions(ctx, 'tenant-id');
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(1);
@@ -332,11 +325,7 @@ describe('SubscriptionService', () => {
         .spyOn(redisService, 'get')
         .mockImplementation(async () => JSON.stringify(sampleSubscriptions));
       const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getActiveSubscriptions(
-        ctx,
-        'user-id',
-        'tenant-id',
-      );
+      const result = await service.getActiveSubscriptions(ctx, 'tenant-id');
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(2);
@@ -351,11 +340,7 @@ describe('SubscriptionService', () => {
         .spyOn(redisService, 'get')
         .mockImplementation(async () => JSON.stringify(sampleSubscriptions2));
       const ctx = TestHelpersBase.CreatePlatformContext();
-      const result = await service.getActiveSubscriptions(
-        ctx,
-        'user-id',
-        'tenant-id',
-      );
+      const result = await service.getActiveSubscriptions(ctx, 'tenant-id');
       expect(
         subscriptionServiceClient.getSubscriptionsByTenantId,
       ).toHaveBeenCalledTimes(3);
