@@ -55,7 +55,7 @@ export class CommonService {
       serverTime: bannersResponse.serverTimeIso,
       tenantTimeZone: bannersResponse.tenantTimezone,
       banners: TenantBannersResponseSchemaToDtoMapper.mapToBannerResponseDTO(
-        bannersResponse.banners || [],
+        bannersResponse.banners,
         tenantSubscriptionMap,
       ),
     };
