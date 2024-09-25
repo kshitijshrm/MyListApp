@@ -175,6 +175,30 @@ paths:
                         type: string
       tags:
         - Health
+  /app/console-api/common/banners:
+    get:
+      operationId: getActiveBanners
+      summary: Get all active banners applicable on a tenant
+      description: >
+        
+        **Access:**  Inorder to access this api, one must pass the
+        x-coreos-access header. 
+      parameters:
+        - name: x-coreos-access
+          in: header
+          description: coreos access token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BannerResponseDTO"
+      tags:
+        - Common
   /app/console-api/ping:
     get:
       operationId: getOk
@@ -205,16 +229,10 @@ components:
           type: string
           description: The name of the url
           example: relativePath
-          examples:
-            - relativePath
-            - interface
         url:
           type: string
           description: The actual url item
           example: /app/my-app
-          examples:
-            - /app/my-app
-            - https://mytenant.os1.delhivery.com/app/my-app
         description:
           type: string
           description: The actual item description
@@ -473,11 +491,11 @@ components:
           type: array
           items:
             type: string
-        Landing Page:
+        landingPage:
           type: string
           description: relative url path of the landing page (launch page)
           example: /launch/control-tower
-        allowed redirect URIs:
+        allowedRedirectUrls:
           description: list of relative paths allowed to be accessed on this solution
           example:
             - /orders
@@ -485,6 +503,11 @@ components:
           type: array
           items:
             type: string
+        productGuideUrl:
+          type: string
+          description: url of the product guide for the current selected solution
+          example:
+            - www.dispatchoneguide.com
       required:
         - solutionId
         - solutionVersionId
@@ -498,8 +521,9 @@ components:
         - isMarketplaceCompatible
         - isConsoleCompatible
         - coreAppSettings
-        - Landing Page
-        - allowed redirect URIs
+        - landingPage
+        - allowedRedirectUrls
+        - productGuideUrl
     SubscriptionStatusDTO:
       type: object
       properties:
@@ -647,3 +671,150 @@ components:
       required:
         - foundation
         - solutions
+    BannerMessageDataDTO:
+      type: object
+      properties:
+        activityStartTime:
+          type: string
+          description: banner activity start time in ISO
+          example: 2024-08-29T23:00:00.000Z
+        activityEndTIme:
+          type: string
+          description: banner activity end time in ISO
+          example: 2024-08-29T23:30:00.000Z
+        activityDate:
+          type: string
+          description: banner activity date in ISO
+          example: 2024-08-29
+      required:
+        - activityStartTime
+        - activityEndTIme
+        - activityDate
+    BannerContentDTO:
+      type: object
+      properties:
+        message:
+          type: string
+          description: message to be displayed
+          example: We have a planned for maintenance from {{activityStartTime}} to
+            {{activityEndTime}} on {{activityDate}}. During this time this
+            application will be temporarily unavailable.
+        data:
+          description: JSON data whose properties will be injected into the content
+          allOf:
+            - $ref: "#/components/schemas/BannerMessageDataDTO"
+      required:
+        - message
+        - data
+    BannerDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the banner
+          example: banner:e27f429d-42ce-499a-aa43-dfcb1a1ddf3b
+        title:
+          type: string
+          description: short title of the banner
+          example: Scheduled Maintainance Alert!
+        activeFromTime:
+          type: string
+          description: time in ISO from which this banner should be shown to users
+          example: 2024-09-04T17:00:00.000Z
+        activeUntilTime:
+          type: string
+          description: time in ISO till which this banner should remain shown to users
+          example: 2024-09-04T22:00:00.000Z
+        content:
+          description: The banner message
+          allOf:
+            - $ref: "#/components/schemas/BannerContentDTO"
+      required:
+        - id
+        - title
+        - activeFromTime
+        - activeUntilTime
+        - content
+    TenantSubscriptionDTO:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          description: subscription Id of the tenant
+          example: subscription:3n672510-c6a7-4f03-a4b2-01c19dbd64q9
+        solutionId:
+          type: string
+          description: solution Id this banner is applicable on
+          example: solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4
+      required:
+        - subscriptionId
+        - solutionId
+    SolutionBannerDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the banner
+          example: banner:e27f429d-42ce-499a-aa43-dfcb1a1ddf3b
+        title:
+          type: string
+          description: short title of the banner
+          example: Scheduled Maintainance Alert!
+        activeFromTime:
+          type: string
+          description: time in ISO from which this banner should be shown to users
+          example: 2024-09-04T17:00:00.000Z
+        activeUntilTime:
+          type: string
+          description: time in ISO till which this banner should remain shown to users
+          example: 2024-09-04T22:00:00.000Z
+        content:
+          description: The banner message
+          allOf:
+            - $ref: "#/components/schemas/BannerContentDTO"
+        subscription:
+          description: tenant subscription details
+          allOf:
+            - $ref: "#/components/schemas/TenantSubscriptionDTO"
+      required:
+        - id
+        - title
+        - activeFromTime
+        - activeUntilTime
+        - content
+        - subscription
+    BannerResponseDataDTO:
+      type: object
+      properties:
+        foundation:
+          description: list of active foundational banners
+          type: array
+          items:
+            $ref: "#/components/schemas/BannerDTO"
+        solution:
+          description: list of active solution banners
+          type: array
+          items:
+            $ref: "#/components/schemas/SolutionBannerDTO"
+      required:
+        - foundation
+        - solution
+    BannerResponseDTO:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          description: server time at the time of request
+          example: 2024-09-06T17:00:00.000Z
+        tenantTimeZone:
+          type: string
+          description: tenant timezone
+          example: Asia/Kolkata
+        banners:
+          description: list of active banners
+          allOf:
+            - $ref: "#/components/schemas/BannerResponseDataDTO"
+      required:
+        - serverTime
+        - tenantTimeZone
+        - banners

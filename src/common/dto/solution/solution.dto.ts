@@ -124,16 +124,19 @@ export class SolutionDTO {
   })
   coreAppSettings: Array<systemAppSettingItem>;
   @ApiProperty({
-    name: 'Landing Page',
     description: 'relative url path of the landing page (launch page)',
     example: '/launch/control-tower',
   })
   landingPage: string;
   @ApiProperty({
-    name: 'allowed redirect URIs',
     description:
       'list of relative paths allowed to be accessed on this solution',
     example: ['/orders', '/application/settings'],
   })
   allowedRedirectUrls: string[];
+  @ApiProperty({
+    description: 'url of the product guide for the current selected solution',
+    example: ['www.dispatchoneguide.com'],
+  })
+  productGuideUrl: string;
 }

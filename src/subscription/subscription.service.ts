@@ -178,7 +178,6 @@ export class SubscriptionService {
 
   async getActiveSubscriptionsAndSaveToRedis(
     ctx: PlatformRequestContext,
-    userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
     // get subscriptions for tenant
@@ -217,7 +216,6 @@ export class SubscriptionService {
 
   async getActiveSubscriptions(
     ctx: PlatformRequestContext,
-    userId: string,
     tenantId: string,
   ): Promise<Array<Subscription>> {
     const subs = await this.redisService.get(
@@ -225,18 +223,14 @@ export class SubscriptionService {
     );
 
     if (subs) {
-      this.getActiveSubscriptionsAndSaveToRedis(ctx, userId, tenantId).catch(
+      this.getActiveSubscriptionsAndSaveToRedis(ctx, tenantId).catch(
         (error) => {
           this.logger.error(error.message);
         },
       );
       return JSON.parse(subs);
     } else
-      return await this.getActiveSubscriptionsAndSaveToRedis(
-        ctx,
-        userId,
-        tenantId,
-      );
+      return await this.getActiveSubscriptionsAndSaveToRedis(ctx, tenantId);
   }
 
   async getSolutionByVersionIdAndSaveToRedis(
@@ -510,6 +504,9 @@ export class SubscriptionService {
           solutionDto.allowedRedirectUrls = Array.from(
             new Set(solutionDto.allowedRedirectUrls),
           ).filter((path) => path.length > 0);
+
+          solutionDto.productGuideUrl =
+            this.getSolutionProductGuideUrl(solution);
         }
       }
       if (
@@ -536,7 +533,7 @@ export class SubscriptionService {
       tenantConfig,
       userRoles,
     ] = await Promise.all([
-      this.getActiveSubscriptions(ctx, userId, tenantId),
+      this.getActiveSubscriptions(ctx, tenantId),
       this.getCoreosAppsAssignedToUser(ctx, userId, tenantId),
       firstValueFrom(
         this.coreosAgentServiceClient
@@ -930,11 +927,6 @@ export class SubscriptionService {
             map((response) => {
               return response.configs;
             }),
-            catchError((err) => {
-              const message = `Error while fetching config for tenant ${tenantId}. Reson: ${err.message}`;
-              this.logger.error(message, err);
-              throw new InternalServerErrorException(message);
-            }),
           ),
       ).catch((error) => {
         return [];
@@ -996,6 +988,16 @@ export class SubscriptionService {
     );
     if (appRelPath) {
       return appRelPath.url;
+    }
+    return '';
+  }
+
+  private getSolutionProductGuideUrl(solution: Solution): string {
+    const guideLink = solution.version[0].solutionUrls?.find(
+      (url) => url.name === 'docs',
+    );
+    if (guideLink) {
+      return guideLink.url;
     }
     return '';
   }
