@@ -93,10 +93,21 @@ export class CommonService {
       return {
         serverTime: bannersResponse.serverTimeIso,
         tenantTimeZone: bannersResponse.tenantTimezone,
-        banner: this.getActiveBanner(bannersResponse.serverTimeIso, [
-          ...applicableBanners.solution,
-          ...applicableBanners.foundation,
-        ]),
+        banners: {
+          foundation: [
+            this.getActiveBanner(
+              bannersResponse.serverTimeIso,
+              applicableBanners.foundation,
+            ),
+          ],
+          solution: applicableBanners.solution.filter(
+            (banner) =>
+              DateTime.fromISO(bannersResponse.serverTimeIso) >=
+                DateTime.fromISO(banner.activeFromTime) &&
+              DateTime.fromISO(bannersResponse.serverTimeIso) <=
+                DateTime.fromISO(banner.activeUntilTime),
+          ),
+        },
       };
     }
     return {
@@ -142,12 +153,5 @@ export class CommonService {
         return durB - durA;
       })[0];
     }
-
-    return banners.sort((bannerA, bannerB) => {
-      return DateTime.fromISO(bannerA.activeFromTime).diff(
-        DateTime.fromISO(bannerB.activeFromTime),
-        'minutes',
-      ).minutes;
-    })[0];
   }
 }
