@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { string } from 'joi';
 
 export class RecordStatus {
   @ApiProperty({
@@ -134,6 +135,12 @@ export class BannerDTO {
     type: BannerContentDTO,
   })
   content: BannerContentDTO;
+  @ApiProperty({
+    description: 'level type of this banner',
+    type: string,
+    example: 'stack',
+  })
+  levelType: string;
 }
 
 export class TenantSubscriptionDTO {
@@ -174,7 +181,7 @@ export class BannerResponseDataDTO {
   solution: Array<SolutionBannerDTO>;
 }
 
-export class BannerResponseDTO {
+export class BannerAllResponseDTO {
   @ApiProperty({
     description: 'server time at the time of request',
     example: '2024-09-06T17:00:00.000Z',
@@ -190,6 +197,25 @@ export class BannerResponseDTO {
     type: BannerResponseDataDTO,
   })
   banners: BannerResponseDataDTO;
+}
+
+export class BannerLatestResponseDTO {
+  @ApiProperty({
+    description: 'server time at the time of request',
+    example: '2024-09-06T17:00:00.000Z',
+  })
+  serverTime: string;
+  @ApiProperty({
+    description: 'tenant timezone',
+    example: 'Asia/Kolkata',
+  })
+  tenantTimeZone: string;
+  @ApiProperty({
+    description: 'current active banner, if present',
+    type: BannerDTO,
+    required: false,
+  })
+  banner: BannerDTO;
 }
 
 export type TenantSubscriptionMap = Array<{
