@@ -27,6 +27,7 @@ export class TenantBannersResponseSchemaToDtoMapper {
                   subscriptionId: item.subscriptionId,
                   solutionId: item.solutionId,
                 },
+                levelType: cv.levelType,
               });
             }
           });
@@ -38,6 +39,7 @@ export class TenantBannersResponseSchemaToDtoMapper {
             content: cv.content,
             activeFromTime: cv.startUtcIso,
             activeUntilTime: cv.endUtcIso,
+            levelType: cv.levelType,
           });
         }
         return [fb, sb];

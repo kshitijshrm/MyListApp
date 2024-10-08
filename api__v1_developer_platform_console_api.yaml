@@ -190,13 +190,27 @@ paths:
           required: true
           schema:
             type: string
+        - name: solutionId
+          required: false
+          in: query
+          example: solution:9d672510-c6a7-4f03-a4b2-01c19dbd63a4
+          schema:
+            type: string
+        - name: activeOnly
+          required: false
+          in: query
+          example: "true"
+          schema:
+            type: string
       responses:
         "200":
           description: ""
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BannerResponseDTO"
+                oneOf:
+                  - $ref: "#/components/schemas/BannerAllResponseDTO"
+                  - $ref: "#/components/schemas/BannerLatestResponseDTO"
       tags:
         - Common
   /app/console-api/ping:
@@ -706,6 +720,9 @@ components:
       required:
         - message
         - data
+    "":
+      type: object
+      properties: {}
     BannerDTO:
       type: object
       properties:
@@ -729,12 +746,18 @@ components:
           description: The banner message
           allOf:
             - $ref: "#/components/schemas/BannerContentDTO"
+        levelType:
+          description: level type of this banner
+          example: stack
+          allOf:
+            - $ref: "#/components/schemas/"
       required:
         - id
         - title
         - activeFromTime
         - activeUntilTime
         - content
+        - levelType
     TenantSubscriptionDTO:
       type: object
       properties:
@@ -772,6 +795,11 @@ components:
           description: The banner message
           allOf:
             - $ref: "#/components/schemas/BannerContentDTO"
+        levelType:
+          description: level type of this banner
+          example: stack
+          allOf:
+            - $ref: "#/components/schemas/"
         subscription:
           description: tenant subscription details
           allOf:
@@ -782,6 +810,7 @@ components:
         - activeFromTime
         - activeUntilTime
         - content
+        - levelType
         - subscription
     BannerResponseDataDTO:
       type: object
@@ -799,7 +828,7 @@ components:
       required:
         - foundation
         - solution
-    BannerResponseDTO:
+    BannerAllResponseDTO:
       type: object
       properties:
         serverTime:
@@ -818,3 +847,21 @@ components:
         - serverTime
         - tenantTimeZone
         - banners
+    BannerLatestResponseDTO:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          description: server time at the time of request
+          example: 2024-09-06T17:00:00.000Z
+        tenantTimeZone:
+          type: string
+          description: tenant timezone
+          example: Asia/Kolkata
+        banner:
+          description: current active banner, if present
+          allOf:
+            - $ref: "#/components/schemas/BannerDTO"
+      required:
+        - serverTime
+        - tenantTimeZone
