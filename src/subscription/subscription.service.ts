@@ -394,9 +394,7 @@ export class SubscriptionService {
                 (url) => url.name === 'relativePath',
               );
               if (appRelativePathUrl) {
-                solutionDto.allowedRedirectUrls.push(
-                  appRelativePathUrl.url.toLowerCase(),
-                );
+                solutionDto.allowedRedirectUrls.push(appRelativePathUrl.url);
               }
               if (
                 applyFilterForConsoleCompatibleWebApps &&
@@ -445,9 +443,7 @@ export class SubscriptionService {
                   (url) => url.name === 'relativePath',
                 );
                 if (appRelativePathUrl) {
-                  solutionDto.allowedRedirectUrls.push(
-                    appRelativePathUrl.url.toLowerCase(),
-                  );
+                  solutionDto.allowedRedirectUrls.push(appRelativePathUrl.url);
                 }
                 if (
                   applyFilterForConsoleCompatibleWebApps &&
@@ -652,9 +648,7 @@ export class SubscriptionService {
                     (url) => url.name === 'relativePath',
                   );
                 if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
-                  solution.allowedRedirectUrls.push(
-                    appRelativePathUrl.url.toLowerCase(),
-                  );
+                  solution.allowedRedirectUrls.push(appRelativePathUrl.url);
                 }
                 if (
                   app.versions[0].appUrls?.find((url) => url.name === 'setting')
@@ -732,9 +726,7 @@ export class SubscriptionService {
                       (url) => url.name === 'relativePath',
                     );
                   if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
-                    solution.allowedRedirectUrls.push(
-                      appRelativePathUrl.url.toLowerCase(),
-                    );
+                    solution.allowedRedirectUrls.push(appRelativePathUrl.url);
                   }
                   if (
                     app.versions[0].appUrls?.find(
