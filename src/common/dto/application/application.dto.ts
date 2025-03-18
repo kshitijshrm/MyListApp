@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FileMetadataDTO } from '../common/common.dto';
+import { PlatformRegexConfig } from '@foxtrotplatform/developer-platform-core-lib';
 
 export enum AppStatus {
   APPLICATION_PHASE_UNSPECIFIED = 'APPLICATION_PHASE_UNSPECIFIED',
@@ -188,4 +189,20 @@ For exmaple, When the console is being accessed from the tenant mytenant.os1.del
     type: Array<string>,
   })
   settingPageRolesRequired: Array<string>;
+}
+
+export class ApplicationVersionIdentifierDTO {
+  @ApiProperty({
+    description: 'A unique identifier for the application',
+    example: 'app:bf17e158-1951-47f9-84f1-e50aeb59fac2',
+    pattern: PlatformRegexConfig.appId.source,
+  })
+  appId: string;
+  @ApiProperty({
+    description:
+      'A unique identifier for the application version in an application',
+    example: 'appversion:bf17e158-1951-47f9-84f1-e50aeb59fac2',
+    pattern: PlatformRegexConfig.appVersionId.source,
+  })
+  appVersionId: string;
 }

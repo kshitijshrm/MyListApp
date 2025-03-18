@@ -3,15 +3,23 @@ import {
   Solution,
   SolutionConfiguration,
   SolutionDocumentMetadata,
+  SolutionVersion,
+  SolutionVersion_Application,
+  solutionTypeToJSON
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import {
   ConfigurationMetadataDTO,
   DocumentMetadataDTO,
   FileMetadataDTO,
 } from '../common/common.dto';
-import { SolutionDTO } from './solution.dto';
+import { SolutionApplicationDTO, SolutionDTO, SolutionResponseDTO, SolutionVersionDTO } from './solution.dto';
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { Inject } from '@nestjs/common';
+import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core-lib';
 
 export class SolutionResponseSchemaToDtoMapper {
+  @Inject(SubscriptionService)
+  private static readonly subscriptionService: SubscriptionService;
   static mapToSolutionDTO(solution: Solution): SolutionDTO {
     const response: SolutionDTO = {
       solutionId: solution.id.solutionId,
@@ -46,36 +54,59 @@ export class SolutionResponseSchemaToDtoMapper {
     return response;
   }
 
-  static mapToSolutionResponseDTO(solution: Solution): SolutionDTO {
-    const response: SolutionDTO = {
+  static mapToSolutionResponseDTO(ctx: PlatformRequestContext, solution: Solution): SolutionResponseDTO {
+    const solutionDTO: SolutionResponseDTO = {
       solutionId: solution.id.solutionId,
-      solutionVersionId: solution.version[0].id.solutionVersionId,
-      displayName: solution.version[0].displayAttributes.displayName,
-      version: solution.version[0].version,
-      shortDescription: solution.version[0].displayAttributes.shortDescription,
-      longDescription: solution.version[0].displayAttributes.longDescription,
+      productFamily: solution.productFamily,
+      supportedCountries: solution.supportedCountries,
+      solutionType: solutionTypeToJSON(solution.solutionType) as any,
+      organizationId: solution.organization.organizationId,
+      versions: [],
+    };
+
+    solution.version.forEach((version) => {
+      solutionDTO.versions.push(
+        SolutionResponseSchemaToDtoMapper.mapToSolutionVersionDTO(ctx, version),
+      );
+    });
+    return solutionDTO;
+  }
+
+  static mapToSolutionVersionDTO(
+    ctx: PlatformRequestContext,
+    solution: SolutionVersion,
+  ): SolutionVersionDTO {
+    console.log('solution', solution);
+    const response: SolutionVersionDTO = {
+      solutionId: solution.id.solutionId,
+      solutionVersionId: solution.id.solutionVersionId,
+      displayName: solution.displayAttributes.displayName,
+      version: solution.version,
+      shortDescription: solution.displayAttributes.shortDescription,
+      longDescription: solution.displayAttributes.longDescription,
       icon:
-        solution.version[0].icons && solution.version[0].icons.length > 0
+        solution.icons && solution.icons.length > 0
           ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
-            solution.version[0].icons[0],
+            solution.icons[0],
           )
           : undefined,
-      images: solution.version[0].displayImages
-        ? solution.version[0].displayImages.map(
+      images: solution.displayImages
+        ? solution.displayImages.map(
           SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
         )
         : undefined,
-      applications: [],
-      isMarketplaceCompatible:
-        solution.version[0].compatibility?.isMarketplaceCompatible,
+      applications: solution.associatedApplications
+        ? solution.associatedApplications.map(
+          (application) => SolutionResponseSchemaToDtoMapper.mapToSolutionApplicationDTO(ctx, application),
+        )
+        : undefined,
       isConsoleCompatible:
-        solution.version[0].compatibility?.isConsoleCompatible,
-      coreAppSettings: solution.version[0].systemAppSettings ?? [],
-      landingPage: '',
-      allowedRedirectUrls: [],
-      productGuideUrl: solution.version[0].solutionUrls?.find(
-        (url) => url.name === 'docs',
-      )?.url,
+        solution.compatibility?.isConsoleCompatible,
+      listingId: solution.listingId,
+      createdAt: solution.recordAudit.createdAt,
+      updatedAt: solution.recordAudit.updatedAt,
+      updatedBy: solution.recordAudit.updatedBy,
+      createdBy: solution.recordAudit.createdBy,
     };
     return response;
   }
@@ -88,6 +119,23 @@ export class SolutionResponseSchemaToDtoMapper {
       fileUrl: file.attributes.fileUrl,
     };
     return fileMetadataDTO;
+  }
+
+  static mapToSolutionApplicationDTO(
+    ctx: PlatformRequestContext,
+    application: SolutionVersion_Application,
+  ): SolutionApplicationDTO {
+    console.log('application', application);
+    const applicationDetails = this.subscriptionService.getApplicationDetails(ctx, application)
+    console.log('applicationDetails', applicationDetails);
+    const applicationDTO: SolutionApplicationDTO = {
+      appId: application.id.appId,
+      appVersionId: application.id.appVersionId,
+      displayOrder: application.displayOrder,
+      listingId: application.listingId,
+      semver: application.semver,
+    };
+    return applicationDTO;
   }
 
   static mapToDocumentMetadataDTO(

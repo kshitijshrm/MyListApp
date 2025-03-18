@@ -753,6 +753,20 @@ export class SubscriptionService {
     return { subscriptionsResponse, meta: { appsAssignedToUser, userRoles } };
   }
 
+  async getApplicationDetails(ctx: PlatformRequestContext, app: SolutionVersion_Application) {
+    const appFromRedis = await this.redisService.get(
+      RedisConstants.getApplicationByVersionIdKey(app.id.appVersionId),
+    );
+    if (appFromRedis) {
+      this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id).catch();
+      const application: Application = JSON.parse(appFromRedis);
+      return ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(application);
+    } else {
+      const application = await this.getApplicationByVersionIdAndSaveToRedis(ctx, app.id);
+      return application ? ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(application) : null;
+    }
+  }
+
   private sortSolutionApplications(
     appsReferencedInSolution: SolutionVersion_Application[],
   ): SolutionVersion_Application[] {
@@ -827,6 +841,7 @@ export class SubscriptionService {
         map((response) => {
           this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
           return SolutionResponseSchemaToDtoMapper.mapToSolutionResponseDTO(
+            ctx,
             response.solution,
           );
 

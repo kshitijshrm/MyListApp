@@ -70,7 +70,8 @@
     "ts-proto": "^1.120.0",
     "ts-protoc-gen": "^0.15.0",
     "uuid-by-string": "^3.0.7",
-    "yaml": "^2.2.1"
+    "yaml": "^2.2.1",
+    "class-validator": "^0.14.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
