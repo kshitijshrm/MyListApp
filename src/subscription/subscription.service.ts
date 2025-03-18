@@ -690,7 +690,7 @@ export class SubscriptionService {
                 ) {
                   this.logger.log(
                     'application already added to solution: ' +
-                    compatibleSolutionId,
+                    JSON.stringify(compatibleSolutionId),
                   );
                   continue;
                 }
@@ -711,7 +711,7 @@ export class SubscriptionService {
                       tenantEntity.stackId,
                     );
                   this.logger.log(
-                    'adding application to solution: ' + compatibleSolutionId,
+                    'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
                   );
                   this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                     app,
@@ -820,7 +820,7 @@ export class SubscriptionService {
       .pipe(
         map((response) => {
           this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
-          return SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(
+          return SolutionResponseSchemaToDtoMapper.mapToSolutionResponseDTO(
             response.solution,
           );
 

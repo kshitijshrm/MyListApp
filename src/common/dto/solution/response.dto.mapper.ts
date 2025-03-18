@@ -23,13 +23,47 @@ export class SolutionResponseSchemaToDtoMapper {
       icon:
         solution.version[0].icons && solution.version[0].icons.length > 0
           ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
-              solution.version[0].icons[0],
-            )
+            solution.version[0].icons[0],
+          )
           : undefined,
       images: solution.version[0].displayImages
         ? solution.version[0].displayImages.map(
-            SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
+          SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
+        )
+        : undefined,
+      applications: [],
+      isMarketplaceCompatible:
+        solution.version[0].compatibility?.isMarketplaceCompatible,
+      isConsoleCompatible:
+        solution.version[0].compatibility?.isConsoleCompatible,
+      coreAppSettings: solution.version[0].systemAppSettings ?? [],
+      landingPage: '',
+      allowedRedirectUrls: [],
+      productGuideUrl: solution.version[0].solutionUrls?.find(
+        (url) => url.name === 'docs',
+      )?.url,
+    };
+    return response;
+  }
+
+  static mapToSolutionResponseDTO(solution: Solution): SolutionDTO {
+    const response: SolutionDTO = {
+      solutionId: solution.id.solutionId,
+      solutionVersionId: solution.version[0].id.solutionVersionId,
+      displayName: solution.version[0].displayAttributes.displayName,
+      version: solution.version[0].version,
+      shortDescription: solution.version[0].displayAttributes.shortDescription,
+      longDescription: solution.version[0].displayAttributes.longDescription,
+      icon:
+        solution.version[0].icons && solution.version[0].icons.length > 0
+          ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+            solution.version[0].icons[0],
           )
+          : undefined,
+      images: solution.version[0].displayImages
+        ? solution.version[0].displayImages.map(
+          SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
+        )
         : undefined,
       applications: [],
       isMarketplaceCompatible:
