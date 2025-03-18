@@ -100,4 +100,30 @@ When the tenant being queried is a developer tenant, there wont be any access re
       tenantId,
     );
   }
+  @Get('/:tenantId/solutions/:solutionVersionId')
+  @ApiOperation({
+    summary: 'Get all apps associated with a solution version',
+    description: `Get all apps associated with a solution version. This list includes both solution and app subscriptions along with the addOn apps.
+`,
+  })
+  @HttpCode(200)
+  @ApiResponse({
+    type: SubscriptionSettings,
+    isArray: true,
+    status: 200,
+  })
+  private getAllSolutionApps(
+    @Req() request,
+    @Param('tenantId') tenantId: string,
+    @Param('solutionVersionId') solutionVersionId: string,
+    @Headers() headers,
+  ): Promise<any> {
+    const ctx: PlatformRequestContext =
+      PlatformRequestContext.createFromHttpHeaders(headers);
+    return this.subscriptionService.getAllSolutionApps(
+      ctx,
+      tenantId,
+      solutionVersionId,
+    );
+  }
 }

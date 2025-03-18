@@ -1,6 +1,7 @@
 import {
   PlatformRequestContext,
   RedisService,
+  GrpcErrorStatus
 } from '@foxtrotplatform/developer-platform-core-lib';
 import {
   Inject,
@@ -12,7 +13,7 @@ import {
 import { ClientGrpc } from '@nestjs/microservices';
 import * as _ from 'lodash';
 import * as pluralize from 'pluralize';
-import { catchError, firstValueFrom, map, Observable } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, throwError } from 'rxjs';
 import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
@@ -613,7 +614,7 @@ export class SubscriptionService {
               ) {
                 this.logger.log(
                   'application already added to solution: ' +
-                    compatibleSolutionId,
+                  compatibleSolutionId,
                 );
                 continue;
               }
@@ -689,7 +690,7 @@ export class SubscriptionService {
                 ) {
                   this.logger.log(
                     'application already added to solution: ' +
-                      compatibleSolutionId,
+                    compatibleSolutionId,
                   );
                   continue;
                 }
@@ -797,6 +798,46 @@ export class SubscriptionService {
     return response;
   }
 
+  async getAllSolutionApps(
+    ctx: PlatformRequestContext,
+    tenantId: string,
+    solutionVersionId: string,
+  ) {
+    const tenantSubscriptions =
+      await this.getActiveSubscriptions(ctx, tenantId);
+
+    this.logger.log("getAllSolutionApps: tenantSubscriptions" + JSON.stringify(tenantSubscriptions));
+    return this.applicationServiceClient
+      .getSolutionByVersionId(
+        {
+          id: {
+            solutionId: undefined,
+            solutionVersionId,
+          },
+        },
+        ctx.rpcMetadata,
+      )
+      .pipe(
+        map((response) => {
+          this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
+          return SolutionResponseSchemaToDtoMapper.mapToSolutionDTO(
+            response.solution,
+          );
+
+        }),
+        catchError((error) => {
+          if (error.code === GrpcErrorStatus.NOT_FOUND)
+            return throwError(
+              () =>
+                new NotFoundException(
+                  `Solution Version with ID: ${solutionVersionId} Not Found.`,
+                ),
+            );
+          return throwError(() => error);
+        }),
+      );
+  }
+
   findSolutionBySolutionId(
     solutions: SolutionDTO[],
     solutionId: string,
@@ -841,8 +882,8 @@ export class SubscriptionService {
     // filter out which are not console compatable apps not assigned to user
     return applyFilterForConsoleCompatibleWebApps
       ? app.versions[0]?.applicationCompitablity?.isConsoleCompatible &&
-          (tenant.isDeveloperTenant ||
-            coreosAppsAssignedToUser?.includes(app.urn))
+      (tenant.isDeveloperTenant ||
+        coreosAppsAssignedToUser?.includes(app.urn))
       : tenant.isDeveloperTenant || coreosAppsAssignedToUser?.includes(app.urn);
   }
 
