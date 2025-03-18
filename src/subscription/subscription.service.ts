@@ -713,6 +713,10 @@ export class SubscriptionService {
                   this.logger.log(
                     'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
                   );
+                  this.logger.log(
+                    'adding application to solution app: ' + JSON.stringify(app));
+                  this.logger.log(
+                    'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
                   this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                     app,
                     tenantConfig,
@@ -722,6 +726,8 @@ export class SubscriptionService {
                       app,
                     ),
                   );
+                  this.logger.log(
+                    'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
                   const appRelativePathUrl: ApplicationUrl =
                     app.versions[0]?.appUrls?.find(
                       (url) => url.name === 'relativePath',
