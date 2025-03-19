@@ -608,7 +608,7 @@ export class SubscriptionService {
                 );
                 continue;
               }
-              this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
+              this.logger.log('solution found for id: ' + compatibleSolutionId);
               if (
                 solution.applications.find(
                   (application) => application.appId === app.id.appId,
@@ -616,7 +616,7 @@ export class SubscriptionService {
               ) {
                 this.logger.log(
                   'application already added to solution: ' +
-                  compatibleSolutionId?.solutionId,
+                  compatibleSolutionId,
                 );
                 continue;
               }
@@ -637,12 +637,8 @@ export class SubscriptionService {
                     tenantEntity.stackId,
                   );
                 this.logger.log(
-                  'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
-                );
-                this.logger.log(
-                  'adding application to solution app: ' + JSON.stringify(app));
-                this.logger.log(
-                  'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
+                    'adding application to solution: ' + compatibleSolutionId,
+                  );
                 this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   app,
                   tenantConfig,
@@ -650,8 +646,6 @@ export class SubscriptionService {
                 solution.applications.push(
                   ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
                 );
-                this.logger.log(
-                  'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
                 const appRelativePathUrl: ApplicationUrl =
                   app.versions[0]?.appUrls?.find(
                     (url) => url.name === 'relativePath',
@@ -698,7 +692,7 @@ export class SubscriptionService {
                 ) {
                   this.logger.log(
                     'application already added to solution: ' +
-                    JSON.stringify(compatibleSolutionId),
+                    compatibleSolutionId,
                   );
                   continue;
                 }
@@ -719,12 +713,8 @@ export class SubscriptionService {
                       tenantEntity.stackId,
                     );
                   this.logger.log(
-                    'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
+                    'adding application to solution: ' + compatibleSolutionId,
                   );
-                  this.logger.log(
-                    'adding application to solution app: ' + JSON.stringify(app));
-                  this.logger.log(
-                    'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
                   this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                     app,
                     tenantConfig,
@@ -734,8 +724,6 @@ export class SubscriptionService {
                       app,
                     ),
                   );
-                  this.logger.log(
-                    'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
                   const appRelativePathUrl: ApplicationUrl =
                     app.versions[0]?.appUrls?.find(
                       (url) => url.name === 'relativePath',
@@ -844,7 +832,7 @@ export class SubscriptionService {
         )
         .pipe(
           map(async (response) => {
-            this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
+            this.logger.log("getAllSolutionApps: response" + JSON.stringify(response));
             return await this.mapToSolutionResponseDTO(
               ctx,
               response.solution,
@@ -880,7 +868,6 @@ export class SubscriptionService {
           const app = JSON.parse(appFromRedis);
           const compatibleSolutionsForApp =
             app.versions[0]?.applicationCompitablity?.compitableSolutions;
-          this.logger.log("getAllSolutionApps: compatibleSolutionsForApp" + JSON.stringify(compatibleSolutionsForApp));
           this.logger.log("getAllSolutionApps: app" + JSON.stringify(app));
           if (compatibleSolutionsForApp) {
             for (const compatibleSolutionId of compatibleSolutionsForApp) {
@@ -912,8 +899,6 @@ export class SubscriptionService {
                   semver: app.versions[0].version,
                 }
               );
-              this.logger.log(
-                'adding application to solution subs: ' + JSON.stringify(solutioVersionIdReponse))
             }
           }
         } else {
@@ -924,7 +909,6 @@ export class SubscriptionService {
           if (app) {
             const compatibleSolutionsForApp =
               app.versions[0]?.applicationCompitablity?.compitableSolutions;
-            this.logger.log("getAllSolutionApps: compatibleSolutionsForApp" + JSON.stringify(compatibleSolutionsForApp));
             this.logger.log("getAllSolutionApps: app" + JSON.stringify(app));
             if (compatibleSolutionsForApp) {
               for (const compatibleSolutionId of compatibleSolutionsForApp) {
@@ -956,16 +940,13 @@ export class SubscriptionService {
                     semver: app.versions[0].version,
                   }
                 );
-                this.logger.log(
-                  'adding application to solution subs: ' + JSON.stringify(solutioVersionIdReponse))
               }
             }
           }
         }
       } 
     }
-    this.logger.log("getAllSolutionApps: solutionResponse" + JSON.stringify(solutioVersionIdReponse));
-    this.logger.log("getAllSolutionApps: tenantSubscriptions" + JSON.stringify(subscriptions));
+
     return solutioVersionIdReponse;
   }
 
@@ -1016,7 +997,6 @@ export class SubscriptionService {
     ctx: PlatformRequestContext,
     solution: SolutionVersion,
   ): Promise<SolutionVersionDTO> {
-    console.log('solution', solution);
     const response: SolutionVersionDTO = {
       solutionId: solution.id.solutionId,
       solutionVersionId: solution.id.solutionVersionId,
@@ -1057,7 +1037,6 @@ export class SubscriptionService {
     application: SolutionVersion_Application,
   ): Promise<SolutionApplicationDTO> {
     const applicationDetails = await this.getApplicationDetails(ctx, application);
-    console.log('applicationDetails', applicationDetails);
     const applicationDTO: SolutionApplicationDTO = {
       appId: application.id.appId,
       appVersionId: application.id.appVersionId,
