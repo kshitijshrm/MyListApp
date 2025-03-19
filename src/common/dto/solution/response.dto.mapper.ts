@@ -20,6 +20,10 @@ import { PlatformRequestContext } from '@foxtrotplatform/developer-platform-core
 export class SolutionResponseSchemaToDtoMapper {
   @Inject(SubscriptionService)
   private static subscriptionService: SubscriptionService;
+
+  constructor(@Inject(SubscriptionService) subscriptionService: SubscriptionService) {
+    SolutionResponseSchemaToDtoMapper.subscriptionService = subscriptionService;
+  }
   static mapToSolutionDTO(solution: Solution): SolutionDTO {
     const response: SolutionDTO = {
       solutionId: solution.id.solutionId,
@@ -126,7 +130,8 @@ export class SolutionResponseSchemaToDtoMapper {
     application: SolutionVersion_Application,
   ): SolutionApplicationDTO {
     console.log('application', application);
-    const applicationDetails = SolutionResponseSchemaToDtoMapper.subscriptionService.getApplicationDetails(ctx, application)
+    console.log('subscriptionService', SolutionResponseSchemaToDtoMapper.subscriptionService);
+    const applicationDetails = SolutionResponseSchemaToDtoMapper.subscriptionService.getApplicationDetails(ctx, application);
     console.log('applicationDetails', applicationDetails);
     const applicationDTO: SolutionApplicationDTO = {
       appId: application.id.appId,
