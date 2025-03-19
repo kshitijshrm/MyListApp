@@ -903,18 +903,18 @@ export class SubscriptionService {
       versions: [],
     };
 
-    solution.version.forEach((version) => {
+    solution.version.forEach(async (version) => {
       solutionDTO.versions.push(
-        this.mapToSolutionVersionDTO(ctx, version),
+        await this.mapToSolutionVersionDTO(ctx, version),
       );
     });
     return solutionDTO;
   }
 
-  mapToSolutionVersionDTO(
+  async mapToSolutionVersionDTO(
     ctx: PlatformRequestContext,
     solution: SolutionVersion,
-  ): SolutionVersionDTO {
+  ): Promise<SolutionVersionDTO> {
     console.log('solution', solution);
     const response: SolutionVersionDTO = {
       solutionId: solution.id.solutionId,
@@ -935,8 +935,10 @@ export class SubscriptionService {
         )
         : undefined,
       applications: solution.associatedApplications
-        ? solution.associatedApplications.map(
-          (application) => this.mapToSolutionApplicationDTO(ctx, application),
+        ? await Promise.all(
+          solution.associatedApplications.map(
+            (application) => this.mapToSolutionApplicationDTO(ctx, application),
+          ),
         )
         : undefined,
       isConsoleCompatible:
@@ -949,11 +951,11 @@ export class SubscriptionService {
     };
     return response;
   }
-  mapToSolutionApplicationDTO(
+  async mapToSolutionApplicationDTO(
     ctx: PlatformRequestContext,
     application: SolutionVersion_Application,
-  ): SolutionApplicationDTO {
-    const applicationDetails = this.getApplicationDetails(ctx, application);
+  ): Promise<SolutionApplicationDTO> {
+    const applicationDetails = await this.getApplicationDetails(ctx, application);
     console.log('applicationDetails', applicationDetails);
     const applicationDTO: SolutionApplicationDTO = {
       appId: application.id.appId,
@@ -961,6 +963,7 @@ export class SubscriptionService {
       displayOrder: application.displayOrder,
       listingId: application.listingId,
       semver: application.semver,
+      listingName: applicationDetails.listingName,
     };
     return applicationDTO;
   }
