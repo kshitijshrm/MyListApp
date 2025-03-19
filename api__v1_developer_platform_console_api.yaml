@@ -77,6 +77,40 @@ paths:
                 items:
                   $ref: "#/components/schemas/SubscriptionSettings"
       tags: *a2
+  /app/console-api/subscription/{tenantId}/solutions/{solutionVersionId}:
+    get:
+      operationId: getAllApplicationsDetails
+      summary: Get all apps associated with a solution version
+      description: >
+        Get all apps associated with a solution version. This list includes both solution and app subscriptions along with the addOn apps. 
+      parameters:
+        - *a1
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: solutionVersionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SolutionResponseDTO"
+        "404":
+          description: Solution not found based on provided solution version id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponseDTO"
+      tags: *a2
   /app/console-api/health:
     get:
       operationId: check
@@ -685,6 +719,206 @@ components:
       required:
         - foundation
         - solutions
+    NotFoundErrorResponseDTO:
+      type: object
+      properties:
+        error:
+          $ref: "#/components/schemas/NotFoundErrorDTO"
+        request:
+          $ref: "#/components/schemas/StandardRequestDTO"
+      required:
+        - error
+        - request
+    StandardRequestDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        method:
+          type: string
+        params:
+          type: object
+        query:
+          type: object
+        body:
+          type: object
+      required:
+        - url
+        - method
+        - params
+        - query
+        - body
+    NotFoundErrorDTO:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Information about the error
+          example: "[Relevant error message here]"
+        additionalInfo:
+          type: string
+          description: Optional field with additional information about the error
+          example: "[Relevant error message here]"
+        statusCode:
+          type: number
+          description: Http status code of the response
+          example: 404
+        timestamp:
+          type: string
+          description: Timestamp of the response
+          example: 2023-10-06T16:50:10.387Z
+      required:
+        - description
+        - additionalInfo
+        - statusCode
+        - timestamp
+    SolutionResponseDTO:
+      type: object
+      properties:
+        solutionId:
+          type: string
+          description: A unique identifier for the solution
+          example: solution:b31414f1-bc40-42c9-bcc0-ed7a47126441
+          pattern: ^solution:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+        versions:
+          description: List of solution versions that are associated with the solution
+          type: array
+          items:
+            $ref: "#/components/schemas/SolutionVersionDTO"
+        solutionType:
+          type: string
+          description: Solution type
+          enum:
+            - APP
+            - API
+          example: APP
+          default: APP
+        productFamily:
+          type: string
+          description: Product family group of the solution
+        supportedCountries:
+          description: Countries where the solution is supported
+          type: array
+          items:
+            type: string
+        organizationId:
+          type: string
+          description: Organization ID
+      required:
+        - solutionId
+        - versions
+        - productFamily
+        - supportedCountries
+        - organizationId
+    SolutionVersionDTO:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          description: UTC timestamp in ISO format of the moment of creation
+        createdBy:
+          type: string
+          description: UserId of the user who initiated the creation
+        updatedAt:
+          type: string
+          description: UTC timestamp in ISO format of the moment of updation
+        updatedBy:
+          type: string
+          description: UserId of the user who initiated the updation
+        displayName:
+          type: string
+          description: Solution name to be displayed in the marketplace
+          example: Vehicle Routing
+        longDescription:
+          type: string
+          description: Solution description to be displayed in the marketplace
+          example: This is a solution for vehicle routing used to optimize routes for
+            delivery
+        shortDescription:
+          type: string
+          description: Solution short description to be displayed in the marketplace
+          example: This is a solution for vehicle routing
+        isConsoleCompatible:
+          type: boolean
+          description: Boolean to indicate if the solution is compatible with marketplace
+          example: true
+        solutionId:
+          type: string
+          description: A unique identifier for the solution version
+          example: solutionversion:b31414f1-bc40-42c9-bcc0-ed7a47126441
+          pattern: ^solutionversion:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+        solutionVersionId:
+          type: string
+          description: A unique identifier for the solution version
+          example: solutionversion:b31414f1-bc40-42c9-bcc0-ed7a47126441
+          pattern: ^solutionversion:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+        version:
+          type: string
+          description: Human readable semantic version of the solution
+          example: 1.0.0
+        images:
+          description: List of images associated with the solution
+          type: array
+          items:
+            $ref: "#/components/schemas/FileMetadataDTO"
+        icon:
+          description: Icon associated with the solution
+          type: array
+          items:
+            $ref: "#/components/schemas/FileMetadataDTO"
+        applications:
+          description: List of applications that are part of the solution
+          type: array
+          items:
+            $ref: "#/components/schemas/SolutionApplicationDTO"
+        listingId:
+          type: string
+          description: Listing id of the solution
+      required:
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        - displayName
+        - longDescription
+        - shortDescription
+        - isConsoleCompatible
+        - solutionId
+        - solutionVersionId
+        - version
+        - images
+        - icon
+        - applications
+        - listingId
+        
+    SolutionApplicationDTO:
+      type: object
+      properties:
+        appId:
+          type: string
+          description: A unique identifier for the application
+          example: app:bf17e158-1951-47f9-84f1-e50aeb59fac2
+          pattern: ^app:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+        appVersionId:
+          type: string
+          description: A unique identifier for the application version in an application
+          example: appversion:bf17e158-1951-47f9-84f1-e50aeb59fac2
+          pattern: ^appversion:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+        listingId:
+          type: string
+          description: ListingId of the application in the solution
+        listingName:
+          type: string
+          description: displayName of the application in the solution
+        semver:
+          type: string
+          description: Semantic version number of the application in the solution
+      required:
+        - appId
+        - appVersionId
+        - listingId
+        - listingName
+        - semver
     BannerMessageDataDTO:
       type: object
       properties:
@@ -720,9 +954,6 @@ components:
       required:
         - message
         - data
-    "":
-      type: object
-      properties: {}
     BannerDTO:
       type: object
       properties:
@@ -749,8 +980,6 @@ components:
         levelType:
           description: level type of this banner
           example: stack
-          allOf:
-            - $ref: "#/components/schemas/"
       required:
         - id
         - title
@@ -798,8 +1027,6 @@ components:
         levelType:
           description: level type of this banner
           example: stack
-          allOf:
-            - $ref: "#/components/schemas/"
         subscription:
           description: tenant subscription details
           allOf:
