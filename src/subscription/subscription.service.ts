@@ -1071,7 +1071,7 @@ export class SubscriptionService {
     });
   }
 
-  mapToSolutionResponseDTO(ctx: PlatformRequestContext, solution: Solution): SolutionResponseDTO {
+  async mapToSolutionResponseDTO(ctx: PlatformRequestContext, solution: Solution): Promise<SolutionResponseDTO> {
     const solutionDTO: SolutionResponseDTO = {
       solutionId: solution.id.solutionId,
       productFamily: solution.productFamily,
@@ -1081,11 +1081,10 @@ export class SubscriptionService {
       versions: [],
     };
 
-    solution.version.forEach(async (version) => {
-      solutionDTO.versions.push(
-        await this.mapToSolutionVersionDTO(ctx, version),
-      );
-    });
+    for (const version of solution.version) {
+      const versionDTO = await this.mapToSolutionVersionDTO(ctx, version);
+      solutionDTO.versions.push(versionDTO);
+    }
     return solutionDTO;
   }
 
