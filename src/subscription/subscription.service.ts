@@ -831,36 +831,37 @@ export class SubscriptionService {
     tenantId: string,
     solutionVersionId: string,
   ) {
-    const solutioVersionIdReponse = this.applicationServiceClient
-      .getSolutionByVersionId(
-        {
-          id: {
-            solutionId: undefined,
-            solutionVersionId,
+    const solutioVersionIdReponse = await firstValueFrom(
+      this.applicationServiceClient
+        .getSolutionByVersionId(
+          {
+            id: {
+              solutionId: undefined,
+              solutionVersionId,
+            },
           },
-        },
-        ctx.rpcMetadata,
-      )
-      .pipe(
-        map(async (response) => {
-          this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
-          return await this.mapToSolutionResponseDTO(
-            ctx,
-            response.solution,
-          );
-
-        }),
-        catchError((error) => {
-          if (error.code === GrpcErrorStatus.NOT_FOUND)
-            return throwError(
-              () =>
-                new NotFoundException(
-                  `Solution Version with ID: ${solutionVersionId} Not Found.`,
-                ),
+          ctx.rpcMetadata,
+        )
+        .pipe(
+          map(async (response) => {
+            this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
+            return await this.mapToSolutionResponseDTO(
+              ctx,
+              response.solution,
             );
-          return throwError(() => error);
-        }),
-      );
+          }),
+          catchError((error) => {
+            if (error.code === GrpcErrorStatus.NOT_FOUND)
+              return throwError(
+                () =>
+                  new NotFoundException(
+                    `Solution Version with ID: ${solutionVersionId} Not Found.`,
+                  ),
+              );
+            return throwError(() => error);
+          }),
+      ),
+    );
 
     const subscriptions =
       await this.getActiveSubscriptions(ctx, tenantId);
