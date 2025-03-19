@@ -95,6 +95,9 @@ export class SubscriptionService {
   @Inject(RedisService)
   private redisService: RedisService;
 
+  @Inject(SolutionResponseSchemaToDtoMapper)
+  private readonly solutionResponseSchemaToDtoMapper: SolutionResponseSchemaToDtoMapper;
+
   onModuleInit() {
     this.applicationServiceClient =
       this.applicationClient.getService<ApplicationServiceV2Client>(
@@ -846,7 +849,7 @@ export class SubscriptionService {
       .pipe(
         map((response) => {
           this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
-          return SolutionResponseSchemaToDtoMapper.mapToSolutionResponseDTO(
+          return this.solutionResponseSchemaToDtoMapper.mapToSolutionResponseDTO(
             ctx,
             response.solution,
           );
