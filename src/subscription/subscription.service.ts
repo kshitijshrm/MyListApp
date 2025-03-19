@@ -881,6 +881,7 @@ export class SubscriptionService {
           const compatibleSolutionsForApp =
             app.versions[0]?.applicationCompitablity?.compitableSolutions;
           this.logger.log("getAllSolutionApps: compatibleSolutionsForApp" + JSON.stringify(compatibleSolutionsForApp));
+          this.logger.log("getAllSolutionApps: app" + JSON.stringify(app));
           if (compatibleSolutionsForApp) {
             for (const compatibleSolutionId of compatibleSolutionsForApp) {
               if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
@@ -923,6 +924,8 @@ export class SubscriptionService {
           if (app) {
             const compatibleSolutionsForApp =
               app.versions[0]?.applicationCompitablity?.compitableSolutions;
+            this.logger.log("getAllSolutionApps: compatibleSolutionsForApp" + JSON.stringify(compatibleSolutionsForApp));
+            this.logger.log("getAllSolutionApps: app" + JSON.stringify(app));
             if (compatibleSolutionsForApp) {
               for (const compatibleSolutionId of compatibleSolutionsForApp) {
                 if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
