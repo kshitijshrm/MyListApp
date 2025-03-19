@@ -606,7 +606,7 @@ export class SubscriptionService {
                 );
                 continue;
               }
-              this.logger.log('solution found for id: ' + compatibleSolutionId);
+              this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
               if (
                 solution.applications.find(
                   (application) => application.appId === app.id.appId,
@@ -614,7 +614,7 @@ export class SubscriptionService {
               ) {
                 this.logger.log(
                   'application already added to solution: ' +
-                  compatibleSolutionId,
+                  compatibleSolutionId?.solutionId,
                 );
                 continue;
               }
@@ -635,7 +635,7 @@ export class SubscriptionService {
                     tenantEntity.stackId,
                   );
                 this.logger.log(
-                  'adding application to solution: ' + compatibleSolutionId,
+                  'adding application to solution: ' + compatibleSolutionId?.solutionId,
                 );
                 this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   app,
