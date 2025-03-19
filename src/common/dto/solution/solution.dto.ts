@@ -145,14 +145,6 @@ export class SolutionDTO {
 
 
 export class SolutionApplicationDTO extends ApplicationVersionIdentifierDTO {
-  @ApiProperty({
-    description: 'Display order of the application in the solution',
-    required: false,
-    example: 1,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  displayOrder?: number;
 
   @ApiProperty({
     description:
