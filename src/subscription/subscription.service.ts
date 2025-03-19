@@ -884,7 +884,7 @@ export class SubscriptionService {
           this.logger.log("getAllSolutionApps: app" + JSON.stringify(app));
           if (compatibleSolutionsForApp) {
             for (const compatibleSolutionId of compatibleSolutionsForApp) {
-              if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
+              if (compatibleSolutionId.solutionId !== solutioVersionIdReponse.versions[0].solutionId) {
                 this.logger.log(
                   'solution not found for id: ' + compatibleSolutionId?.solutionId + compatibleSolutionId.solutionVersionId,
                 );
