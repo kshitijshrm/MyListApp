@@ -880,11 +880,12 @@ export class SubscriptionService {
           const app = JSON.parse(appFromRedis);
           const compatibleSolutionsForApp =
             app.versions[0]?.applicationCompitablity?.compitableSolutions;
+          this.logger.log("getAllSolutionApps: compatibleSolutionsForApp" + JSON.stringify(compatibleSolutionsForApp));
           if (compatibleSolutionsForApp) {
             for (const compatibleSolutionId of compatibleSolutionsForApp) {
               if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
                 this.logger.log(
-                  'solution not found for id: ' + compatibleSolutionId,
+                  'solution not found for id: ' + compatibleSolutionId?.solutionId + compatibleSolutionId.solutionVersionId,
                 );
                 continue;
               }
