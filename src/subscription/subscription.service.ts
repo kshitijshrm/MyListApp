@@ -842,9 +842,9 @@ export class SubscriptionService {
         ctx.rpcMetadata,
       )
       .pipe(
-        map((response) => {
+        map(async (response) => {
           this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
-          return this.mapToSolutionResponseDTO(
+          return await this.mapToSolutionResponseDTO(
             ctx,
             response.solution,
           );
