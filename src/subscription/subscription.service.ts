@@ -831,11 +831,7 @@ export class SubscriptionService {
     tenantId: string,
     solutionVersionId: string,
   ) {
-    const tenantSubscriptions =
-      await this.getActiveSubscriptions(ctx, tenantId);
-
-    this.logger.log("getAllSolutionApps: tenantSubscriptions" + JSON.stringify(tenantSubscriptions));
-    return this.applicationServiceClient
+    const solutioVersionIdReponse = this.applicationServiceClient
       .getSolutionByVersionId(
         {
           id: {
@@ -865,6 +861,188 @@ export class SubscriptionService {
           return throwError(() => error);
         }),
       );
+
+    const subscriptions =
+      await this.getActiveSubscriptions(ctx, tenantId);
+    // for (const subscription of subscriptions || []) {
+    //   if (subscription.item.application) {
+    //     const appFromRedis = await this.redisService.get(
+    //       RedisConstants.getApplicationByVersionIdKey(
+    //         subscription.item.application.id.appVersionId,
+    //       ),
+    //     );
+    //     if (appFromRedis) {
+    //       this.getApplicationByVersionIdAndSaveToRedis(
+    //         ctx,
+    //         subscription.item.application.id,
+    //       ).catch();
+    //       const app = JSON.parse(appFromRedis);
+    //       const compatibleSolutionsForApp =
+    //         app.versions[0]?.applicationCompitablity?.compitableSolutions;
+    //       if (compatibleSolutionsForApp) {
+    //         for (const compatibleSolutionId of compatibleSolutionsForApp) {
+    //           const solution = this.findSolutionBySolutionId(
+    //             solutioVersionIdReponse.,
+    //             compatibleSolutionId.solutionId,
+    //           );
+    //           if (!solution) {
+    //             this.logger.log(
+    //               'solution not found for id: ' + compatibleSolutionId,
+    //             );
+    //             continue;
+    //           }
+    //           this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
+    //           if (
+    //             solution.applications.find(
+    //               (application) => application.appId === app.id.appId,
+    //             )
+    //           ) {
+    //             this.logger.log(
+    //               'application already added to solution: ' +
+    //               compatibleSolutionId?.solutionId,
+    //             );
+    //             continue;
+    //           }
+    //           if (
+    //             this.isAppToBeAddedToSolution(
+    //               app,
+    //               tenantEntity,
+    //               appsAssignedToUser,
+    //               applyFilterForConsoleCompatibleWebApps,
+    //             )
+    //           ) {
+    //             this.sortApplicationMenuItems(
+    //               app.versions[0]?.appNavigation?.menuItems || [],
+    //             );
+    //             app.versions[0].appUrlOverrides =
+    //               this.filterUrlOverridesByStackId(
+    //                 app.versions[0]?.appUrlOverrides || [],
+    //                 tenantEntity.stackId,
+    //               );
+    //             this.logger.log(
+    //               'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
+    //             );
+    //             this.logger.log(
+    //               'adding application to solution app: ' + JSON.stringify(app));
+    //             this.logger.log(
+    //               'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
+    //             this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+    //               app,
+    //               tenantConfig,
+    //             );
+    //             solution.applications.push(
+    //               ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(app),
+    //             );
+    //             this.logger.log(
+    //               'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
+    //             const appRelativePathUrl: ApplicationUrl =
+    //               app.versions[0]?.appUrls?.find(
+    //                 (url) => url.name === 'relativePath',
+    //               );
+    //             if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
+    //               solution.allowedRedirectUrls.push(appRelativePathUrl.url);
+    //             }
+    //             if (
+    //               app.versions[0].appUrls?.find((url) => url.name === 'setting')
+    //                 ?.url?.length > 0
+    //             ) {
+    //               subscriptionsResponse.isSettingsAvailable ||= true;
+    //             }
+    //           }
+    //         }
+    //       }
+    //     } else {
+    //       const app = await this.getApplicationByVersionIdAndSaveToRedis(
+    //         ctx,
+    //         subscription.item.application.id,
+    //       );
+    //       if (app) {
+    //         const compatibleSolutionsForApp =
+    //           app.versions[0]?.applicationCompitablity?.compitableSolutions;
+    //         if (compatibleSolutionsForApp) {
+    //           for (const compatibleSolutionId of compatibleSolutionsForApp) {
+    //             const solution = this.findSolutionBySolutionId(
+    //               solutions,
+    //               compatibleSolutionId.solutionId,
+    //             );
+    //             if (!solution) {
+    //               this.logger.log(
+    //                 'solution not found for id: ' + compatibleSolutionId,
+    //               );
+    //               continue;
+    //             }
+    //             this.logger.log(
+    //               'solution found for id: ' + compatibleSolutionId,
+    //             );
+    //             if (
+    //               solution.applications.find(
+    //                 (application) => application.appId === app.id.appId,
+    //               )
+    //             ) {
+    //               this.logger.log(
+    //                 'application already added to solution: ' +
+    //                 JSON.stringify(compatibleSolutionId),
+    //               );
+    //               continue;
+    //             }
+    //             if (
+    //               this.isAppToBeAddedToSolution(
+    //                 app,
+    //                 tenantEntity,
+    //                 appsAssignedToUser,
+    //                 applyFilterForConsoleCompatibleWebApps,
+    //               )
+    //             ) {
+    //               this.sortApplicationMenuItems(
+    //                 app.versions[0]?.appNavigation?.menuItems || [],
+    //               );
+    //               app.versions[0].appUrlOverrides =
+    //                 this.filterUrlOverridesByStackId(
+    //                   app.versions[0]?.appUrlOverrides || [],
+    //                   tenantEntity.stackId,
+    //                 );
+    //               this.logger.log(
+    //                 'adding application to solution: ' + JSON.stringify(compatibleSolutionId),
+    //               );
+    //               this.logger.log(
+    //                 'adding application to solution app: ' + JSON.stringify(app));
+    //               this.logger.log(
+    //                 'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
+    //               this.updateAppAndSubMenuDisplayNameBasedOnConfig(
+    //                 app,
+    //                 tenantConfig,
+    //               );
+    //               solution.applications.push(
+    //                 ApplicationResponseSchemaToDtoMapper.mapToApplicationDTO(
+    //                   app,
+    //                 ),
+    //               );
+    //               this.logger.log(
+    //                 'adding application to solution subs: ' + JSON.stringify(subscriptionsResponse))
+    //               const appRelativePathUrl: ApplicationUrl =
+    //                 app.versions[0]?.appUrls?.find(
+    //                   (url) => url.name === 'relativePath',
+    //                 );
+    //               if (appRelativePathUrl && appRelativePathUrl.url.length > 0) {
+    //                 solution.allowedRedirectUrls.push(appRelativePathUrl.url);
+    //               }
+    //               if (
+    //                 app.versions[0].appUrls?.find(
+    //                   (url) => url.name === 'setting',
+    //                 )?.url?.length > 0
+    //               ) {
+    //                 subscriptionsResponse.isSettingsAvailable ||= true;
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    this.logger.log("getAllSolutionApps: solutionResponse" + JSON.stringify(solutioVersionIdReponse));
+    this.logger.log("getAllSolutionApps: tenantSubscriptions" + JSON.stringify(subscriptions));
+    return solutioVersionIdReponse;
   }
 
   findSolutionBySolutionId(
