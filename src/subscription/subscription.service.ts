@@ -914,51 +914,51 @@ export class SubscriptionService {
                 'adding application to solution subs: ' + JSON.stringify(solutioVersionIdReponse))
             }
           }
-        }
-      } else {
-        const app = await this.getApplicationByVersionIdAndSaveToRedis(
-          ctx,
-          subscription.item.application.id,
-        );
-        if (app) {
-          const compatibleSolutionsForApp =
-            app.versions[0]?.applicationCompitablity?.compitableSolutions;
-          if (compatibleSolutionsForApp) {
-            for (const compatibleSolutionId of compatibleSolutionsForApp) {
-              if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
-                this.logger.log(
-                  'solution not found for id: ' + compatibleSolutionId,
-                );
-                continue;
-              }
-
-              this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
-              if (
-                solutioVersionIdReponse.versions[0].applications.find(
-                  (application) => application.appId === app.id.appId,
-                )
-              ) {
-                this.logger.log(
-                  'application already added to solution: ' +
-                  compatibleSolutionId?.solutionId,
-                );
-                continue;
-              }
-              solutioVersionIdReponse.versions[0].applications.push(
-                {
-                  appId: app.id.appId,
-                  appVersionId: app.versions[0].id.appVersionId,
-                  listingId: app.listingId,
-                  listingName: app.versions[0].displayName,
-                  semver: app.versions[0].version,
+        } else {
+          const app = await this.getApplicationByVersionIdAndSaveToRedis(
+            ctx,
+            subscription.item.application.id,
+          );
+          if (app) {
+            const compatibleSolutionsForApp =
+              app.versions[0]?.applicationCompitablity?.compitableSolutions;
+            if (compatibleSolutionsForApp) {
+              for (const compatibleSolutionId of compatibleSolutionsForApp) {
+                if (compatibleSolutionId.solutionVersionId !== solutionVersionId) {
+                  this.logger.log(
+                    'solution not found for id: ' + compatibleSolutionId,
+                  );
+                  continue;
                 }
-              );
-              this.logger.log(
-                'adding application to solution subs: ' + JSON.stringify(solutioVersionIdReponse))
+
+                this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
+                if (
+                  solutioVersionIdReponse.versions[0].applications.find(
+                    (application) => application.appId === app.id.appId,
+                  )
+                ) {
+                  this.logger.log(
+                    'application already added to solution: ' +
+                    compatibleSolutionId?.solutionId,
+                  );
+                  continue;
+                }
+                solutioVersionIdReponse.versions[0].applications.push(
+                  {
+                    appId: app.id.appId,
+                    appVersionId: app.versions[0].id.appVersionId,
+                    listingId: app.listingId,
+                    listingName: app.versions[0].displayName,
+                    semver: app.versions[0].version,
+                  }
+                );
+                this.logger.log(
+                  'adding application to solution subs: ' + JSON.stringify(solutioVersionIdReponse))
+              }
             }
           }
         }
-      }
+      } 
     }
     this.logger.log("getAllSolutionApps: solutionResponse" + JSON.stringify(solutioVersionIdReponse));
     this.logger.log("getAllSolutionApps: tenantSubscriptions" + JSON.stringify(subscriptions));
