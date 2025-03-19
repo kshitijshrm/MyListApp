@@ -17,7 +17,7 @@ import { catchError, firstValueFrom, map, Observable, throwError } from 'rxjs';
 import { RedisConstants } from 'src/common/constants/redis.constants';
 import { ApplicationResponseSchemaToDtoMapper } from 'src/common/dto/application/response.dto.mapper';
 import { SolutionResponseSchemaToDtoMapper } from 'src/common/dto/solution/response.dto.mapper';
-import { SolutionDTO } from 'src/common/dto/solution/solution.dto';
+import { SolutionApplicationDTO, SolutionDTO, SolutionResponseDTO, SolutionVersionDTO } from 'src/common/dto/solution/solution.dto';
 import { SolutionSettingsResponseSchema } from 'src/common/dto/solutionSettings/response.dto.mapper';
 import {
   CoreAppsSettingsDTO,
@@ -61,6 +61,8 @@ import {
   Solution,
   systemAppSettingItem,
   SolutionVersion_Application,
+  solutionTypeToJSON,
+  SolutionVersion,
 } from 'src/shared/schemas/os1/developerportal/solution/solution.pb';
 import {
   SubscriptionServiceClient,
@@ -94,9 +96,6 @@ export class SubscriptionService {
 
   @Inject(RedisService)
   private redisService: RedisService;
-
-  @Inject(SolutionResponseSchemaToDtoMapper)
-  private readonly solutionResponseSchemaToDtoMapper: SolutionResponseSchemaToDtoMapper;
 
   onModuleInit() {
     this.applicationServiceClient =
@@ -849,7 +848,7 @@ export class SubscriptionService {
       .pipe(
         map((response) => {
           this.logger.log("getAllSolutionApps: solutions" + JSON.stringify(response));
-          return this.solutionResponseSchemaToDtoMapper.mapToSolutionResponseDTO(
+          return this.mapToSolutionResponseDTO(
             ctx,
             response.solution,
           );
@@ -892,6 +891,78 @@ export class SubscriptionService {
         });
       }
     });
+  }
+
+  mapToSolutionResponseDTO(ctx: PlatformRequestContext, solution: Solution): SolutionResponseDTO {
+    const solutionDTO: SolutionResponseDTO = {
+      solutionId: solution.id.solutionId,
+      productFamily: solution.productFamily,
+      supportedCountries: solution.supportedCountries,
+      solutionType: solutionTypeToJSON(solution.solutionType) as any,
+      organizationId: solution.organization.organizationId,
+      versions: [],
+    };
+
+    solution.version.forEach((version) => {
+      solutionDTO.versions.push(
+        this.mapToSolutionVersionDTO(ctx, version),
+      );
+    });
+    return solutionDTO;
+  }
+
+  mapToSolutionVersionDTO(
+    ctx: PlatformRequestContext,
+    solution: SolutionVersion,
+  ): SolutionVersionDTO {
+    console.log('solution', solution);
+    const response: SolutionVersionDTO = {
+      solutionId: solution.id.solutionId,
+      solutionVersionId: solution.id.solutionVersionId,
+      displayName: solution.displayAttributes.displayName,
+      version: solution.version,
+      shortDescription: solution.displayAttributes.shortDescription,
+      longDescription: solution.displayAttributes.longDescription,
+      icon:
+        solution.icons && solution.icons.length > 0
+          ? SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+            solution.icons[0],
+          )
+          : undefined,
+      images: solution.displayImages
+        ? solution.displayImages.map(
+          SolutionResponseSchemaToDtoMapper.mapToFileMetadataDTO,
+        )
+        : undefined,
+      applications: solution.associatedApplications
+        ? solution.associatedApplications.map(
+          (application) => this.mapToSolutionApplicationDTO(ctx, application),
+        )
+        : undefined,
+      isConsoleCompatible:
+        solution.compatibility?.isConsoleCompatible,
+      listingId: solution.listingId,
+      createdAt: solution.recordAudit.createdAt,
+      updatedAt: solution.recordAudit.updatedAt,
+      updatedBy: solution.recordAudit.updatedBy,
+      createdBy: solution.recordAudit.createdBy,
+    };
+    return response;
+  }
+  mapToSolutionApplicationDTO(
+    ctx: PlatformRequestContext,
+    application: SolutionVersion_Application,
+  ): SolutionApplicationDTO {
+    const applicationDetails = this.getApplicationDetails(ctx, application);
+    console.log('applicationDetails', applicationDetails);
+    const applicationDTO: SolutionApplicationDTO = {
+      appId: application.id.appId,
+      appVersionId: application.id.appVersionId,
+      displayOrder: application.displayOrder,
+      listingId: application.listingId,
+      semver: application.semver,
+    };
+    return applicationDTO;
   }
 
   private sortApplicationMenuItems(
