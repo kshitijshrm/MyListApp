@@ -637,8 +637,8 @@ export class SubscriptionService {
                     tenantEntity.stackId,
                   );
                 this.logger.log(
-                    'adding application to solution: ' + compatibleSolutionId,
-                  );
+                  'adding application to solution: ' + compatibleSolutionId,
+                );
                 this.updateAppAndSubMenuDisplayNameBasedOnConfig(
                   app,
                   tenantConfig,
@@ -848,7 +848,7 @@ export class SubscriptionService {
               );
             return throwError(() => error);
           }),
-      ),
+        ),
     );
 
     const subscriptions =
@@ -897,6 +897,12 @@ export class SubscriptionService {
                   listingId: app.listingId,
                   listingName: app.versions[0].displayName,
                   semver: app.versions[0].version,
+                  appIcon: app.versions[0].appIcons &&
+                    app.versions[0].appIcons.length > 0
+                    ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+                      app.versions[0].appIcons[0],
+                    )
+                    : undefined
                 }
               );
             }
@@ -938,13 +944,19 @@ export class SubscriptionService {
                     listingId: app.listingId,
                     listingName: app.versions[0].displayName,
                     semver: app.versions[0].version,
+                    appIcon: app.versions[0].appIcons &&
+                      app.versions[0].appIcons.length > 0
+                      ? ApplicationResponseSchemaToDtoMapper.mapToFileMetadataDTO(
+                        app.versions[0].appIcons[0],
+                      )
+                      : undefined
                   }
                 );
               }
             }
           }
         }
-      } 
+      }
     }
 
     return solutioVersionIdReponse;
@@ -1043,6 +1055,7 @@ export class SubscriptionService {
       listingId: application.listingId,
       semver: application.semver,
       listingName: applicationDetails.listingName,
+      appIcon: applicationDetails?.icon
     };
     return applicationDTO;
   }

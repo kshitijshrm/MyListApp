@@ -171,6 +171,11 @@ export class SolutionApplicationDTO extends ApplicationVersionIdentifierDTO {
     required: false,
   })
   semver?: string;
+  @ApiProperty({
+    description: 'The icon associated with the application',
+    type: FileMetadataDTO,
+  })
+  appIcon?: FileMetadataDTO;
 }
 export class SolutionVersionIdentifierDTO {
   @ApiProperty({

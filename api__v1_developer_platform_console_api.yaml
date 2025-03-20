@@ -919,6 +919,10 @@ components:
         semver:
           type: string
           description: Semantic version number of the application in the solution
+        appIcon:
+          description: The icon associated with the menu item
+          allOf:
+            - $ref: "#/components/schemas/FileMetadataDTO"
       required:
         - appId
         - appVersionId
