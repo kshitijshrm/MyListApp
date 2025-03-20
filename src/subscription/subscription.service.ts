@@ -878,7 +878,7 @@ export class SubscriptionService {
                 continue;
               }
 
-              this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
+              this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId);
               if (
                 solutioVersionIdReponse.versions[0].applications.find(
                   (application) => application.appId === app.id.appId,
@@ -919,7 +919,7 @@ export class SubscriptionService {
                   continue;
                 }
 
-                this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId + ' ' + JSON.stringify(app));
+                this.logger.log('solution found for id: ' + compatibleSolutionId?.solutionId);
                 if (
                   solutioVersionIdReponse.versions[0].applications.find(
                     (application) => application.appId === app.id.appId,
