@@ -85,6 +85,12 @@ paths:
         Get all apps associated with a solution version. This list includes both solution and app subscriptions along with the addOn apps. 
       parameters:
         - *a1
+        - name: x-coreos-access
+          description: coreos access token
+          in: header
+          required: true
+          schema:
+          type: string
         - name: tenantId
           required: true
           in: path
