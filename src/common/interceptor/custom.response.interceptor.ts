@@ -16,9 +16,6 @@ export class GetAllSubscriptionsResponseInterceptor implements NestInterceptor {
       map((data) => {
         return {
           data: instanceToPlain(data.subscriptions),
-          additionalInfo: {
-            isSettingsAvailable: data.isSettingsAvailable,
-          },
           request: {
             url: request.originalUrl,
             method: request.method,

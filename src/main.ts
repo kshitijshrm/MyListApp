@@ -1,5 +1,4 @@
-require('@foxtrotplatform/tracer');
-import { PlatformLogger } from '@foxtrotplatform/developer-platform-core-lib';
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import {
   DocumentBuilder,
@@ -10,62 +9,55 @@ import { writeFileSync } from 'fs';
 import { stringify } from 'yaml';
 import { AppModule } from './app.module';
 import { GlobalHttpExceptionFilter } from './common/filters/global.http.exception.filter';
-import { GlobalGrpcToHttpExceptionInterceptor } from './common/interceptor/global.grpc.exception.interceptor';
 import { GlobalResponseTransformInterceptor } from './common/interceptor/global.response.transformer.interceptor';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: new PlatformLogger(),
+    logger: new Logger(),
     bufferLogs: true,
   });
-  const basePath = '/app/console-api';
+  const basePath = '/app/list-api';
   app.setGlobalPrefix(basePath);
   app.enableCors();
 
-  const openApiDocument = SwaggerModule.createDocument(
-    app,
-    new DocumentBuilder()
-      .setTitle('Developer Platform Console API')
-      .setDescription(
-        `
-Console API is a <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/backends-for-frontends"> Backend for frontend </a> REST API that provides the data and functionality required by the Console UI.
-`,
-      )
-      .setBasePath(basePath)
-      .setVersion('1.0.0')
-      .build(),
-  );
-
-  const openApiOptions: SwaggerDocumentOptions = {
-    //  To make sure that the library generates operation names like createUser instead of UserController_createUser
-    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
-    deepScanRoutes: true,
-  };
-
-  const openAPIObject = SwaggerModule.createDocument(
-    app,
-    openApiDocument,
-    openApiOptions,
-  );
-
-  // TODO: write as yaml only on local build
-  writeFileSync(
-    './api__v1_developer_platform_console_api.yaml',
-    stringify(openAPIObject),
-  );
-
-  SwaggerModule.setup(`${basePath}/docs`, app, openAPIObject, {
-    swaggerOptions: {
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
-    },
-  });
-
+  // Apply global filters and interceptors before Swagger setup
   app.useGlobalFilters(new GlobalHttpExceptionFilter());
-  app.useGlobalInterceptors(new GlobalGrpcToHttpExceptionInterceptor());
   app.useGlobalInterceptors(new GlobalResponseTransformInterceptor());
 
+  // Create a simpler Swagger config
+
+  // try {
+  //   // Create a simpler Swagger config
+  //   const config = new DocumentBuilder()
+  //     .setTitle("Developer Platform Marketplace API")
+  //     .setDescription("APIs for marketplace client")
+  //     .setVersion("1.0.0")
+  //     .addTag("api")
+  //     .build();
+
+  //   // Define explicit options for Swagger
+  //   const options: SwaggerDocumentOptions = {
+  //     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+  //   };
+
+  //   // Create document with explicit options
+  //   const document = SwaggerModule.createDocument(app, config, options);
+
+  //   // Write to file (optional)
+  //   writeFileSync('./api__v1_list_api.yaml', stringify(document));
+
+  //   // Setup Swagger UI
+  //   SwaggerModule.setup(`${basePath}/docs`, app, document);
+  // } catch (error) {
+  //   console.error('Swagger setup error:', error);
+  //   // Continue even if Swagger fails
+  // }
+
+
+
   await app.listen(3000);
+  console.log(`Application is running on: http://localhost:3000${basePath}`);
 }
 
 bootstrap();

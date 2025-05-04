@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { HealthModule } from './health/health.module';
-import { SubscriptionModule } from './subscription/subscription.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisConstants } from './common/constants/redis.constants';
-import { redisStore } from 'cache-manager-ioredis-yet';
 import { GlobalCustomCacheInterceptor } from './common/interceptor/global.cache.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { CommonModule } from './common-module/common.module';
+import { DatabaseModule } from './database/database.module';
+import { MyListModule } from './list/my-list.module';
+import { CacheServiceModule } from './common/services/cache.module';
 
 @Module({
   imports: [
@@ -19,47 +19,14 @@ import { CommonModule } from './common-module/common.module';
           : '.env.cloud',
       isGlobal: true,
     }),
-    SubscriptionModule,
     HealthModule,
-    CacheModule.registerAsync({
+    CacheModule.register({
       isGlobal: true,
-      useFactory: async (cs: ConfigService) => ({
-        store: await redisStore({
-          ttl: RedisConstants.one_day_in_milli_seconds,
-          clusterConfig: {
-            nodes: (
-              (cs.get('REDIS_CLUSTER_MULTI_HOST') as string) ||
-              cs.get('REDIS_CLUSTER_HOST')
-            )
-              .split(',')
-              .map((host) => ({
-                host: host.trim(),
-                port: parseInt(cs.get('REDIS_CLUSTER_PORT') as string, 10),
-              })),
-            options: {
-              redisOptions: {
-                password: cs.get('REDIS_CLUSTER_PASSWORD'),
-                maxRetriesPerRequest:
-                  parseInt(cs.get('REDIS_RETRIES') as string, 10) || 3,
-                tls:
-                  cs.get('f_stage') != 'local'
-                    ? {
-                        servername: cs.get('REDIS_CLUSTER_HOST'),
-                        minVersion: 'TLSv1.2',
-                        rejectUnauthorized: false,
-                      }
-                    : undefined,
-              },
-              slotsRefreshTimeout: 10000,
-              slotsRefreshInterval: 50000,
-              keyPrefix: cs.get('f_redis_namespace'),
-            },
-          },
-        }),
-      }),
-      inject: [ConfigService],
+      ttl: RedisConstants.one_day_in_seconds, // default TTL in seconds
     }),
-    CommonModule,
+    DatabaseModule,
+    MyListModule,
+    CacheServiceModule,
   ],
   providers: [
     {

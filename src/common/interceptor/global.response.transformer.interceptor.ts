@@ -27,14 +27,6 @@ export class GlobalResponseTransformInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    if (
-      request.method === 'GET' &&
-      /\/app\/console-api\/common\/banners/.test(request.originalUrl)
-    ) {
-      // Set Cache-Control header for the response
-      response.setHeader('Cache-Control', 'public, max-age=900');
-    }
-
     return next.handle().pipe(
       map((data) => {
         return {
