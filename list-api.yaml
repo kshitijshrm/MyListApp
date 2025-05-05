@@ -1,0 +1,157 @@
+openapi: 3.0.0
+info:
+  title: MyList API
+  version: 1.0.0
+  description: API to manage a user's movie list
+
+servers:
+  - url: https://mylistapp-production.up.railway.app/app/list-api
+
+paths:
+  /my-list:
+    post:
+      summary: Add a content item to user's list
+      tags:
+        - MyList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentId
+                - contentType
+                - title
+              properties:
+                contentId:
+                  type: string
+                contentType:
+                  type: string
+                  enum: [movie, series]
+                title:
+                  type: string
+                description:
+                  type: string
+                genres:
+                  type: array
+                  items:
+                    type: string
+            example:
+              contentId: '343'
+              contentType: 'movie'
+              title: 'The Makdi qwwe'
+              description: 'Test.'
+              genres: ['Drama']
+      parameters:
+        - name: x-list-api-userId
+          in: header
+          required: true
+          schema:
+            type: string
+          example: user-1
+      responses:
+        201:
+          description: Content added successfully
+          content:
+            application/json:
+              example:
+                data:
+                  userId: 'user-1'
+                  contentId: '343'
+                  contentType: 'movie'
+                  title: 'The Makdi qwwe'
+                  description: 'Test.'
+                  genres: ['Drama']
+                  addedAt: '2025-05-05T13:25:08.230Z'
+                  createdAt: '2025-05-05T13:25:08.234Z'
+                  updatedAt: '2025-05-05T13:25:08.234Z'
+                  id: '6818bc34eac96bd9fb9bdeab'
+                request:
+                  url: '/app/list-api/my-list'
+                  method: 'POST'
+                  params: {}
+                  query: {}
+                  body:
+                    contentId: '343'
+                    contentType: 'movie'
+                    title: 'The Makdi qwwe'
+                    description: 'Test.'
+                    genres: ['Drama']
+        400:
+          description: Invalid input
+
+    get:
+      summary: Get the user's list
+      tags:
+        - MyList
+      parameters:
+        - name: x-list-api-userId
+          in: header
+          required: true
+          schema:
+            type: string
+          example: user-1
+      responses:
+        200:
+          description: List retrieved successfully
+          content:
+            application/json:
+              example:
+                data:
+                  items:
+                    - userId: 'user-1'
+                      contentId: '67764'
+                      contentType: 'movie'
+                      title: 'The Makdi qwwe'
+                      description: 'Test.'
+                      genres: ['Drama']
+                      addedAt: '2025-05-05T13:24:53.239Z'
+                      createdAt: '2025-05-05T13:24:53.257Z'
+                      updatedAt: '2025-05-05T13:24:53.257Z'
+                      id: '6818bc25eac96bd9fb9bdea5'
+                  total: 1
+                  page: 1
+                  limit: 20
+                  pages: 1
+                request:
+                  url: '/app/list-api/my-list'
+                  method: 'GET'
+                  params: {}
+                  query: {}
+
+  /my-list/{contentId}:
+    delete:
+      summary: Remove an item from the user's list
+      tags:
+        - MyList
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '343'
+        - name: x-list-api-userid
+          in: header
+          required: true
+          schema:
+            type: string
+          example: user-1
+      responses:
+        200:
+          description: Content removed successfully
+          content:
+            application/json:
+              example:
+                data:
+                  contentId: '343'
+                  message: 'Content successfully removed from My List'
+                request:
+                  url: '/app/list-api/my-list/343'
+                  method: 'DELETE'
+                  params:
+                    contentId: '343'
+                  query: {}
+        404:
+          description: Content not found
