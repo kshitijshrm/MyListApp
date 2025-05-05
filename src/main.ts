@@ -25,38 +25,8 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalHttpExceptionFilter());
   app.useGlobalInterceptors(new GlobalResponseTransformInterceptor());
 
-  // Create a simpler Swagger config
 
-  // try {
-  //   // Create a simpler Swagger config
-  //   const config = new DocumentBuilder()
-  //     .setTitle("Developer Platform Marketplace API")
-  //     .setDescription("APIs for marketplace client")
-  //     .setVersion("1.0.0")
-  //     .addTag("api")
-  //     .build();
-
-  //   // Define explicit options for Swagger
-  //   const options: SwaggerDocumentOptions = {
-  //     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
-  //   };
-
-  //   // Create document with explicit options
-  //   const document = SwaggerModule.createDocument(app, config, options);
-
-  //   // Write to file (optional)
-  //   writeFileSync('./api__v1_list_api.yaml', stringify(document));
-
-  //   // Setup Swagger UI
-  //   SwaggerModule.setup(`${basePath}/docs`, app, document);
-  // } catch (error) {
-  //   console.error('Swagger setup error:', error);
-  //   // Continue even if Swagger fails
-  // }
-
-
-
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT, '0.0.0.0');
   console.log(`Application is running on: http://localhost:3000${basePath}`);
 }
 
