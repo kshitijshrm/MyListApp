@@ -1,4 +1,4 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, BadRequestException } from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, BadRequestException, Logger } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -8,6 +8,8 @@ import { CacheService } from '../services/cache.service';
 
 @Injectable()
 export class GlobalCustomCacheInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(GlobalCustomCacheInterceptor.name);
+
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly cacheService: CacheService
@@ -30,6 +32,14 @@ export class GlobalCustomCacheInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const request = context.switchToHttp().getRequest();
+    const url = request.originalUrl;
+
+    // Skip authentication for health check and ping endpoints
+    if (ServiceConstants.cache_interceptor_skip_routes.some(route =>
+      new RegExp(route).test(url))) {
+      this.logger.log(`Skipping auth for route: ${url}`);
+      return next.handle();
+    }
 
     const authHeader = request.headers[
       ServiceConstants.userId_header

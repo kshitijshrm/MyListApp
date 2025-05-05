@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MyList, MyListDocument } from '../database/schemas/my-list.schema';
@@ -27,7 +27,9 @@ export class MyListService {
       }).lean().exec();
 
       if (existingItem) {
-        return existingItem;
+        // Transform the existing item manually
+        const transformed = this.transformMongoDocument(existingItem);
+        return transformed;
       }
 
       // Create a new item
@@ -42,7 +44,25 @@ export class MyListService {
       // Invalidate cache
       await this.cacheService.del(this.getCacheKey(userId));
 
-      // Return the clean JSON object instead of the Mongoose document
+      // Option: Update the cache instead of just invalidating it
+      const cacheKey = this.getCacheKey(userId);
+      const cachedData = await this.cacheService.get<any>(cacheKey);
+
+      if (cachedData && Array.isArray(cachedData.items)) {
+        // Add the new item to the beginning of the array (since it's sorted by addedAt desc)
+        const transformedNewItem = this.transformMongoDocument(savedItem.toObject());
+        const updatedItems = [transformedNewItem, ...cachedData.items];
+
+        // Update the cache with the new items list and total count
+        const updatedCacheData = {
+          items: updatedItems,
+          total: updatedItems.length
+        };
+
+        await this.cacheService.set(cacheKey, updatedCacheData);
+      }
+
+      // Return the clean JSON object
       return savedItem.toJSON();
     } catch (error) {
       // Handle other errors that might occur
@@ -68,8 +88,24 @@ export class MyListService {
       throw new NotFoundException('Item not found in your list');
     }
 
-    // Invalidate cache
-    await this.cacheService.del(this.getCacheKey(userId));
+    // Get the cache key
+    const cacheKey = this.getCacheKey(userId);
+
+    // Option 1: Invalidate the entire cache for this user
+    await this.cacheService.del(cacheKey);
+
+    // This prevents a cache miss on the next request
+    const cachedData = await this.cacheService.get<any>(cacheKey);
+    if (cachedData && cachedData.items) {
+      // Filter out the deleted item
+      const updatedItems = cachedData.items.filter(item => item.contentId !== contentId);
+      // Update the cache with the new items list and total count
+      const updatedCacheData = {
+        items: updatedItems,
+        total: updatedItems.length
+      };
+      await this.cacheService.set(cacheKey, updatedCacheData);
+    }
   }
 
   async getMyList(userId: string, paginationDto: PaginationDto): Promise<PaginatedListResponseDto> {
@@ -78,9 +114,19 @@ export class MyListService {
 
     // Try to get from cache first
     const cacheKey = this.getCacheKey(userId);
-    const cachedData = await this.cacheService.get<PaginatedListResponseDto>(cacheKey);
+    const cachedData = await this.cacheService.get<any>(cacheKey);
 
-    if (cachedData) {
+    // Add cache validation - check if the cached data is valid
+    const isCacheValid = cachedData &&
+      Array.isArray(cachedData.items) &&
+      typeof cachedData.total === 'number';
+
+    Logger.log(`Cache status for ${userId}: ${isCacheValid ? 'VALID' : 'INVALID/MISSING'}`);
+    if (isCacheValid) {
+      Logger.log(`Using cached data with ${cachedData.items.length} items`);
+    }
+
+    if (isCacheValid) {
       // If we have cached data, we can paginate in memory which is faster
       const start = skip;
       const end = skip + limit;
@@ -95,7 +141,8 @@ export class MyListService {
       };
     }
 
-    // If not in cache, query the database
+    Logger.log(`Fetching from database for ${userId}`);
+    // If not in cache or cache is invalid, query the database
     const [items, total] = await Promise.all([
       this.myListModel.find({ userId })
         .sort({ addedAt: -1 })
@@ -106,14 +153,10 @@ export class MyListService {
       this.myListModel.countDocuments({ userId }).lean().exec()
     ]);
 
+    Logger.log(`Database returned ${items.length} items out of ${total} total`);
+
     // Transform the items to ensure proper JSON format
-    const transformedItems = items.map(item => {
-      // Create a new object with id instead of _id
-      const transformed = { ...item, id: item._id.toString() };
-      delete transformed._id;
-      delete transformed.__v;
-      return transformed;
-    });
+    const transformedItems = items.map(item => this.transformMongoDocument(item));
 
     const response: PaginatedListResponseDto = {
       items: transformedItems as MyList[],
@@ -131,15 +174,11 @@ export class MyListService {
         .exec();
 
       // Transform all items for caching
-      const transformedAllItems = allItems.map(item => {
-        const transformed = { ...item, id: item._id.toString() };
-        delete transformed._id;
-        delete transformed.__v;
-        return transformed;
-      });
+      const transformedAllItems = allItems.map(item => this.transformMongoDocument(item));
 
       const cacheData = { items: transformedAllItems, total };
       await this.cacheService.set(cacheKey, cacheData);
+      Logger.log(`Cached ${transformedAllItems.length} items for ${userId}`);
     }
 
     return response;
@@ -148,5 +187,26 @@ export class MyListService {
   async isInMyList(userId: string, contentId: string): Promise<boolean> {
     const item = await this.myListModel.findOne({ userId, contentId }).exec();
     return !!item;
+  }
+
+  // Add this helper method to transform MongoDB documents
+  private transformMongoDocument(doc: any): MyList {
+    const transformed = { ...doc };
+
+    // Convert _id to id
+    if (doc._id) {
+      transformed.id = doc._id.toString();
+    }
+
+    // Handle Buffer _id if it exists
+    if (transformed.id && typeof transformed.id === 'object' && transformed.id.buffer) {
+      transformed.id = transformed.id.buffer.toString('hex');
+    }
+
+    // Remove MongoDB-specific fields
+    delete transformed._id;
+    delete transformed.__v;
+
+    return transformed as MyList;
   }
 }

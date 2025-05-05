@@ -1,12 +1,5 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import {
-  DocumentBuilder,
-  SwaggerDocumentOptions,
-  SwaggerModule,
-} from '@nestjs/swagger';
-import { writeFileSync } from 'fs';
-import { stringify } from 'yaml';
 import { AppModule } from './app.module';
 import { GlobalHttpExceptionFilter } from './common/filters/global.http.exception.filter';
 import { GlobalResponseTransformInterceptor } from './common/interceptor/global.response.transformer.interceptor';
@@ -27,7 +20,7 @@ async function bootstrap() {
 
 
   await app.listen(process.env.PORT, '0.0.0.0');
-  console.log(`Application is running on: http://localhost:3000${basePath}`);
+  console.log(`Application is running on: ${process.env.PORT}${basePath}`);
 }
 
 bootstrap();

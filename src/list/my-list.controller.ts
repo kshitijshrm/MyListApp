@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
@@ -19,9 +20,11 @@ import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedListResponseDto } from './dto/list-response.dto';
 import { MyList } from '../database/schemas/my-list.schema';
 import { ServiceConstants } from '../common/constants/service.constants';
+import { DocumentTransformInterceptor } from '../common/interceptor/document-transform.interceptor';
 
 @ApiTags('My List')
 @Controller('my-list')
+@UseInterceptors(DocumentTransformInterceptor)
 @ApiHeader({
   name: ServiceConstants.userId_header,
   description: 'User Id',
@@ -43,26 +46,40 @@ export class MyListController {
   }
 
   @Delete(':contentId')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove content from My List' })
-  @ApiResponse({ status: 204, description: 'Content removed from My List' })
+  @ApiResponse({
+    status: 200, description: 'Content removed from My List', schema: {
+      type: 'object',
+      properties: {
+        contentId: { type: 'string', example: 'movie123' },
+        message: { type: 'string', example: 'Content successfully removed from My List' }
+      }
+    }
+  })
   @ApiResponse({ status: 404, description: 'Content not found in My List' })
   async removeFromList(
     @Headers(ServiceConstants.userId_header) userId: string,
     @Param('contentId') contentId: string
-  ): Promise<void> {
-    return this.myListService.removeFromList(userId, contentId);
+  ): Promise<{ contentId: string; message: string }> {
+    await this.myListService.removeFromList(userId, contentId);
+    return {
+      contentId,
+      message: 'Content successfully removed from My List'
+    };
   }
 
   @Get()
   @ApiOperation({ summary: 'Get user\'s My List with pagination' })
   @ApiResponse({ status: 200, description: 'Returns paginated My List', type: PaginatedListResponseDto })
-  @UseInterceptors(CacheInterceptor)
   async getMyList(
     @Headers(ServiceConstants.userId_header) userId: string,
     @Query() paginationDto: PaginationDto
-  ): Promise<PaginatedListResponseDto> {
-    return this.myListService.getMyList(userId, paginationDto);
+  ) {
+    Logger.log(`Controller: Getting list for user: ${userId}`);
+    const result = await this.myListService.getMyList(userId, paginationDto);
+    Logger.log(`Controller: Returning ${result.items.length} items for user ${userId}`);
+    return result;
   }
 
   @Get(':contentId/status')
