@@ -1,21 +1,25 @@
-ARG F_REGISTRY
+# Build stage
+FROM node:20-alpine AS builder
 
-FROM ${F_REGISTRY}fxtrt-base-node:20  AS builder
-ARG F_GITHUB_TOKEN
 WORKDIR /usr/app
+
+# Copy source files
 COPY . .
 
-RUN apk update && apk add protobuf protobuf-dev grpc
+# Install dependencies and build the app
+RUN yarn install && yarn build
 
-RUN mkdir -p ./src/shared/schemas
+# Production stage
+FROM node:20-alpine
 
-RUN echo -e "@foxtrotplatform:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=$F_GITHUB_TOKEN\n@delhivery:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=$F_GITHUB_TOKEN" > .npmrc \
-    && yarn install \
-    && yarn build
-
-FROM ${F_REGISTRY}fxtrt-base-node:20
 WORKDIR /usr/opt/app
+
+# Copy built app from builder
 COPY --from=builder /usr/app ./
+
+# Install only production dependencies
 RUN yarn install --production && yarn cache clean
+
 EXPOSE 3000
-CMD sh -c "yarn start:prod"
+
+CMD ["yarn", "start:prod"]
